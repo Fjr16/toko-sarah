@@ -15,8 +15,11 @@ class Item extends Model
         'name',
         'small_unit',
         'medium_unit',
+        'medium_to_small',
         'big_unit',
+        'big_to_medium',
         'base_price',
         'stok',
+        'status',
     ];
 }
