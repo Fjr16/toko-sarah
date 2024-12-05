@@ -3,8 +3,8 @@
 @section('content')
     <div class="card">
         <div class="card-header border-bottom mb-4 d-flex justify-content-between align-items-center">
-            <h4 class="m-0 p-0">Data Barang</h4>
-            <a href="{{ route('barang.create') }}" class="btn btn-sm btn-primary">+ Tambah Barang</a>
+            <h4 class="m-0 p-0">Daftar Barang, Kategori <span class="text-primary">{{ $itemCategory->name ?? '-' }}</span></h4>
+            <a href="{{ route('kategori/barang.index') }}" class="btn btn-sm btn-danger"><i class="bx bx-left-arrow"></i> Kembali</a>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -12,7 +12,6 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Kategori</th>
                             <th>Kode</th>
                             <th>Nama</th>
                             <th>Satuan Terkecil</th>
@@ -28,18 +27,21 @@
                         @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration ?? '-' }}</td>
-                            <td>{{ $item->itemCategory->name ?? '-' }}</td>
                             <td>{{ $item->code ?? '-' }}</td>
                             <td>{{ $item->name ?? '-' }}</td>
                             <td>{{ $item->small_unit ?? '-' }}</td>
                             <td>{{ $item->medium_unit ?? '-' }}</td>
                             <td>{{ $item->big_unit ?? '-' }}</td>
-                            <td>{{ number_format($item->base_price ?? 0) . ' /' . $item->small_unit ?? '-' }}</td>
-                            <td>{{ $item->stok  . ' '. $item->small_unit }}</td>
-                            <td><span class="badge bg-{{ $item->status === 'active' ? 'primary' : 'danger' }}">{{ $item->status ?? '' }}</span></td>
+                            <td>{{ ((int) $item->base_price ?? 0) . ' /' . ($item->small_unit ?? '-') }}</td>
+                            <td>{{ ($item->stok ?? 0) . ' ' . $item->small_unit ?? '-' }}</td>
+                            <td>
+                                <span class="badge bg-{{ $item->status === 'active' ? 'primary' : 'danger' }}">
+                                    {{ $item->status ?? '-' }}
+                                </span>
+                            </td>
                             <td class="text-nowrap">
                                 <div class="d-flex">
-                                    <a href="{{ route('barang.edit', encrypt($item->id)) }}" class="btn btn-sm btn-warning me-2"><i class="bx bx-edit"></i></a>
+                                    <a href="{{ route('barang.edit', encrypt($item->id)) }}" class="btn btn-sm btn-warning me-1"><i class="bx bx-edit"></i></a>
                                     <form action="{{ route('barang.destroy', encrypt($item->id)) }}" method="POST">
                                         @csrf
                                         @method('DELETE')

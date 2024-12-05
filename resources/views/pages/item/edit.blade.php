@@ -28,27 +28,27 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="nama-barang" class="form-label">Nama Barang</label>
-                            <input type="number" class="form-control form-control-md" id="nama-barang" name="name" placeholder="Input Nama Barang" value="{{ old('name', $item->name) }}" required />
+                            <input type="text" class="form-control form-control-md" id="nama-barang" name="name" placeholder="Input Nama Barang" value="{{ old('name', $item->name) }}" required />
                         </div>
                         <div class="mb-3">
                             <label for="harga-awal" class="form-label">Harga Awal</label>
                             <div class="input-group">
-                                <input type="mumber" name="base_harga" id="harga-awal" value="0" class="form-control form-control-md" placeholder="Input Harga Awal Barang" value="{{ old('base_price', $item->base_price) }}" required />
-                                <span class="input-group-text get-satuan-kecil">/</span>
+                                <input type="mumber" name="base_harga" id="harga-awal" value="{{ old('base_price', (int) $item->base_price ?? 0) }}" class="form-control form-control-md" placeholder="Input Harga Awal Barang" value="{{ old('base_price', $item->base_price) }}" required />
+                                <span class="input-group-text get-satuan-kecil">/{{ $item->small_unit ?? '' }}</span>
                             </div>
                         </div>
                         <div class="mb-3">
                             <label for="stok-awal" class="form-label">Stok Awal</label>
                             <div class="input-group">
-                                <input type="mumber" name="stok" id="stok-awal" value="0" class="form-control form-control-md" placeholder="Input Stok Awal Barang" value="{{ old('stok', $item->stok ?? '') }}" required />
-                                <span class="input-group-text get-satuan-kecil">/</span>
+                                <input type="mumber" name="stok" id="stok-awal" value="{{ old('stok', $item->stok ?? 0) }}" class="form-control form-control-md" placeholder="Input Stok Awal Barang" value="{{ old('stok', $item->stok ?? '') }}" required />
+                                <span class="input-group-text get-satuan-kecil">/{{ $item->small_unit ?? '' }}</span>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label for="satuan-terkecil" class="form-label">Satuan Terkecil</label>
-                            <input name="satuan-terkecil" class="form-control form-control-md" id="satuan-terkecil" placeholder="Input Satuan Terkecil" value="{{ old('small_unit', $item->small_unit) }}" required></input>
+                            <input name="small_unit" class="form-control form-control-md" id="satuan-terkecil" placeholder="Input Satuan Terkecil" value="{{ old('small_unit', $item->small_unit) }}" required></input>
                         </div>
                         <div class="mb-3">
                             <label for="satuan-menengah" class="form-label">Satuan Menengah</label>

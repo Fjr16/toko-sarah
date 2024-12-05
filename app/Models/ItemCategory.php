@@ -11,5 +11,6 @@ class ItemCategory extends Model
 
     protected $fillable = [
         'name',
+        'status',
     ];
 }

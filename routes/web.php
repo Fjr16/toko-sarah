@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ItemCategoryController;
 use App\Http\Controllers\ItemController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,16 @@ Route::middleware(['auth'])->group(function () {
         return view('welcome');
     });
 
+    // kategori barang
+    Route::get('kategori/barang/index', [ItemCategoryController::class, 'index'])->name('kategori/barang.index');
+    Route::get('kategori/barang/create', [ItemCategoryController::class, 'create'])->name('kategori/barang.create');
+    Route::post('kategori/barang/store', [ItemCategoryController::class, 'store'])->name('kategori/barang.store');
+    Route::get('kategori/barang/show/{id}', [ItemCategoryController::class, 'show'])->name('kategori/barang.show');
+    Route::get('kategori/barang/edit/{id}', [ItemCategoryController::class, 'edit'])->name('kategori/barang.edit');
+    Route::put('kategori/barang/update/{id}', [ItemCategoryController::class, 'update'])->name('kategori/barang.update');
+    Route::delete('kategori/barang/destroy/{id}', [ItemCategoryController::class, 'destroy'])->name('kategori/barang.destroy');
+    
+    // barang
     Route::get('barang/index', [ItemController::class, 'index'])->name('barang.index');
     Route::get('barang/create', [ItemController::class, 'create'])->name('barang.create');
     Route::post('barang/store', [ItemController::class, 'store'])->name('barang.store');

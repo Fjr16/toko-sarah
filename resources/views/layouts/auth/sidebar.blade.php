@@ -63,7 +63,7 @@
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ $title == 'Item Category' ? 'active' : '' }}">
-                        <a href="" class="menu-link">
+                        <a href="{{ route('kategori/barang.index') }}" class="menu-link">
                             <div>Kategori Barang</div>
                         </a>
                     </li>

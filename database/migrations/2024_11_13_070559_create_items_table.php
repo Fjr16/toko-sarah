@@ -17,11 +17,11 @@ return new class extends Migration
             $table->string('code')->required();    //barcode pabrik
             $table->string('name')->required();
             $table->string('small_unit')->required();
-            $table->string('medium_unit')->required();
-            $table->integer('medium_to_small')->required();
-            $table->string('big_unit')->required();
-            $table->integer('big_to_medium')->required();
-            $table->decimal('base_price',10,2)->required();
+            $table->string('medium_unit')->nullable();
+            $table->integer('medium_to_small')->nullable();
+            $table->string('big_unit')->nullable();
+            $table->integer('big_to_medium')->nullable();
+            $table->decimal('base_price',10,2)->required()->default(0);
             $table->integer('stok')->default(0);
             $table->enum('status', ['active', 'deleted'])->default('active');
             $table->timestamps();

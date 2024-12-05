@@ -22,4 +22,8 @@ class Item extends Model
         'stok',
         'status',
     ];
+
+    public function itemCategory() {
+        return $this->belongsTo(ItemCategory::class);
+    }
 }

@@ -26,7 +26,7 @@ class ItemController extends Controller
      */
     public function create()
     {
-        $data = ItemCategory::all();
+        $data = ItemCategory::where('status', 'active')->get();
         return view('pages.item.create', [
             'title' => 'Item',
             'menu' => 'item',
@@ -41,12 +41,12 @@ class ItemController extends Controller
     {
         $data = $request->validate([
             'item_category_id' => 'required|exists:item_categories,id',
-            'code' => 'required',
-            'name' => 'required|string',
+            'code' => 'required|unique:items,code',
+            'name' => 'required|string|unique:items,name',
             'small_unit' => 'required|string',
-            'medium_unit' => 'mullable|string',
+            'medium_unit' => 'nullable|string',
             'medium_to_small' => 'required_with:medium_unit',
-            'big_unit' => 'mullable|string',
+            'big_unit' => 'nullable|string',
             'big_to_medium' => 'required_with:big_unit',
             'base_price' => 'nullable',
             'stok' => 'nullable',
@@ -89,12 +89,12 @@ class ItemController extends Controller
         $item = Item::find(decrypt($id));
         $data = $request->validate([
             'item_category_id' => 'required|exists:item_categories,id',
-            'code' => 'required',
-            'name' => 'required|string',
+            'code' => 'required|unique:items,code,' . $item->id,
+            'name' => 'required|string|unique:items,name,' . $item->id,
             'small_unit' => 'required|string',
-            'medium_unit' => 'mullable|string',
+            'medium_unit' => 'nullable|string',
             'medium_to_small' => 'required_with:medium_unit',
-            'big_unit' => 'mullable|string',
+            'big_unit' => 'nullable|string',
             'big_to_medium' => 'required_with:big_unit',
             'base_price' => 'nullable',
             'stok' => 'nullable',
@@ -108,11 +108,14 @@ class ItemController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
+        $this->validate($request, [
+            'status' => 'in:active,deleted',
+        ]);
         $item = Item::find(decrypt($id));
         $item->update([
-            'status' => 'deleted',
+            'status' => $request->status,
         ]);
 
         return back()->with('success', 'Berhasil Diperbarui');
