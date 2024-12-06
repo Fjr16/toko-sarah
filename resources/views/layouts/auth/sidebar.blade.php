@@ -86,8 +86,14 @@
                     <div>Barang</div>
                 </a>
             </li> --}}
+            <li class="menu-item {{ $title === 'Supplier' ? 'active' : '' }}">
+                <a href="{{ route('supplier.index') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-store-alt"></i>
+                    <div>Supplier</div>
+                </a>
+            </li>
             <li class="menu-item {{ $title === 'Management User' ? 'active' : '' }}">
-                <a href="" class="menu-link">
+                <a href="{{ route('user.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-user"></i>
                     <div>Manajemen user</div>
                 </a>

@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\ItemCategoryController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -22,9 +24,9 @@ Route::middleware(['auth'])->group(function () {
             'menu' => 'dashboard',
         ]);
     });
-    Route::get('/home', function () {
-        return view('welcome');
-    });
+    // Route::get('/home', function () {
+    //     return view('welcome');
+    // });
 
     // kategori barang
     Route::get('kategori/barang/index', [ItemCategoryController::class, 'index'])->name('kategori/barang.index');
@@ -42,6 +44,23 @@ Route::middleware(['auth'])->group(function () {
     Route::get('barang/edit/{id}', [ItemController::class, 'edit'])->name('barang.edit');
     Route::put('barang/update/{id}', [ItemController::class, 'update'])->name('barang.update');
     Route::delete('barang/destroy/{id}', [ItemController::class, 'destroy'])->name('barang.destroy');
+
+    // supplier
+    Route::get('supplier/index', [SupplierController::class, 'index'])->name('supplier.index');
+    Route::get('supplier/create', [SupplierController::class, 'create'])->name('supplier.create');
+    Route::post('supplier/store', [SupplierController::class, 'store'])->name('supplier.store');
+    Route::get('supplier/edit/{id}', [SupplierController::class, 'edit'])->name('supplier.edit');
+    Route::get('supplier/show/{id}', [SupplierController::class, 'show'])->name('supplier.show');
+    Route::put('supplier/update/{id}', [SupplierController::class, 'update'])->name('supplier.update');
+    Route::delete('supplier/destroy/{id}', [SupplierController::class, 'destroy'])->name('supplier.destroy');
+
+    // User management
+    Route::get('user/index', [UserController::class, 'index'])->name('user.index');
+    Route::get('user/create', [UserController::class, 'create'])->name('user.create');
+    Route::post('user/store', [UserController::class, 'store'])->name('user.store');
+    Route::get('user/edit/{id}', [UserController::class, 'edit'])->name('user.edit');
+    Route::put('user/update/{id}', [UserController::class, 'update'])->name('user.update');
+    Route::delete('user/destroy/{id}', [UserController::class, 'destroy'])->name('user.destroy');
 });
 
 require __DIR__.'/auth.php';

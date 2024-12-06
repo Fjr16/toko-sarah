@@ -199,46 +199,6 @@
 
     <script src="{{ asset('/assets/vendor/js/menu.js') }}"></script>
     <!-- endbuild -->
-    
-    {{-- js Leaflet untuk maps --}}
-    <script src="{{ asset('/assets/vendor/leaflet/leaflet.js') }}"></script>
-    {{-- Leaflet --}}
-    <script>
-
-        // untuk leaflet map
-        let map = L.map('map').setView([-0.9483107301737814, 100.37339582797605], 13);
-    
-        const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        }).addTo(map);
-    
-        var tempMarker;
-
-        $(document).ready(function(){
-            // handle old location
-            var loc = $('#maps-lokasi').val();
-            loc = loc.split(", ");
-            if (loc) {
-                tempMarker = L.marker([loc[0], loc[1]])
-                .addTo(map);
-            }
-        });
-    
-        function onMapClick(e) {
-            if (tempMarker) {
-                map.removeLayer(tempMarker)
-            }
-            tempMarker = L.marker(e.latlng)
-                .addTo(map);
-    
-            var currentLatLang = e.latlng.lat + ', ' + e.latlng.lng;
-    
-            $('#maps-lokasi').val(currentLatLang);
-        }
-    
-        map.on('click', onMapClick);
-    </script>
 
     <!-- Vendors JS -->
     <script src="{{ asset('/assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
@@ -321,12 +281,21 @@
     <script>
         function showModalDelete(element) {
             const url = $(element).data('url');
-            console.log(url);
+            const name = $(element).data('name');
+            const value = $(element).data('value');
+            const aksi = $(element).data('warning');
 
             const modal = $('#modalDelete');
 
             const formDelete = modal.find('form');
             formDelete.attr('action', url);
+
+            const elementWarning = modal.find('#data_aksi');
+            elementWarning.text(aksi);
+
+            const btnSubmit = formDelete.find('button');
+            btnSubmit.attr('name', name);
+            btnSubmit.attr('value', value);
             
             modal.modal('show');
         }

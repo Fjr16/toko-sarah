@@ -39,13 +39,16 @@
                             <td><span class="badge bg-{{ $item->status === 'active' ? 'primary' : 'danger' }}">{{ $item->status ?? '' }}</span></td>
                             <td class="text-nowrap">
                                 <div class="d-flex">
-                                    <a href="{{ route('barang.edit', encrypt($item->id)) }}" class="btn btn-sm btn-warning me-2"><i class="bx bx-edit"></i></a>
-                                    <form action="{{ route('barang.destroy', encrypt($item->id)) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-sm btn-danger" name="status" value="deleted" type="submit"><i class="bx bx-x-circle"></i></button>
-                                        <button class="btn btn-sm btn-success" name="status" value="active" type="submit"><i class="bx bx-check-circle"></i></button>
-                                    </form>
+                                    <a href="{{ route('barang.edit', encrypt($item->id)) }}" class="btn btn-icon btn-outline-warning mx-2"><i class="bx bx-edit"></i></a>
+                                    @if ($item->status === 'active')
+                                        <button class="btn btn-icon btn-outline-danger me-1" type="button" data-value="deleted" data-name="status" data-warning="Hapus / disable barang" data-url="{{ route('barang.destroy', encrypt($item->id)) }}" onclick="showModalDelete(this)">
+                                            <i class="bx bx-x-circle"></i>
+                                        </button>
+                                    @else
+                                        <button class="btn btn-icon btn-outline-success" type="button" data-value="active" data-name="status" data-warning="Aktivasi barang" data-url="{{ route('barang.destroy', encrypt($item->id)) }}" onclick="showModalDelete(this)">
+                                            <i class="bx bx-check-circle"></i>
+                                        </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -56,3 +59,4 @@
         </div>
     </div>
 @endsection
+<x-modal-confirm-delete></x-modal-confirm-delete>

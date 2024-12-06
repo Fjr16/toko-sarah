@@ -27,6 +27,7 @@ class AuthenticateController extends Controller
             'username' => 'required|string',
             'password' => 'required',
         ]);
+        $credentials['status'] = 'active';
 
         if (!Auth::attempt($credentials)) {
             return back()->with('error', 'Username atau password salah');
