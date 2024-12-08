@@ -98,6 +98,12 @@
                     <div>Manajemen user</div>
                 </a>
             </li>
+            <li class="menu-item {{ $title === 'Penjualan' ? 'active' : '' }}">
+                <a href="{{ route('sales.create') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-cart"></i>
+                    <div>Sales</div>
+                </a>
+            </li>
         {{-- @endcan --}}
         
     </ul>

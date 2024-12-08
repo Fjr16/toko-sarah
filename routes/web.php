@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ItemCategoryController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -61,6 +62,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('user/edit/{id}', [UserController::class, 'edit'])->name('user.edit');
     Route::put('user/update/{id}', [UserController::class, 'update'])->name('user.update');
     Route::delete('user/destroy/{id}', [UserController::class, 'destroy'])->name('user.destroy');
+    
+    // Penjualan
+    // Route::get('sales/index', [UserController::class, 'index'])->name('sales.index');
+    Route::get('sales/create', [SalesController::class, 'create'])->name('sales.create');
+    Route::post('sales/store', [SalesController::class, 'store'])->name('sales.store');
+    // Route::get('sales/edit/{id}', [UserController::class, 'edit'])->name('sales.edit');
+    // Route::put('sales/update/{id}', [UserController::class, 'update'])->name('sales.update');
+    // Route::delete('sales/destroy/{id}', [UserController::class, 'destroy'])->name('sales.destroy');
 });
 
 require __DIR__.'/auth.php';
