@@ -16,6 +16,8 @@ class Selling extends Model
         'total_kotor',
         'total_pajak',
         'total_bersih',
+        'total_item',
+        'total_jumlah',
         'status',
     ];
 }

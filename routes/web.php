@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\ItemCategoryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\SalesController;
@@ -64,12 +65,15 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('user/destroy/{id}', [UserController::class, 'destroy'])->name('user.destroy');
     
     // Penjualan
-    // Route::get('sales/index', [UserController::class, 'index'])->name('sales.index');
     Route::get('sales/create', [SalesController::class, 'create'])->name('sales.create');
     Route::post('sales/store', [SalesController::class, 'store'])->name('sales.store');
-    // Route::get('sales/edit/{id}', [UserController::class, 'edit'])->name('sales.edit');
-    // Route::put('sales/update/{id}', [UserController::class, 'update'])->name('sales.update');
-    // Route::delete('sales/destroy/{id}', [UserController::class, 'destroy'])->name('sales.destroy');
+    
+    // cart
+    Route::get('cart/store/{barcode}', [CartController::class, 'store'])->name('cart.store');
+    Route::delete('cart/destroy/{id}', [CartController::class, 'destroy'])->name('cart.destroy');
+    Route::delete('cart/reset', [CartController::class, 'resetCart'])->name('cart.reset');
+    Route::put('cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
+    // Route::post('cart/store', [CartController::class, 'store'])->name('cart.store');
 });
 
 require __DIR__.'/auth.php';

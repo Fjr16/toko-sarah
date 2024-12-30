@@ -7,19 +7,19 @@ use Illuminate\Http\Request;
 
 class SalesController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
+        // session()->forget('data');
+        if (session('data')) {
+            session()->put('data', session('data'));
+        }else{
+            session()->put('data', []);
+        }
+
         $produks = Item::all();
         $total = 60000;
         return view('pages.sales.create', [

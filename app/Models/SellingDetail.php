@@ -12,10 +12,13 @@ class SellingDetail extends Model
     protected $fillable = [
         'selling_id',
         'item_id',
-        'code',
-        'jumlah',
-        'diskon',
-        'pajak',
-        'total_harga',
+        'product_barcode',
+        'product_name',
+        'product_jumlah',
+        'product_satuan',
+        'product_harga',
+        'product_sub_total',
+        'product_diskon',
+        // 'product_pajak',
     ];
 }

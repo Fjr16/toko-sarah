@@ -20,6 +20,8 @@ return new class extends Migration
             $table->decimal('total_kotor', 10,2)->default(0)->required();
             $table->decimal('total_pajak', 10,2)->default(0);
             $table->decimal('total_bersih', 10,2)->default(0)->required();
+            $table->integer('total_item')->required();
+            $table->integer('total_jumlah')->required();
             $table->enum('status', ['paid', 'unpaid', 'pending'])->default('pending');
             $table->timestamps();
         });
