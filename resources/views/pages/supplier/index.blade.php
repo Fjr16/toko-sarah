@@ -1,7 +1,6 @@
 @extends('layouts.auth.main')
 
 @section('content')
-@dd(session()->all())
     <div class="card">
         <div class="card-header border-bottom mb-4 d-flex justify-content-between align-items-center">
             <h4 class="m-0 p-0">Data Supplier</h4>

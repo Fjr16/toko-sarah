@@ -101,8 +101,32 @@
             <li class="menu-item {{ $title === 'Penjualan' ? 'active' : '' }}">
                 <a href="{{ route('sales.create') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-cart"></i>
-                    <div>Sales</div>
+                    <div>Penjualan</div>
                 </a>
+            </li>
+            <li class="menu-item {{ $title === 'Pembelian' ? 'active' : '' }}">
+                <a href="{{ route('pembelian.create') }}" class="menu-link">
+                    <i class="menu-icon tf-icons bx bx-store"></i>
+                    <div>Pembelian</div>
+                </a>
+            </li>
+            <li class="menu-item {{ $menu == 'Riwayat' ? 'open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class='menu-icon tf-icons bx bx-box'></i>
+                    <div>Riwayat</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ $title == 'Riwayat Pembelian' ? 'active' : '' }}">
+                        <a href="" class="menu-link">
+                            <div>Pembelian</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ $title == 'Riwayat Penjualan' ? 'active' : '' }}">
+                        <a href="{{ route('sales/riwayat.index') }}" class="menu-link">
+                            <div>Penjualan</div>
+                        </a>
+                    </li>
+                </ul>
             </li>
         {{-- @endcan --}}
         

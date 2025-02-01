@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ItemRequest;
 use App\Models\Item;
 use App\Models\ItemCategory;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ItemController extends Controller
 {
@@ -37,25 +40,42 @@ class ItemController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(ItemRequest $request)
     {
-        $data = $request->validate([
-            'item_category_id' => 'required|exists:item_categories,id',
-            'code' => 'required|unique:items,code',
-            'name' => 'required|string|unique:items,name',
-            'small_unit' => 'required|string',
-            'medium_unit' => 'nullable|string',
-            'medium_to_small' => 'required_with:medium_unit',
-            'big_unit' => 'nullable|string',
-            'big_to_medium' => 'required_with:big_unit',
-            'base_price' => 'nullable',
-            'stok' => 'nullable',
-        ]);
-
+        $data = $request->all();
 
         Item::create($data);
 
         return redirect()->route('barang.index')->with('success', 'Berhasil Ditambahkan');
+    }
+
+    public function storeAndAddToCart(ItemRequest $request){
+        DB::beginTransaction();
+        try {
+            $data = $request->all();
+            if ($item = Item::create($data)) {
+                $req = Request::create(route('pembelian.store', $item->code), 'GET');
+                $res = app()->handle($req);
+                $message = json_decode($res->getContent(), true)['message'];
+                if ($res->getStatusCode() === 200) {
+                    DB::commit();
+                    return redirect()->route('pembelian.create')->with('success', $message);
+                }else{
+                    DB::rollBack();
+                    return redirect()->route('pembelian.create')->with('error', $message);
+                }
+            }else{
+                DB::rollBack();
+                return back()->with('error', 'Gagal Menyimpan Data, coba lagi');
+            }
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'status_code' => 500,
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+        
     }
 
     /**

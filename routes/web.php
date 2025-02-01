@@ -5,6 +5,7 @@ use App\Http\Controllers\ItemCategoryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -46,6 +47,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('barang/edit/{id}', [ItemController::class, 'edit'])->name('barang.edit');
     Route::put('barang/update/{id}', [ItemController::class, 'update'])->name('barang.update');
     Route::delete('barang/destroy/{id}', [ItemController::class, 'destroy'])->name('barang.destroy');
+    // store and add to cart
+    Route::post('item/store/add/to/cart', [ItemController::class, 'storeAndAddToCart'])->name('item/store/add/to.cart');
 
     // supplier
     Route::get('supplier/index', [SupplierController::class, 'index'])->name('supplier.index');
@@ -65,8 +68,11 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('user/destroy/{id}', [UserController::class, 'destroy'])->name('user.destroy');
     
     // Penjualan
+    Route::get('sales/riwayat', [SalesController::class, 'index'])->name('sales/riwayat.index');
+    Route::get('sales/riwayat/detail/{id}', [SalesController::class, 'detail'])->name('sales/riwayat.detail');
     Route::get('sales/create', [SalesController::class, 'create'])->name('sales.create');
     Route::post('sales/store', [SalesController::class, 'store'])->name('sales.store');
+    Route::get('sales/invoice', [SalesController::class, 'show'])->name('sales.invoice');
     
     // cart
     Route::get('cart/store/{barcode}', [CartController::class, 'store'])->name('cart.store');
@@ -74,6 +80,15 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('cart/reset', [CartController::class, 'resetCart'])->name('cart.reset');
     Route::put('cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
     // Route::post('cart/store', [CartController::class, 'store'])->name('cart.store');
+
+    // Pembelian
+    // Route::get('pembelian/riwayat', [SalesController::class, 'index'])->name('pembelian/riwayat.index');
+    // Route::get('pembelian/riwayat/detail/{id}', [SalesController::class, 'detail'])->name('pembelian/riwayat.detail');
+    Route::get('pembelian/create', [TransactionController::class, 'create'])->name('pembelian.create');
+    Route::get('pembelian/store/{barcode}', [TransactionController::class, 'store'])->name('pembelian.store');
+    Route::delete('pembelian/destroy/{id}', [TransactionController::class, 'destroy'])->name('pembelian.destroy');
+    Route::put('pembelian/update/{id}', [TransactionController::class, 'update'])->name('pembelian.update');
+    Route::get('pembelian/invoice', [TransactionController::class, 'show'])->name('pembelian.invoice');
 });
 
 require __DIR__.'/auth.php';

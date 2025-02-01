@@ -81,33 +81,33 @@
 @endsection
 
 @section('script')
-<script>
-    document.addEventListener('DOMContentLoaded', function(){
-      var satuanTerkecil = document.getElementById('satuan-terkecil');
-      var satuanSedang = document.getElementById('satuan-menengah');
-      var satuanTerbesar = document.getElementById('satuan-terbesar');
-  
-      var setSatuanKecil = document.getElementById('get-satuan-kecil');
-      var setSatuanKecilClass = document.querySelectorAll('.get-satuan-kecil');
-      var setSatuanSedang1 = document.getElementById('get-satuan-sedang-awal');
-      var setSatuanSedang2 = document.getElementById('get-satuan-sedang-akhir');
-      var setSatuanBesar = document.getElementById('get-satuan-besar');
-  
-  
-      satuanTerkecil.addEventListener('keyup', function(){
-          setSatuanKecil.textContent = satuanTerkecil.value;
-          setSatuanKecilClass.forEach(element => {
-            element.textContent = '/' + satuanTerkecil.value;
-          });
-      });
-      satuanTerbesar.addEventListener('keyup', function(){
-          setSatuanBesar.textContent = '1 ' + satuanTerbesar.value + ' =';
-      });
-     
-      satuanSedang.addEventListener('keyup', function(){
-        setSatuanSedang1.textContent = '1 ' + satuanSedang.value + ' =';
-        setSatuanSedang2.textContent = satuanSedang.value;
-      });
-    })
-  </script>
+    {{-- <script>
+        document.addEventListener('DOMContentLoaded', function(){
+        var satuanTerkecil = document.getElementById('satuan-terkecil');
+        var satuanSedang = document.getElementById('satuan-menengah');
+        var satuanTerbesar = document.getElementById('satuan-terbesar');
+    
+        var setSatuanKecil = document.getElementById('get-satuan-kecil');
+        var setSatuanKecilClass = document.querySelectorAll('.get-satuan-kecil');
+        var setSatuanSedang1 = document.getElementById('get-satuan-sedang-awal');
+        var setSatuanSedang2 = document.getElementById('get-satuan-sedang-akhir');
+        var setSatuanBesar = document.getElementById('get-satuan-besar');
+    
+    
+        satuanTerkecil.addEventListener('keyup', function(){
+            setSatuanKecil.textContent = satuanTerkecil.value;
+            setSatuanKecilClass.forEach(element => {
+                element.textContent = '/' + satuanTerkecil.value;
+            });
+        });
+        satuanTerbesar.addEventListener('keyup', function(){
+            setSatuanBesar.textContent = '1 ' + satuanTerbesar.value + ' =';
+        });
+        
+        satuanSedang.addEventListener('keyup', function(){
+            setSatuanSedang1.textContent = '1 ' + satuanSedang.value + ' =';
+            setSatuanSedang2.textContent = satuanSedang.value;
+        });
+        })
+    </script> --}}
 @endsection

@@ -4,13 +4,122 @@
 {{-- @dd(session()->all()) --}}
     <div class="card">
         <div class="card-header mb-4 border-bottom d-flex justify-content-between">
-            <h4 class="m-0 p-0">Penjualan</h4>
+            <h4 class="m-0 p-0">{{ $title ?? 'Pembelian' }}</h4>
             <h4 class="m-0 p-0 fw-bold fst-italic totalAkhir"></h4>
         </div>
         <div class="card-body">
-                <div class="row mb-3">
+                <div class="row mb-4">
+                    <div class="col-sm-4">
+                        <label for="defaultInput" class="form-label">Tgl. Pembelian</label>
+                        <input id="defaultInput" class="form-control" name="tanggal_pembelian" type="date" value="{{ date('Y-m-d') }}"/>
+                    </div>
+                    <div class="col-sm-4">
+                        <label for="defaultInput" class="form-label">Supplier</label>
+                        <select name="supplier_id" id="supplier_id" class="form-select">
+                            @foreach ($suppliers as $sup)
+                                @if ($sup->id === old('supplier_id'))
+                                    <option value="{{ $sup->id }}" selected>{{ $sup->name ?? '-' }}</option>
+                                @else
+                                    <option value="{{ $sup->id }}" selected>{{ $sup->name ?? '-' }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-sm-4">
+                        <label for="defaultInput" class="form-label">Status Bayar</label>
+                        <select name="tipe_bayar" id="tipe_bayar" class="form-select">
+                            <option value="Lunas">Lunas</option>
+                            <option value="Hutang">Hutang</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mb-3 border-top pt-4">
+                    <h5>Detail Pembelian</h5>
                     <div class="col-md-12">
                         <input type="text" name="code" id="kode-produk" class="form-control" placeholder="Enter Product Code">
+                    </div>
+                </div>
+                <div class="row mb-4 px-3">
+                    <button class="btn btn-sm btn-dark text-uppercase" type="button" data-bs-toggle="collapse" data-bs-target="#newProduct" aria-expanded="false" aria-controls="collapseExample">
+                        <i class="bx bx-plus"></i> New Product
+                    </button>
+                </div>
+                <div class="collapse mb-4" id="newProduct">
+                    <div class="card bg-label-primary">
+                        <form action="{{ route('item/store/add/to.cart') }}" method="POST">
+                        @csrf
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <label for="kategori-barang" class="form-label col-form-label col-sm-2">Kategori Barang</label>
+                                <div class="col-sm-10">
+                                    <select class="form-select form-control" id="kategori-barang" aria-label="Default select example" name="item_category_id" required>
+                                    <option selected disabled>-- Pilih Kategori --</option>
+                                    @foreach ($itemCategories as $cat)
+                                        <option value="{{ $cat->id }}" {{ old('item_category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name ?? '-' }}</option>
+                                    @endforeach
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="kode-barang" class="form-label col-form-label col-sm-2">Kode Barang</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control form-control-md" id="kode-barang" name="code" placeholder="Input / scan kode barang disini" value="{{ old('code') }}" required />
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="nama-barang" class="form-label col-form-label col-sm-2">Nama Barang</label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control form-control-md" id="nama-barang" name="name" placeholder="Input Nama Barang" value="{{ old('name') }}" required />
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="satuan-terkecil" class="form-label">Satuan Terkecil</label>
+                                    <input name="small_unit" class="form-control form-control-md" id="satuan-terkecil" placeholder="Input Satuan Terkecil" required></input>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="satuan-menengah" class="form-label">Satuan Menengah</label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="text" class="form-control" placeholder="Input Satuan Menengah" id="satuan-menengah" name="medium_unit"/>
+                                        <span class="input-group-text" id="get-satuan-sedang-awal">-</span>
+                                        <input type="number" class="form-control" placeholder="nilai konversi ke satuan terkecil" name="medium_to_small"/>
+                                        <span class="input-group-text" id="get-satuan-kecil">-</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="satuan-terbesar" class="form-label">Satuan Terbesar</label>
+                                    <div class="input-group input-group-merge">
+                                        <input type="text" class="form-control" placeholder="Input Satuan Terbesar" id="satuan-terbesar" name="big_unit" />
+                                        <span class="input-group-text" id="get-satuan-besar">-</span>
+                                        <input type="mumber" class="form-control" placeholder="nilai konversi ke satuan menengah" name="big_to_medium"/>
+                                        <span class="input-group-text" id="get-satuan-sedang-akhir">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="harga-awal" class="form-label">Harga Awal</label>
+                                    <div class="input-group">
+                                        <input type="mumber" name="base_price" id="harga-awal" placeholder="0" class="form-control form-control-md" placeholder="Input Harga Awal Barang" value="{{ old('base_price') }}" required />
+                                        <span class="input-group-text get-satuan-kecil">/</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="stok-awal" class="form-label">Stok Awal</label>
+                                    <div class="input-group">
+                                        <input type="mumber" name="stok" id="stok-awal" placeholder="0" class="form-control form-control-md" placeholder="Input Stok Awal Barang" value="{{ old('stok') }}" required />
+                                        <span class="input-group-text get-satuan-kecil">/</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 mt-4 border-top">
+                                <div class="d-flex justify-content-center mt-4">
+                                    {{-- <a href="{{ route('barang.index') }}" class="btn btn-md btn-danger me-2"><i class="bx bx-left-arrow"></i> Kembali</a> --}}
+                                    <button type="submit" class="btn btn-sm btn-success"><i class="bx bx-file"></i> Save & add To Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                        </form>
                     </div>
                 </div>
 
@@ -29,15 +138,15 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @if (empty(session('data')))
+                        @if (empty(session('data_pembelian')))
                             <tr>
                                 <td colspan="8" class="text-center fst-italic small fw-bold">-- Belum Ada Produk Dalam Keranjang --</td>
                             </tr>  
                         @else    
-                            @foreach (session()->get('data') as $item)
+                            @foreach (session()->get('data_pembelian') as $item)
                             <tr>
                                 <td>
-                                    <form action="{{ route('cart.destroy', $item['id']) }}" method="POST" style="display:inline;">
+                                    <form action="{{ route('pembelian.destroy', $item['id']) }}" method="POST" style="display:inline;">
                                         @csrf
                                         @method('DELETE')
                                         <button class="btn btn-icon btn-xs btn-danger"><i class="bx bx-x"></i></button>
@@ -55,14 +164,6 @@
                             </tr>
                             @endforeach
                         @endif
-                        {{-- <tr class="fw-bold table-secondary">
-                            <td colspan="7">Items</td>
-                            <td class="text-end totalItems">-</td>
-                        </tr>
-                        <tr class="fw-bold table-secondary">
-                            <td colspan="7">Total Items</td>
-                            <td class="text-end totalQty">-</td>
-                        </tr> --}}
                         <tr class="fw-bold table-secondary fst-italic">
                             <td colspan="7">Subtotal</td>
                             <td class="text-end subtotal">Rp. -</td>
@@ -115,9 +216,9 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header border-bottom d-block">
-              <h5 class="modal-title" id="modalLongTitle">Konfirmasi Penjualan</h5>
+              <h5 class="modal-title" id="modalLongTitle">Konfirmasi Pembelian</h5>
               {{-- <p class="small my-0 py-0 text-uppercase">Order ID : <span class="fw-bold">4910487129047124</span></p> --}}
-              <p class="small my-0 py-0 text-uppercase">Order ID : <span class="fw-bold">-</span></p>
+              <p class="small my-0 py-0 text-uppercase">Transaction ID : <span class="fw-bold">-</span></p>
             </div>
             <form action="{{ route('sales.store') }}" method="POST">
                 @csrf
@@ -131,12 +232,12 @@
                                     <td>Tanggal : <span>{{ date('d/m/Y') }}</span></td>
                                 </tr>
                                 <tr>
-                                    <td>Order : <span>{{ auth()->user()->name ?? '' }}</span></td>
+                                    <td>Supplier : <span>-</span></td>
                                     <td>Jam : <span>{{ date('H:i') }}</span></td>
                                 </tr>
                                 <tr>
-                                    <td>Kasir : <span>{{ auth()->user()->name ?? '' }}</span></td>
-                                    <td>Nama Order : <span>Pelanggan</span></td>
+                                    <td>Status Bayar : <span>Lunas</span></td>
+                                    <td></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -153,7 +254,7 @@
                             </thead>
                            
                             <tbody>
-                                @foreach (session()->get('data') as $item)
+                                @foreach (session()->get('data_pembelian') as $item)
                                     <tr>
                                         <td>{{ $item['name'] ?? '' }}</td>
                                         <td>{{ $item['jumlah'] }}</td>
@@ -225,7 +326,8 @@
         const harga = document.getElementById('harga-satuan');
         barcodeInput.addEventListener('change', function(e){
             const barcodeValue = this.value.trim();
-            fetch(`/cart/store/${barcodeValue}`)
+            console.log(barcodeValue);
+            fetch(`/pembelian/store/${barcodeValue}`)
             .then(response => response.json())
             .then(res => {
                 if (res.status_code === 200) {
@@ -251,7 +353,7 @@
                 jumlah : element.value,
                };
 
-               fetch(`/cart/update/${encryptedId}`, {
+               fetch(`/pembelian/update/${encryptedId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type' : 'application/json',
@@ -282,7 +384,7 @@
         let totalAkhir = 0;
         function sumAll(){
             // sum all data
-            const data = @json(session('data'));
+            const data = @json(session('data_pembelian'));
             const dataArr = Object.values(data);
             let totalQty = 0;
             let totalDiskon = 0;

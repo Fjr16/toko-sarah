@@ -21,4 +21,11 @@ class SellingDetail extends Model
         'product_diskon',
         // 'product_pajak',
     ];
+
+    public function item() {
+        return $this->belongsTo(Item::class);
+    }
+    public function selling() {
+        return $this->belongsTo(Selling::class);
+    }
 }

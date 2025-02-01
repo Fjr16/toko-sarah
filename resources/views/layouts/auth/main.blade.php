@@ -88,6 +88,9 @@
         /* /table rme */
     </style>
 
+    {{-- dinamis css --}}
+    @yield('css-added')
+
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('/assets/vendor/libs/select2/select2.css') }}" />
     <link rel="stylesheet" href="{{ asset('/assets/vendor/css/core.css') }}" class="template-customizer-core-css" />
@@ -299,6 +302,53 @@
             
             modal.modal('show');
         }
+    </script>
+    <script>
+        // function untuk membuat input dengan format rupiah
+        function formatRupiah(angka){
+            var number_string = angka.replace(/[^,\d]/g, '').toString(),
+                split = number_string.split(','),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+                
+            if (ribuan) {
+                separator = sisa ? '.' : '';
+                rupiah += separator + ribuan.join('.');
+            }
+
+            rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+            return rupiah;
+        }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+        var satuanTerkecil = document.getElementById('satuan-terkecil');
+        var satuanSedang = document.getElementById('satuan-menengah');
+        var satuanTerbesar = document.getElementById('satuan-terbesar');
+    
+        var setSatuanKecil = document.getElementById('get-satuan-kecil');
+        var setSatuanKecilClass = document.querySelectorAll('.get-satuan-kecil');
+        var setSatuanSedang1 = document.getElementById('get-satuan-sedang-awal');
+        var setSatuanSedang2 = document.getElementById('get-satuan-sedang-akhir');
+        var setSatuanBesar = document.getElementById('get-satuan-besar');
+    
+    
+        satuanTerkecil.addEventListener('keyup', function(){
+            setSatuanKecil.textContent = satuanTerkecil.value;
+            setSatuanKecilClass.forEach(element => {
+                element.textContent = '/' + satuanTerkecil.value;
+            });
+        });
+        satuanTerbesar.addEventListener('keyup', function(){
+            setSatuanBesar.textContent = '1 ' + satuanTerbesar.value + ' =';
+        });
+        
+        satuanSedang.addEventListener('keyup', function(){
+            setSatuanSedang1.textContent = '1 ' + satuanSedang.value + ' =';
+            setSatuanSedang2.textContent = satuanSedang.value;
+        });
+        })
     </script>
 
     @yield('script')
