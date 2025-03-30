@@ -3,19 +3,19 @@
 @section('content')
     <div class="card">
         <div class="card-header mb-4 border-bottom">
-            <h4 class="m-0 p-0">Tambah Supplier</h4>
+            <h4 class="m-0 p-0">Tambah {{ $title ?? '' }}</h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('supplier.store') }}" method="POST">
+            <form action="{{ route('customer.store') }}" method="POST">
                 @csrf
                 <div class="row">
                     <div class="col-md mb-3">
-                        <label for="nama_supplier" class="form-label">Nama Supplier</label>
-                        <input type="text" class="form-control form-control-md" id="nama_supplier" name="name" placeholder="Nama Supplier" value="{{ old('name') }}" required />
+                        <label for="nama_pelanggan" class="form-label">Nama Pelanggan</label>
+                        <input type="text" class="form-control form-control-md" id="nama_pelanggan" name="name" placeholder="Nama Pelanggan" value="{{ old('name') }}" required />
                     </div>
                     <div class="col-md mb-3">
                         <label for="email" class="form-label">Email</label>
-                        <input type="text" class="form-control form-control-md" id="email" name="email" placeholder="supplier@gmail.com" value="{{ old('email') }}"/>
+                        <input type="text" class="form-control form-control-md" id="email" name="email" placeholder="customer@gmail.com" value="{{ old('email') }}"/>
                     </div>
                 </div>
                 <div class="row">
@@ -40,7 +40,7 @@
                 </div>
                 <div class="col-md-12 mt-4 border-top">
                     <div class="d-flex justify-content-center mt-4">
-                        <a href="{{ route('supplier.index') }}" class="btn btn-md btn-danger me-2"><i class="bx bx-left-arrow"></i> Kembali</a>
+                        <a href="{{ route('customer.index') }}" class="btn btn-md btn-danger me-2"><i class="bx bx-left-arrow"></i> Kembali</a>
                         <button type="submit" class="btn btn-md btn-success"><i class="bx bx-file"></i> Simpan</button>
                     </div>
                 </div>

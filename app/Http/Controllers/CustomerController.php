@@ -2,23 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use Exception;
-use App\Models\Supplier;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-class SupplierController extends Controller
+class CustomerController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $data = Supplier::all();
-        $trashed = Supplier::onlyTrashed()->get();
-        return view('pages.supplier.index', [
-            'title' => 'Supplier',
+        $data = Customer::all();
+        $trashed = Customer::onlyTrashed()->get();
+        return view('pages.customer.index',[
+            'title' => 'Pelanggan',
             'menu' => 'settings',
             'data' => $data,
             'trashed' => $trashed,
@@ -30,8 +30,8 @@ class SupplierController extends Controller
      */
     public function create()
     {
-        return view('pages.supplier.create', [
-            'title' => 'Supplier',
+        return view('pages.customer.create',[
+            'title' => 'Pelanggan',
             'menu' => 'settings',
         ]);
     }
@@ -43,7 +43,7 @@ class SupplierController extends Controller
     {
         try {
             $data = $request->validate([
-                'name' => 'string|required|unique:suppliers,name',
+                'name' => 'string|required',
                 'email' => 'string|email|nullable',
                 'phone' => 'string|required',
                 'city' => 'string|nullable',
@@ -52,11 +52,11 @@ class SupplierController extends Controller
             ]);
             if ($data['email']) {
                 $request->validate([
-                    'email' => 'unique:suppliers,email',
+                    'email' => 'unique:customers,email',
                 ]);
             }
-            Supplier::create($data);
-            return redirect()->route('supplier.index')->with('success', 'Data berhasil disimpan');
+            Customer::create($data);
+            return redirect()->route('customer.index')->with('success', 'Data berhasil disimpan');
         } catch (Exception $e) {
             return back()->with('error', $e->getMessage())->withInput();
         } catch (ModelNotFoundException $e) {
@@ -71,12 +71,18 @@ class SupplierController extends Controller
      */
     public function edit(string $id)
     {
-        $item = Supplier::find(decrypt($id));
-        return view('pages.supplier.edit', [
-            'title' => 'Supplier',
-            'menu' => 'settings',
-            'item' => $item,
-        ]);
+        try {
+            $item = Customer::findOrFail(decrypt($id));
+            return view('pages.customer.edit',[
+                'title' => 'Pelanggan',
+                'menu' => 'settings',
+                'item' => $item,
+            ]);
+        } catch (Exception $e) {
+            return redirect()->route('customer.index')->with('error', $e->getMessage());
+        } catch (ModelNotFoundException $e) {
+            return redirect()->route('customer.index')->with('error', $e->getMessage());
+        }
     }
 
     /**
@@ -85,9 +91,9 @@ class SupplierController extends Controller
     public function update(Request $request, string $id)
     {
         try {
-            $item = Supplier::findOrFail(decrypt($id));
+            $item = Customer::findOrFail(decrypt($id));
             $data = $request->validate([
-                'name' => 'string|required|unique:suppliers,name,'. $item->id,
+                'name' => 'string|required',
                 'email' => 'string|email|nullable',
                 'phone' => 'string|required',
                 'city' => 'string|nullable',
@@ -96,11 +102,11 @@ class SupplierController extends Controller
             ]);
             if ($data['email']) {
                 $request->validate([
-                    'email' => 'unique:suppliers,email,'.decrypt($id),
+                    'email' => 'unique:customers,email,'.decrypt($id),
                 ]);
             }
             $item->update($data);
-            return redirect()->route('supplier.index')->with('success', 'Data berhasil diperbarui');
+            return redirect()->route('customer.index')->with('success', 'Data berhasil diperbarui');
         } catch (Exception $e) {
             return back()->with('error', $e->getMessage())->withInput();
         } catch (ModelNotFoundException $e) {
@@ -116,7 +122,7 @@ class SupplierController extends Controller
     public function destroy(string $id)
     {
         try {
-            $item = Supplier::findOrFail(decrypt($id));
+            $item = Customer::findOrFail(decrypt($id));
             $item->delete();
             return back()->with('success', 'Data berhasil dihapus');
         } catch (Exception $e) {
@@ -125,11 +131,11 @@ class SupplierController extends Controller
             return back()->with('error', $e->getMessage());
         }
     }
-    
+
     public function restore(string $id)
     {
         try {
-            $item = Supplier::withTrashed()->findOrFail(decrypt($id));
+            $item = Customer::withTrashed()->findOrFail(decrypt($id));
             $item->restore();
             return back()->with('success', 'Data berhasil direstore');
         } catch (Exception $e) {

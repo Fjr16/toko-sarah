@@ -4,7 +4,7 @@
     <div class="card">
         <div class="card-header border-bottom mb-4 d-flex justify-content-between align-items-center">
             <h4 class="m-0 p-0">Data {{ $title ?? '' }}</h4>
-            <a href="{{ route('supplier.create') }}" class="btn btn-sm btn-primary">+ Tambah {{ $title ?? '' }}</a>
+            <a href="{{ route('customer.create') }}" class="btn btn-sm btn-primary">+ Tambah {{ $title ?? '' }}</a>
         </div>
         <div class="card-body">
             <div class="nav-align-top nav-tabs-shadow">
@@ -37,11 +37,11 @@
                 <div class="tab-content">
                   <div class="tab-pane fade show active" id="navs-top-home" role="tabpanel">
                     <div class="table-responsive">
-                        <table class="table table-hover" id="datatable">
+                        <table class="table table-hover datatable">
                             <thead class="table-primary">
                                 <tr>
                                     <th>#</th>
-                                    <th>Nama Supplier</th>
+                                    <th>Nama Pelanggan</th>
                                     <th>Email</th>
                                     <th>HP / WA</th>
                                     <th>Kota</th>
@@ -62,9 +62,10 @@
                                     <td>{{ $item->address ?? '' }}</td>
                                     <td>
                                         <div class="d-flex">
-                                            <a href="{{ route('supplier.edit', encrypt($item->id)) }}" class="btn btn-icon btn-outline-warning me-1"><i class="bx bx-edit"></i></a>
-                                            <button class="btn btn-icon btn-outline-danger me-1" type="button" data-warning="Hapus supplier" data-url="{{ route('supplier.destroy', encrypt($item->id)) }}" onclick="showModalDelete(this)">
-                                                <i class="bx bx-trash"></i>
+                                            <a href="{{ route('customer.edit', encrypt($item->id)) }}" class="btn btn-icon btn-outline-warning me-1"><i class="bx bx-edit"></i></a>
+        
+                                            <button class="btn btn-icon btn-outline-danger me-1" type="button" data-value="deleted" data-name="status" data-warning="Hapus Pelanggan" data-url="{{ route('customer.destroy', encrypt($item->id)) }}" onclick="showModalDelete(this)">
+                                                    <i class="bx bx-trash"></i>
                                             </button>
                                         </div>
                                     </td>
@@ -100,7 +101,7 @@
                                     <td>{{ $item->country ?? '' }}</td>
                                     <td>{{ $item->address ?? '' }}</td>
                                     <td>
-                                        <form action="{{ route('supplier.restore', encrypt($item->id)) }}" method="POST">
+                                        <form action="{{ route('customer.restore', encrypt($item->id)) }}" method="POST">
                                             @csrf
                                             <button class="btn btn-warning me-1" type="submit">
                                                 <i class='bx bx-refresh'></i>
@@ -118,5 +119,6 @@
             </div>
         </div>
     </div>
+    
 @endsection
 <x-modal-confirm-delete></x-modal-confirm-delete>

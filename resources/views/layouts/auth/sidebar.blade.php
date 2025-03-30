@@ -3,7 +3,7 @@
         <a href="/dashboard" class="app-brand-link">
             <span class="app-brand-logo demo">
             </span>
-            <span class="app-brand-text menu-text fw-bolder fs-4 ms-2 mt-1">SPK Destinasi</span>
+            <span class="app-brand-text menu-text fw-bolder fs-4 ms-2 mt-1">TOKO SARAH</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none ">
@@ -59,39 +59,55 @@
             <li class="menu-item {{ $menu == 'item' ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class='menu-icon tf-icons bx bx-box'></i>
-                    <div>Barang</div>
+                    <div>Product</div>
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ $title == 'Item Category' ? 'active' : '' }}">
                         <a href="{{ route('kategori/barang.index') }}" class="menu-link">
-                            <div>Kategori Barang</div>
+                            <div>Kategori</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ $title == 'add-item' ? 'active' : '' }}">
+                        <a href="{{ route('barang.create') }}" class="menu-link">
+                            <div>Tambah Product</div>
                         </a>
                     </li>
                     <li class="menu-item {{ $title == 'Item' ? 'active' : '' }}">
                         <a href="{{ route('barang.index') }}" class="menu-link">
-                            <div>Barang</div>
+                            <div>All Product</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ $title == 'Item-barcode' ? 'active' : '' }}">
+                        <a href="" class="menu-link">
+                            <div>Print Barcode</div>
                         </a>
                     </li>
                 </ul>
             </li>
-            {{-- <li class="menu-item {{ $title === 'Item Category' ? 'active' : '' }}">
-                <a href="" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-category"></i>
-                    <div>Kategori barang</div>
+            <li class="menu-item {{ $menu == 'stok' ? 'open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class='menu-icon tf-icons bx bx-box'></i>
+                    <div>Penambahan Stok</div>
                 </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ $title == 'add-stok' ? 'active' : '' }}">
+                        <a href="" class="menu-link">
+                            <div>Tambah Stok</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ $title == 'all-stok' ? 'active' : '' }}">
+                        <a href="" class="menu-link">
+                            <div>Riwayat Penambahan</div>
+                        </a>
+                    </li>
+                </ul>
             </li>
-            <li class="menu-item {{ $title === 'item' ? 'active' : '' }}">
-                <a href="" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-category"></i>
-                    <div>Barang</div>
-                </a>
-            </li> --}}
-            <li class="menu-item {{ $title === 'Supplier' ? 'active' : '' }}">
+            {{-- <li class="menu-item {{ $title === 'Supplier' ? 'active' : '' }}">
                 <a href="{{ route('supplier.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-store-alt"></i>
                     <div>Supplier</div>
                 </a>
-            </li>
+            </li> --}}
             <li class="menu-item {{ $title === 'Management User' ? 'active' : '' }}">
                 <a href="{{ route('user.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-user"></i>
@@ -113,7 +129,7 @@
             <li class="menu-item {{ $menu == 'Riwayat' ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class='menu-icon tf-icons bx bx-box'></i>
-                    <div>Riwayat</div>
+                    <div>Laporan</div>
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ $title == 'Riwayat Pembelian' ? 'active' : '' }}">
@@ -121,9 +137,57 @@
                             <div>Pembelian</div>
                         </a>
                     </li>
+                    <li class="menu-item {{ $title == 'Return Pembelian' ? 'active' : '' }}">
+                        <a href="" class="menu-link">
+                            <div>Return Pembelian</div>
+                        </a>
+                    </li>
                     <li class="menu-item {{ $title == 'Riwayat Penjualan' ? 'active' : '' }}">
                         <a href="{{ route('sales/riwayat.index') }}" class="menu-link">
                             <div>Penjualan</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ $title == 'Return Penjualan' ? 'active' : '' }}">
+                        <a href="" class="menu-link">
+                            <div>Return Penjualan</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ $title == 'Return Penjualan' ? 'active' : '' }}">
+                        <a href="" class="menu-link">
+                            <div>Keuntungan / Kerugian</div>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="menu-item {{ $menu == 'settings' ? 'open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class='menu-icon tf-icons bx bx-box'></i>
+                    <div>Pengaturan</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ $title == 'Supplier' ? 'active' : '' }}">
+                        <a href="{{ route('supplier.index') }}" class="menu-link">
+                            <div>Supplier</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ $title == 'Pelanggan' ? 'active' : '' }}">
+                        <a href="{{ route('customer.index') }}" class="menu-link">
+                            <div>Pelanggan</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ $title == 'Satuan' ? 'active' : '' }}">
+                        <a href="{{ route('unit.index') }}" class="menu-link">
+                            <div>Satuan</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ $title == 'Mata Uang' ? 'active' : '' }}">
+                        <a href="{{ route('currency.index') }}" class="menu-link">
+                            <div>Mata Uang</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ $title == 'Pengaturan Sistem' ? 'active' : '' }}">
+                        <a href="{{ route('pengaturan/sistem.index') }}" class="menu-link">
+                            <div>Pengaturan Sistem</div>
                         </a>
                     </li>
                 </ul>

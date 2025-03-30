@@ -1,11 +1,15 @@
 <?php
 
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CurrencyController;
+use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ItemCategoryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\SalesController;
+use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\UnitController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -55,9 +59,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('supplier/create', [SupplierController::class, 'create'])->name('supplier.create');
     Route::post('supplier/store', [SupplierController::class, 'store'])->name('supplier.store');
     Route::get('supplier/edit/{id}', [SupplierController::class, 'edit'])->name('supplier.edit');
-    Route::get('supplier/show/{id}', [SupplierController::class, 'show'])->name('supplier.show');
     Route::put('supplier/update/{id}', [SupplierController::class, 'update'])->name('supplier.update');
     Route::delete('supplier/destroy/{id}', [SupplierController::class, 'destroy'])->name('supplier.destroy');
+    Route::post('supplier/restore/{id}', [SupplierController::class, 'restore'])->name('supplier.restore');
 
     // User management
     Route::get('user/index', [UserController::class, 'index'])->name('user.index');
@@ -87,8 +91,38 @@ Route::middleware(['auth'])->group(function () {
     Route::get('pembelian/create', [TransactionController::class, 'create'])->name('pembelian.create');
     Route::get('pembelian/store/{barcode}', [TransactionController::class, 'store'])->name('pembelian.store');
     Route::delete('pembelian/destroy/{id}', [TransactionController::class, 'destroy'])->name('pembelian.destroy');
+    Route::delete('pembelian/reset', [TransactionController::class, 'reset'])->name('pembelian.reset');
     Route::put('pembelian/update/{id}', [TransactionController::class, 'update'])->name('pembelian.update');
     Route::get('pembelian/invoice', [TransactionController::class, 'show'])->name('pembelian.invoice');
+
+    // setting
+    Route::get('pengaturan/sistem.index', [SettingController::class, 'index'])->name('pengaturan/sistem.index');
+    // Mata Uang
+    Route::get('currency/index', [CurrencyController::class, 'index'])->name('currency.index');
+    Route::get('currency/create', [CurrencyController::class, 'create'])->name('currency.create');
+    Route::post('currency/store', [CurrencyController::class, 'store'])->name('currency.store');
+    Route::get('currency/edit/{id}', [CurrencyController::class, 'edit'])->name('currency.edit');
+    Route::get('currency/show/{id}', [CurrencyController::class, 'show'])->name('currency.show');
+    Route::put('currency/update/{id}', [CurrencyController::class, 'update'])->name('currency.update');
+    Route::delete('currency/destroy/{id}', [CurrencyController::class, 'destroy'])->name('currency.destroy');
+
+    // Satuan
+    Route::get('unit/index', [UnitController::class, 'index'])->name('unit.index');
+    Route::get('unit/create', [UnitController::class, 'create'])->name('unit.create');
+    Route::post('unit/store', [UnitController::class, 'store'])->name('unit.store');
+    Route::get('unit/edit/{id}', [UnitController::class, 'edit'])->name('unit.edit');
+    Route::get('unit/show/{id}', [UnitController::class, 'show'])->name('unit.show');
+    Route::put('unit/update/{id}', [UnitController::class, 'update'])->name('unit.update');
+    Route::delete('unit/destroy/{id}', [UnitController::class, 'destroy'])->name('unit.destroy');
+
+    // Pelanggan
+    Route::get('customer/index', [CustomerController::class, 'index'])->name('customer.index');
+    Route::get('customer/create', [CustomerController::class, 'create'])->name('customer.create');
+    Route::post('customer/store', [CustomerController::class, 'store'])->name('customer.store');
+    Route::get('customer/edit/{id}', [CustomerController::class, 'edit'])->name('customer.edit');
+    Route::put('customer/update/{id}', [CustomerController::class, 'update'])->name('customer.update');
+    Route::delete('customer/destroy/{id}', [CustomerController::class, 'destroy'])->name('customer.destroy');
+    Route::post('customer/restore/{id}', [CustomerController::class, 'restore'])->name('customer.restore');
 });
 
 require __DIR__.'/auth.php';

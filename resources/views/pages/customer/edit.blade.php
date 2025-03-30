@@ -6,17 +6,17 @@
             <h4 class="m-0 p-0">Edit {{ $title ?? '' }}</h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('supplier.update', encrypt($item->id)) }}" method="POST">
+            <form action="{{ route('customer.update', encrypt($item->id)) }}" method="POST">
                 @csrf
                 @method('PUT')
                 <div class="row">
                     <div class="col-md mb-3">
-                        <label for="nama_supplier" class="form-label">Nama Supplier</label>
-                        <input type="text" class="form-control form-control-md" id="nama_supplier" name="name" placeholder="Nama Supplier" value="{{ old('name', $item->name ?? '') }}" required />
+                        <label for="nama_pelanggan" class="form-label">Nama Pelanggan</label>
+                        <input type="text" class="form-control form-control-md" id="nama_pelanggan" name="name" placeholder="Nama Pelanggan" value="{{ old('name', $item->name ?? '') }}" required />
                     </div>
                     <div class="col-md mb-3">
                         <label for="email" class="form-label">Email</label>
-                        <input type="text" class="form-control form-control-md" id="email" name="email" placeholder="supplier@gmail.com" value="{{ old('email', $item->email ?? '') }}"/>
+                        <input type="text" class="form-control form-control-md" id="email" name="email" placeholder="customer@gmail.com" value="{{ old('email', $item->email ?? '') }}"/>
                     </div>
                 </div>
                 <div class="row">
@@ -39,9 +39,10 @@
                         <input type="text" class="form-control form-control-md" id="alamat" name="address" placeholder="alamat pelanggan" value="{{ old('address', $item->address ?? '') }}"/>
                     </div>
                 </div>
+                    
                 <div class="col-md-12 mt-4 border-top">
                     <div class="d-flex justify-content-center mt-4">
-                        <a href="{{ route('supplier.index') }}" class="btn btn-md btn-danger me-2"><i class="bx bx-left-arrow"></i> Kembali</a>
+                        <a href="{{ route('customer.index') }}" class="btn btn-md btn-danger me-2"><i class="bx bx-left-arrow"></i> Kembali</a>
                         <button type="submit" class="btn btn-md btn-success"><i class="bx bx-file"></i> Simpan</button>
                     </div>
                 </div>
