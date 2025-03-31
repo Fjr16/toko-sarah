@@ -97,12 +97,12 @@ Route::middleware(['auth'])->group(function () {
 
     // setting
     Route::get('pengaturan/sistem.index', [SettingController::class, 'index'])->name('pengaturan/sistem.index');
+    
     // Mata Uang
     Route::get('currency/index', [CurrencyController::class, 'index'])->name('currency.index');
     Route::get('currency/create', [CurrencyController::class, 'create'])->name('currency.create');
     Route::post('currency/store', [CurrencyController::class, 'store'])->name('currency.store');
     Route::get('currency/edit/{id}', [CurrencyController::class, 'edit'])->name('currency.edit');
-    Route::get('currency/show/{id}', [CurrencyController::class, 'show'])->name('currency.show');
     Route::put('currency/update/{id}', [CurrencyController::class, 'update'])->name('currency.update');
     Route::delete('currency/destroy/{id}', [CurrencyController::class, 'destroy'])->name('currency.destroy');
 
