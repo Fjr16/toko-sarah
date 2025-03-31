@@ -3,8 +3,8 @@
 @section('content')
     <div class="card">
         <div class="card-header d-flex align-items-center justify-content-between border-bottom mb-4">
-            <h4 class="m-0 p-0">Data User</h4>
-            <a href="{{ route('user.create') }}" class="btn btn-sm btn-primary">+ Tambah User</a>
+            <h4 class="m-0 p-0">Data {{ $title ?? '' }}</h4>
+            <a href="{{ route('user.create') }}" class="btn btn-sm btn-primary">+ Tambah {{ $title ?? '' }}</a>
         </div>
         <div class="card-body">
 

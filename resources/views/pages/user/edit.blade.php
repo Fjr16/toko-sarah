@@ -3,7 +3,7 @@
 @section('content')
     <div class="card">
         <div class="card-header mb-4 border-bottom">
-            <h4 class="m-0 p-0">Edit Pengguna</h4>
+            <h4 class="m-0 p-0">Edit {{ $title ?? '' }}</h4>
         </div>
         <div class="card-body">
             <form action="{{ route('user.update', encrypt($item->id)) }}" method="POST">

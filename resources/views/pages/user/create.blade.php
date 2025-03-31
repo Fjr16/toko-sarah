@@ -3,7 +3,7 @@
 @section('content')
     <div class="card">
         <div class="card-header mb-4 border-bottom">
-            <h4 class="m-0 p-0">Tambah Pengguna</h4>
+            <h4 class="m-0 p-0">Tambah {{ $title ?? '' }}</h4>
         </div>
         <div class="card-body">
             <form action="{{ route('user.store') }}" method="POST">
