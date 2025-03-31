@@ -86,6 +86,26 @@
             padding-bottom: 20px;
         }
         /* /table rme */
+
+        /* blok kontent */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Warna gelap dengan transparansi */
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .overlay-content {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
     </style>
 
     {{-- dinamis css --}}

@@ -175,9 +175,10 @@
                             <div>Pelanggan</div>
                         </a>
                     </li>
-                    <li class="menu-item {{ $title == 'Satuan' ? 'active' : '' }}">
+                    <li class="menu-item disabled {{ $title == 'Satuan' ? 'active' : '' }}" style="pointer-events: none;">
                         <a href="{{ route('unit.index') }}" class="menu-link">
-                            <div>Satuan</div>
+                            <div>Satuan </div>
+                            <span class="badge bg-danger text-bg-warning ms-2">Pro</span>
                         </a>
                     </li>
                     <li class="menu-item {{ $title == 'Mata Uang' ? 'active' : '' }}">

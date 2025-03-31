@@ -96,8 +96,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('pembelian/invoice', [TransactionController::class, 'show'])->name('pembelian.invoice');
 
     // setting
-    Route::get('pengaturan/sistem.index', [SettingController::class, 'index'])->name('pengaturan/sistem.index');
-    
+    Route::get('pengaturan/sistem/index', [SettingController::class, 'index'])->name('pengaturan/sistem.index');
+    Route::post('pengaturan/sistem/store', [SettingController::class, 'store'])->name('pengaturan/sistem.store');
+
     // Mata Uang
     Route::get('currency/index', [CurrencyController::class, 'index'])->name('currency.index');
     Route::get('currency/create', [CurrencyController::class, 'create'])->name('currency.create');

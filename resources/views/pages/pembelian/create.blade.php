@@ -204,7 +204,7 @@
 
             <div class="col-md-12 mt-4 ">
                 <div class="d-flex justify-content-center mt-4">
-                    <button class="btn btn-md btn-danger me-2" type="button" data-warning="Kosongkan keranjang belanja ?" data-url="{{ route('cart.reset') }}" onclick="showModalDelete(this)"><i class="bx bx-reset"></i> Reset</button>
+                    <button class="btn btn-md btn-danger me-2" type="button" data-warning="Kosongkan keranjang belanja ?" data-url="{{ route('pembelian.reset') }}" onclick="showModalDelete(this)"><i class="bx bx-reset"></i> Reset</button>
                     <button type="button" class="btn btn-md btn-success" data-bs-toggle="modal" data-bs-target="#modalLong"><i class="bx bx-check"></i> Checkout</button>
                 </div>
             </div>

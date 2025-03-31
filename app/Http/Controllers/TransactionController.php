@@ -33,7 +33,7 @@ class TransactionController extends Controller
         }
 
         $produks = Item::all();
-        $suppliers = Supplier::where('status', 'active')->get();
+        $suppliers = Supplier::get();
         $itemCategories = ItemCategory::where('status', 'active')->get();
         return view('pages.pembelian.create', [
             'title' => 'Pembelian',
@@ -190,5 +190,10 @@ class TransactionController extends Controller
 
         session()->put('data_pembelian', $newData);
         return back()->with('success', 'Berhasil Dihapus');
+    }
+
+    public function reset(){
+        session()->put('data_pembelian', []);
+        return back()->with('success', 'Berhasil Direset');
     }
 }
