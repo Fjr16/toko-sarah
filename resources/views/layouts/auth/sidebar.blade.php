@@ -108,7 +108,7 @@
                     <div>Supplier</div>
                 </a>
             </li> --}}
-            <li class="menu-item {{ $title === 'Management User' ? 'active' : '' }}">
+            <li class="menu-item {{ $title === 'User' ? 'active' : '' }}">
                 <a href="{{ route('user.index') }}" class="menu-link">
                     <i class="menu-icon tf-icons bx bx-user"></i>
                     <div>Manajemen user</div>
@@ -161,7 +161,7 @@
             </li>
             <li class="menu-item {{ $menu == 'settings' ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class='menu-icon tf-icons bx bx-box'></i>
+                    <i class='menu-icon tf-icons bx bx-cog'></i>
                     <div>Pengaturan</div>
                 </a>
                 <ul class="menu-sub">

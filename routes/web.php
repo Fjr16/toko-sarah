@@ -70,6 +70,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('user/edit/{id}', [UserController::class, 'edit'])->name('user.edit');
     Route::put('user/update/{id}', [UserController::class, 'update'])->name('user.update');
     Route::delete('user/destroy/{id}', [UserController::class, 'destroy'])->name('user.destroy');
+    Route::post('user/restore/{id}', [UserController::class, 'restore'])->name('user.restore');
     
     // Penjualan
     Route::get('sales/riwayat', [SalesController::class, 'index'])->name('sales/riwayat.index');

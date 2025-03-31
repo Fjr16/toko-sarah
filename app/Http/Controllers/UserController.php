@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class UserController extends Controller
 {
@@ -15,10 +17,12 @@ class UserController extends Controller
     public function index()
     {
         $data = User::all();
+        $trashed = User::onlyTrashed()->get();
         return view('pages.user.index', [
-            'title' => 'Management User',
+            'title' => 'User',
             'menu' => 'Management User',
             'data' => $data,
+            'trashed' => $trashed,
         ]);
     }
 
@@ -28,7 +32,7 @@ class UserController extends Controller
     public function create()
     {
         return view('pages.user.create', [
-            'title' => 'Management User',
+            'title' => 'User',
             'menu' => 'Management User',
         ]);
     }
@@ -72,7 +76,7 @@ class UserController extends Controller
     {
         $item = User::find(decrypt($id));
         return view('pages.user.edit', [
-            'title' => 'Management User',
+            'title' => 'User',
             'menu' => 'Management User',
             'item' => $item,
         ]);
@@ -112,16 +116,33 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, string $id)
+    public function destroy(string $id)
     {
-        $this->validate($request, [
-            'status' => 'required|in:deleted,active'
-        ]);
-        $item = User::find(decrypt($id));
-        $item->update([
-            'status' => $request->status,
-        ]);
-        
-        return back()->with('success', 'Berhasil Diperbarui');
+        try {
+            $item = User::findOrFail(decrypt($id));
+            $item->delete();
+            return back()->with('success', 'Data berhasil dihapus');
+        } catch (Exception $e) {
+            return back()->with('error', $e->getMessage());
+        } catch (ModelNotFoundException $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function restore($id) 
+    {
+        try {
+            $item = User::onlyTrashed()->findOrFail(decrypt($id));
+            if ($item) {
+                $item->restore();
+                return back()->with('success', 'Data berhasil dipulihkan');
+            } else {
+                return back()->with('error', 'Data tidak ditemukan');
+            }
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        } catch (ModelNotFoundException $e) {
+            return back()->with('error', 'Data tidak ditemukan: ' . $e->getMessage());
+        }
     }
 }
