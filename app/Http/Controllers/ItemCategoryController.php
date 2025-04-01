@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Item;
 use App\Models\ItemCategory;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
 class ItemCategoryController extends Controller
@@ -14,10 +15,12 @@ class ItemCategoryController extends Controller
     public function index()
     {
         $data = ItemCategory::all();
+        $trashed = ItemCategory::onlyTrashed()->get();
         return view('pages.item-category.index', [
-            'title' => 'Item Category',
+            'title' => 'Kategori Produk',
             'menu' => 'item',
             'data' => $data,
+            'trashed' => $trashed,
         ]);
     }
 
@@ -27,7 +30,7 @@ class ItemCategoryController extends Controller
     public function create()
     {
         return view('pages.item-category.create', [
-            'title' => 'Item Category',
+            'title' => 'Kategori Produk',
             'menu' => 'item',
         ]);
     }
@@ -55,7 +58,7 @@ class ItemCategoryController extends Controller
         $itemCategory = ItemCategory::find(decrypt($id));
         $data = Item::where('item_category_id', $itemCategory->id)->get();
         return view('pages.item-category.show', [
-            'title' => 'Item Category',
+            'title' => 'Kategori Produk',
             'menu' => 'item',
             'itemCategory' => $itemCategory,
             'data' => $data,
@@ -69,7 +72,7 @@ class ItemCategoryController extends Controller
     {
         $item = ItemCategory::find(decrypt($id));
         return view('pages.item-category.edit', [
-            'title' => 'Item Category',
+            'title' => 'Kategori Produk',
             'menu' => 'item',
             'item' => $item,
         ]);
@@ -93,17 +96,31 @@ class ItemCategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, string $id)
+    public function destroy(string $id)
     {
-        $this->validate($request, [
-            'status' => 'in:active,deleted',
-        ]);
-        $item = ItemCategory::find(decrypt($id));
+        try {
+            $item = ItemCategory::findOrFail(decrypt($id));
+    
+            $item->delete();
+    
+            return back()->with('success', 'Berhasil Diperbarui');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal Menghapus Data : ' . $e->getMessage());
+        } catch (ModelNotFoundException $e) {
+            return back()->with('error', 'Kategori tidak ditemukan : ' . $e->getMessage());
+        }
+    }
 
-        $item->update([
-            'status' => $request->status,
-        ]);
-
-        return back()->with('success', 'Berhasil Diperbarui');
+    public function restore($id) {
+        try {
+            $item = ItemCategory::onlyTrashed()->findOrFail(decrypt($id));
+            $item->restore();
+            return redirect()->route('kategori/barang.index')->with('success', 'Daqta berhasil dipulihkan');
+        } catch (ModelNotFoundException $e) {
+            return back()->with('error', 'Kategori tidak ditemukan : ' . $e->getMessage());
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal Memulihkan Data : ' . $e->getMessage());
+        }
+        
     }
 }

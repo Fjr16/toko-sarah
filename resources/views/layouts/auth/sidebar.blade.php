@@ -62,7 +62,7 @@
                     <div>Product</div>
                 </a>
                 <ul class="menu-sub">
-                    <li class="menu-item {{ $title == 'Item Category' ? 'active' : '' }}">
+                    <li class="menu-item {{ $title == 'Kategori Produk' ? 'active' : '' }}">
                         <a href="{{ route('kategori/barang.index') }}" class="menu-link">
                             <div>Kategori</div>
                         </a>
@@ -86,7 +86,7 @@
             </li>
             <li class="menu-item {{ $menu == 'stok' ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class='menu-icon tf-icons bx bx-box'></i>
+                    <i class='menu-icon tf-icons bx bx-trending-up'></i>
                     <div>Penambahan Stok</div>
                 </a>
                 <ul class="menu-sub">
@@ -128,7 +128,7 @@
             </li>
             <li class="menu-item {{ $menu == 'Riwayat' ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class='menu-icon tf-icons bx bx-box'></i>
+                    <i class='menu-icon tf-icons bx bxs-report'></i>
                     <div>Laporan</div>
                 </a>
                 <ul class="menu-sub">

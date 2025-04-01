@@ -29,7 +29,7 @@ class ItemController extends Controller
      */
     public function create()
     {
-        $data = ItemCategory::where('status', 'active')->get();
+        $data = ItemCategory::get();
         return view('pages.item.create', [
             'title' => 'add-item',
             'menu' => 'item',
