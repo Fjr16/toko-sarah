@@ -59,7 +59,7 @@
             <li class="menu-item {{ $menu == 'item' ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class='menu-icon tf-icons bx bx-box'></i>
-                    <div>Product</div>
+                    <div>Produk</div>
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ $title == 'Kategori Produk' ? 'active' : '' }}">
@@ -69,19 +69,19 @@
                     </li>
                     <li class="menu-item {{ $title == 'add-item' ? 'active' : '' }}">
                         <a href="{{ route('barang.create') }}" class="menu-link">
-                            <div>Tambah Product</div>
+                            <div>Tambah Produk</div>
                         </a>
                     </li>
-                    <li class="menu-item {{ $title == 'Item' ? 'active' : '' }}">
+                    <li class="menu-item {{ $title == 'Produk' ? 'active' : '' }}">
                         <a href="{{ route('barang.index') }}" class="menu-link">
-                            <div>All Product</div>
+                            <div>All Produk</div>
                         </a>
                     </li>
-                    <li class="menu-item {{ $title == 'Item-barcode' ? 'active' : '' }}">
+                    {{-- <li class="menu-item {{ $title == 'Item-barcode' ? 'active' : '' }}">
                         <a href="" class="menu-link">
                             <div>Print Barcode</div>
                         </a>
-                    </li>
+                    </li> --}}
                 </ul>
             </li>
             <li class="menu-item {{ $menu == 'stok' ? 'open' : '' }}">

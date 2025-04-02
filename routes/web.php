@@ -52,6 +52,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('barang/edit/{id}', [ItemController::class, 'edit'])->name('barang.edit');
     Route::put('barang/update/{id}', [ItemController::class, 'update'])->name('barang.update');
     Route::delete('barang/destroy/{id}', [ItemController::class, 'destroy'])->name('barang.destroy');
+    Route::post('barang/restore/{id}', [ItemController::class, 'restore'])->name('barang.restore');
     // store and add to cart
     Route::post('item/store/add/to/cart', [ItemController::class, 'storeAndAddToCart'])->name('item/store/add/to.cart');
 

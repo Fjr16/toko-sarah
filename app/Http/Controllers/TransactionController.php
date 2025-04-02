@@ -34,7 +34,7 @@ class TransactionController extends Controller
 
         $produks = Item::all();
         $suppliers = Supplier::get();
-        $itemCategories = ItemCategory::where('status', 'active')->get();
+        $itemCategories = ItemCategory::get();
         return view('pages.pembelian.create', [
             'title' => 'Pembelian',
             'menu' => 'Pembelian',
@@ -62,7 +62,7 @@ class TransactionController extends Controller
             $item = Item::where('code', $barcode)->firstOrFail();
             $findItem = $this->findItem($item->id);
             if ($findItem) {
-                // untuk mendapatkan key asli, case misal terdapat array dengan key 0,1,2 ketikda array key 1
+                // untuk mendapatkan key asli, case misal terdapat array dengan key 0,1,2 ketika array key 1
                 // dihapus maka array 0,2. disini ketika index dicari maka index yang dikembalikan sesuai dengan index 0,2 bukan 0,1
                 $index = key(array_filter($dataSession, function($itemSession) use ($item) {
                     return $itemSession['id'] === $item->id;

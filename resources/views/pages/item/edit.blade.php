@@ -3,7 +3,7 @@
 @section('content')
     <div class="card">
         <div class="card-header mb-4 border-bottom">
-            <h4 class="m-0 p-0">Edit Barang</h4>
+            <h4 class="m-0 p-0">Edit {{ $title ?? '' }}</h4>
         </div>
         <div class="card-body">
             <form action="{{ route("barang.update", encrypt($item->id)) }}" method="POST">
@@ -82,7 +82,7 @@
 @endsection
 
 
-@section('script')
+{{-- @section('script')
 <script>
     document.addEventListener('DOMContentLoaded', function(){
       var satuanTerkecil = document.getElementById('satuan-terkecil');
@@ -112,4 +112,4 @@
       });
     })
   </script>
-@endsection
+@endsection --}}

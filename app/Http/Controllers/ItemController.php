@@ -6,6 +6,7 @@ use App\Http\Requests\ItemRequest;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -17,10 +18,12 @@ class ItemController extends Controller
     public function index()
     {
         $data = Item::all();
+        $trashed = Item::onlyTrashed()->get();
         return view('pages.item.index', [
-            'title' => 'Item',
+            'title' => 'Produk',
             'menu' => 'item',
             'data' => $data,
+            'trashed' => $trashed,
         ]);
     }
 
@@ -94,7 +97,7 @@ class ItemController extends Controller
         $data = ItemCategory::all();
         $item = Item::find(decrypt($id));
         return view('pages.item.edit', [
-            'title' => 'Item',
+            'title' => 'Produk',
             'menu' => 'item',
             'item' => $item,
             'data' => $data,
@@ -128,16 +131,31 @@ class ItemController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Request $request, string $id)
+    public function destroy(string $id)
     {
-        $this->validate($request, [
-            'status' => 'in:active,deleted',
-        ]);
-        $item = Item::find(decrypt($id));
-        $item->update([
-            'status' => $request->status,
-        ]);
+        try {
+            $item = Item::findOrFail(decrypt($id));
+            $item->delete();
+    
+            return back()->with('success', 'Berhasil Menghapus Data');
+        } catch (Exception $e) {
+            return back()->with('error', 'Gagal Menghapus Data : ' . $e->getMessage());
+        } catch (ModelNotFoundException $e) {
+            return back()->with('error', 'Data tidak ditemukan : ' . $e->getMessage());
+        }
+    }
 
-        return back()->with('success', 'Berhasil Diperbarui');
+    public function restore(string $id)
+    {
+        try {
+            $item = Item::withTrashed()->findOrFail(decrypt($id));
+            $item->restore();
+    
+            return back()->with('success', 'Berhasil Memulihkan Data');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal Memulihkan Data : ' . $e->getMessage());
+        } catch (ModelNotFoundException $e) {
+            return back()->with('error', 'Data tidak ditemukan : ' . $e->getMessage());
+        }
     }
 }

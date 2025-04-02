@@ -23,7 +23,8 @@ return new class extends Migration
             $table->integer('big_to_medium')->nullable();
             $table->decimal('base_price',10,2)->required()->default(0);
             $table->integer('stok')->default(0);
-            $table->enum('status', ['active', 'deleted'])->default('active');
+            // $table->enum('status', ['active', 'deleted'])->default('active');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
