@@ -44,8 +44,8 @@ class CurrencyController extends Controller
                 'name' => 'required|string|max:50',
                 'code' => 'required|string|max:20|unique:currencies,code',
                 'symbol' => 'required|string|max:5|unique:currencies,symbol',
-                'thousand_separator' => 'required|string|max:5',
-                'decimal_separator' => 'required|string|max:5',
+                'thousand_separator' => 'required|string|max:5|different:decimal_separator',
+                'decimal_separator' => 'required|string|max:5|different:thousand_separator',
             ]);
 
             Currency::create($data);
@@ -89,8 +89,8 @@ class CurrencyController extends Controller
                 'name' => 'required|string|max:50',
                 'code' => 'required|string|max:20|unique:currencies,code,' . decrypt($id),
                 'symbol' => 'required|string|max:5|unique:currencies,symbol,' . decrypt($id),
-                'thousand_separator' => 'required|string|max:5',
-                'decimal_separator' => 'required|string|max:5',
+                'thousand_separator' => 'required|string|max:5|different:decimal_separator',
+                'decimal_separator' => 'required|string|max:5|different:thousand_separator',
             ]);
 
             $item = Currency::findOrFail(decrypt($id));

@@ -45,10 +45,11 @@
                                         <th>Kategori</th>
                                         <th>Kode</th>
                                         <th>Nama</th>
-                                        <th>Satuan Terkecil</th>
+                                        {{-- <th>Satuan Terkecil</th>
                                         <th>Satuan Menengah</th>
-                                        <th>Satuan Terbesar</th>
-                                        <th>Harga Awal</th>
+                                        <th>Satuan Terbesar</th> --}}
+                                        <th>Harga Beli</th>
+                                        <th>Harga Jual</th>
                                         <th>Stok</th>
                                         <th>Action</th>
                                     </tr>
@@ -60,14 +61,16 @@
                                         <td>{{ $item->itemCategory->name ?? '-' }}</td>
                                         <td>{{ $item->code ?? '-' }}</td>
                                         <td>{{ $item->name ?? '-' }}</td>
-                                        <td>{{ $item->small_unit ?? '-' }}</td>
+                                        {{-- <td>{{ $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->medium_unit ?? '-' }}</td>
-                                        <td>{{ $item->big_unit ?? '-' }}</td>
-                                        <td>{{ number_format($item->base_price ?? 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ $item->big_unit ?? '-' }}</td> --}}
+                                        <td>{{ number_format($item->cost, 2, $systemSetting->currency->decimal_separator, $systemSetting->currency->thousand_separator) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ number_format($item->price, 2, $systemSetting->currency->decimal_separator, $systemSetting->currency->thousand_separator) . ' /' . $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->stok  . ' '. $item->small_unit }}</td>
                                         <td class="text-nowrap">
                                             <div class="d-flex">
-                                                <a href="{{ route('barang.edit', encrypt($item->id)) }}" class="btn btn-icon btn-outline-warning mx-2"><i class="bx bx-edit"></i></a>
+                                                <a href="{{ route('barang.edit', encrypt($item->id)) }}" class="btn btn-icon btn-outline-warning"><i class="bx bx-edit"></i></a>
+                                                <a href="{{ route('barang.show', encrypt($item->id)) }}" class="btn btn-icon btn-outline-primary mx-2"><i class="bx bxs-show"></i></a>
                                                 <button class="btn btn-icon btn-outline-danger me-1" type="button" data-warning="Hapus Produk" data-url="{{ route('barang.destroy', encrypt($item->id)) }}" onclick="showModalDelete(this)">
                                                     <i class="bx bx-trash"></i>
                                                 </button>
@@ -88,10 +91,11 @@
                                         <th>Kategori</th>
                                         <th>Kode</th>
                                         <th>Nama</th>
-                                        <th>Satuan Terkecil</th>
-                                        <th>Satuan Menengah</th>
-                                        <th>Satuan Terbesar</th>
-                                        <th>Harga Awal</th>
+                                        {{-- <th>Satuan Terkecil</th> --}}
+                                        {{-- <th>Satuan Menengah</th> --}}
+                                        {{-- <th>Satuan Terbesar</th> --}}
+                                        <th>Harga Beli</th>
+                                        <th>Harga Jual</th>
                                         <th>Stok</th>
                                         <th>Action</th>
                                     </tr>
@@ -103,10 +107,11 @@
                                         <td>{{ $item->itemCategory->name ?? '-' }}</td>
                                         <td>{{ $item->code ?? '-' }}</td>
                                         <td>{{ $item->name ?? '-' }}</td>
-                                        <td>{{ $item->small_unit ?? '-' }}</td>
+                                        {{-- <td>{{ $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->medium_unit ?? '-' }}</td>
-                                        <td>{{ $item->big_unit ?? '-' }}</td>
-                                        <td>{{ number_format($item->base_price ?? 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ $item->big_unit ?? '-' }}</td> --}}
+                                        <td>{{ number_format($item->cost ?? 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ number_format($item->price ?? 0) . ' /' . $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->stok  . ' '. $item->small_unit }}</td>
                                         <td class="text-nowrap">
                                             <form action="{{ route('barang.restore', encrypt($item->id)) }}" method="POST">

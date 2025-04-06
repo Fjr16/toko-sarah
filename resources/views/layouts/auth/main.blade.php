@@ -325,24 +325,6 @@
         }
     </script>
     <script>
-        // function untuk membuat input dengan format rupiah
-        function formatRupiah(angka){
-            var number_string = angka.replace(/[^,\d]/g, '').toString(),
-                split = number_string.split(','),
-                sisa = split[0].length % 3,
-                rupiah = split[0].substr(0, sisa),
-                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
-                
-            if (ribuan) {
-                separator = sisa ? '.' : '';
-                rupiah += separator + ribuan.join('.');
-            }
-
-            rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
-            return rupiah;
-        }
-    </script>
-    <script>
         document.addEventListener('DOMContentLoaded', function(){
         var satuanTerkecil = document.getElementById('satuan-terkecil');
         var satuanSedang = document.getElementById('satuan-menengah');
@@ -371,8 +353,34 @@
         });
         })
     </script>
+    <script>
+        // reformat input number according currency
+        function number_format(thousandSeparator, decimalSeparator, element) {
+            // let value = element.value.replace(/[^\d,]/g, '');   //"\d" sama dengan [0-9], "^" artinya bukan
+            let value = element.value.replace(new RegExp(`[^\\d${decimalSeparator}]`, 'g'), '');   //"\d" sama dengan [0-9], "^" artinya bukan, dan decimal separator diambil dari variabel
+            element.value = formatRupiah(value,thousandSeparator,decimalSeparator);
+        }
+        function formatRupiah(angka, thou, dec) {
+            var number_string = angka.toString(),
+                split = number_string.split(dec),   //mengambil angka sebelum decimalSeparator
+                sisa = split[0].length % 3,         //mengambil sisa dari panjang angka sebelum koma yang dibagi 3
+                rupiah = split[0].substr(0, sisa),  //mengambil angka sebelum koma dari index 0 sampai sisa
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);    //mengambil angka setelah koma dari index sisa sampai akhir
+                //match(/\d{3}/gi) artinya ambil 3 digit angka dari index sisa sampai akhir
+                //gi artinya global dan case insensitive
+                
+            if (ribuan) {
+                separator = sisa ? thou : ''; //jika sisa ada maka gunakan separator ribuan 
+                rupiah += separator + ribuan.join(thou);    //gabungkan separator ribuan dengan angka ribuan setelah sisa
+            }
 
-    @yield('script')
+            rupiah = split[1] != undefined ? rupiah + dec + split[1] : rupiah;  //jika angka sen ada maka sisipkan sen setelah jumlah ribuan dengan separator decimal
+            return rupiah;
+        }
+    </script>
+
+    {{-- @yield('script') --}}
+    @stack('scripts')
 
 </body>
 

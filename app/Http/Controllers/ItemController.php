@@ -2,16 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ItemRequest;
+use Exception;
 use App\Models\Item;
 use App\Models\ItemCategory;
-use Exception;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use App\Models\SystemSetting;
+use App\Http\Requests\ItemRequest;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ItemController extends Controller
 {
+    protected $systemSetting;
+
+    public function __construct()
+    {
+        $this->systemSetting = SystemSetting::first();
+    }
+
+    // clean currency format before submit to controller
+    private function cleanFormat($val, $thousandSep, $decimalSep) {
+        $value = str_replace([$thousandSep, $decimalSep], ['', '.'], $val); //mengambil angka saja dan format sen ganti jadi .
+        return $value;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -24,6 +38,7 @@ class ItemController extends Controller
             'menu' => 'item',
             'data' => $data,
             'trashed' => $trashed,
+            'systemSetting' => $this->systemSetting,
         ]);
     }
 
@@ -37,6 +52,7 @@ class ItemController extends Controller
             'title' => 'add-item',
             'menu' => 'item',
             'data' => $data,
+            'systemSetting' => $this->systemSetting,
         ]);
     }
 
@@ -45,6 +61,8 @@ class ItemController extends Controller
      */
     public function store(ItemRequest $request)
     {
+        $request['cost'] = $this->cleanFormat($request->cost, $this->systemSetting->currency->thousand_separator, $this->systemSetting->currency->decimal_separator);
+        $request['price'] = $this->cleanFormat($request->price, $this->systemSetting->currency->thousand_separator, $this->systemSetting->currency->decimal_separator);
         $data = $request->all();
 
         Item::create($data);
@@ -55,6 +73,8 @@ class ItemController extends Controller
     public function storeAndAddToCart(ItemRequest $request){
         DB::beginTransaction();
         try {
+            $request['cost'] = $this->cleanFormat($request->cost, $this->systemSetting->currency->thousand_separator, $this->systemSetting->currency->decimal_separator);
+            $request['price'] = $this->cleanFormat($request->price, $this->systemSetting->currency->thousand_separator, $this->systemSetting->currency->decimal_separator);
             $data = $request->all();
             if ($item = Item::create($data)) {
                 $req = Request::create(route('pembelian.store', $item->code), 'GET');
@@ -86,7 +106,13 @@ class ItemController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $item = Item::find(decrypt($id));
+        return view('pages.item.show', [
+            'title' => 'Produk',
+            'menu' => 'item',
+            'item' => $item,
+            'systemSetting' => $this->systemSetting,
+        ]);
     }
 
     /**
@@ -101,6 +127,7 @@ class ItemController extends Controller
             'menu' => 'item',
             'item' => $item,
             'data' => $data,
+            'systemSetting' => $this->systemSetting,
         ]);
     }
 
@@ -110,6 +137,8 @@ class ItemController extends Controller
     public function update(Request $request, string $id)
     {
         $item = Item::find(decrypt($id));
+        $request['cost'] = $this->cleanFormat($request->cost, $this->systemSetting->currency->thousand_separator, $this->systemSetting->currency->decimal_separator);
+        $request['price'] = $this->cleanFormat($request->price, $this->systemSetting->currency->thousand_separator, $this->systemSetting->currency->decimal_separator);
         $data = $request->validate([
             'item_category_id' => 'required|exists:item_categories,id',
             'code' => 'required|unique:items,code,' . $item->id,
@@ -119,8 +148,13 @@ class ItemController extends Controller
             'medium_to_small' => 'required_with:medium_unit',
             'big_unit' => 'nullable|string',
             'big_to_medium' => 'required_with:big_unit',
-            'base_price' => 'nullable',
-            'stok' => 'nullable',
+            'cost' => 'required',
+            'price' => 'required',
+            'stok' => 'required|integer',
+            'stok_alert' => 'required|integer',
+            'tax' => 'required|integer',
+            'tax_type' => 'required|in:exclusive,inclusive,none',
+            'note' => 'nullable|string',
         ]);
 
         $item->update($data);

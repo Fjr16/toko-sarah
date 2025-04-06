@@ -216,7 +216,7 @@
 <x-modal-confirm-delete></x-modal-confirm-delete>
 
 
-@section('script')
+@push('scripts')
     <script>
         // add item to cart
         const barcodeInput = document.getElementById('kode-produk');
@@ -331,4 +331,4 @@
             $('input[name="tipe_bayar"]').val(this.value);
         })
     </script>
-@endsection
+@endpush

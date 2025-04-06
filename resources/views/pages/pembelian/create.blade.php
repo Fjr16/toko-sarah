@@ -50,7 +50,7 @@
                         @csrf
                         <div class="card-body">
                             <div class="row mb-3">
-                                <label for="kategori-barang" class="form-label col-form-label col-sm-2">Kategori Barang</label>
+                                <label for="kategori-barang" class="form-label col-form-label col-sm-2">Kategori Barang <span class="text-danger">*</span></label>
                                 <div class="col-sm-10">
                                     <select class="form-select form-control" id="kategori-barang" aria-label="Default select example" name="item_category_id" required>
                                     <option selected disabled>-- Pilih Kategori --</option>
@@ -61,20 +61,20 @@
                                 </div>
                             </div>
                             <div class="row mb-3">
-                                <label for="kode-barang" class="form-label col-form-label col-sm-2">Kode Barang</label>
-                                <div class="col-sm-10">
-                                    <input type="text" class="form-control form-control-md" id="kode-barang" name="code" placeholder="Input / scan kode barang disini" value="{{ old('code') }}" required />
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label for="nama-barang" class="form-label col-form-label col-sm-2">Nama Barang</label>
+                                <label for="nama-barang" class="form-label col-form-label col-sm-2">Nama Barang <span class="text-danger">*</span></label>
                                 <div class="col-sm-10">
                                     <input type="text" class="form-control form-control-md" id="nama-barang" name="name" placeholder="Input Nama Barang" value="{{ old('name') }}" required />
                                 </div>
                             </div>
                             <div class="row mb-3">
+                                <label for="kode-barang" class="form-label col-form-label col-sm-2">Kode Barang <span class="text-danger">*</span></label>
+                                <div class="col-sm-10">
+                                    <input type="text" class="form-control form-control-md" id="kode-barang" name="code" placeholder="Input / scan kode barang disini" value="{{ old('code') }}" required />
+                                </div>
+                            </div>
+                            <div class="row mb-3">
                                 <div class="col-md-4">
-                                    <label for="satuan-terkecil" class="form-label">Satuan Terkecil</label>
+                                    <label for="satuan-terkecil" class="form-label">Satuan Terkecil <span class="text-danger">*</span></label>
                                     <input name="small_unit" class="form-control form-control-md" id="satuan-terkecil" placeholder="Input Satuan Terkecil" required></input>
                                 </div>
                                 <div class="col-md-4">
@@ -96,25 +96,74 @@
                                     </div>
                                 </div>
                             </div>
+
                             <div class="row mb-3">
                                 <div class="col-md-6">
-                                    <label for="harga-awal" class="form-label">Harga Awal</label>
+                                    <label for="cost" class="form-label">Harga Beli <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input type="mumber" name="base_price" id="harga-awal" placeholder="0" class="form-control form-control-md" placeholder="Input Harga Awal Barang" value="{{ old('base_price') }}" required />
-                                        <span class="input-group-text get-satuan-kecil">/</span>
+                                        @if ($systemSetting?->currency_position_default == 'prefix')
+                                            <span class="input-group-text bg-dark text-white">{{ $systemSetting?->currency?->symbol ?? null }}</span>                                
+                                        @endif
+                                        <input type="text" class="form-control form-control-md price" id="cost" name="cost" placeholder="0,00" value="{{ old('cost') }}" onkeyup="number_format('{{ $systemSetting?->currency?->thousand_separator ?? null }}', '{{ $systemSetting?->currency?->decimal_separator ?? null }}', this)" required />
+                                        @if ($systemSetting?->currency_position_default == 'suffix')
+                                            <span class="input-group-text bg-dark text-white">{{ $systemSetting?->currency?->symbol ?? null }}</span>                                
+                                        @endif
+                                        <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="stok-awal" class="form-label">Stok Awal</label>
+                                    <label for="price" class="form-label">Harga Jual <span class="text-danger">*</span></label>
                                     <div class="input-group">
-                                        <input type="mumber" name="stok" id="stok-awal" placeholder="0" class="form-control form-control-md" placeholder="Input Stok Awal Barang" value="{{ old('stok') }}" required />
-                                        <span class="input-group-text get-satuan-kecil">/</span>
+                                        @if ($systemSetting?->currency_position_default == 'prefix')
+                                            <span class="input-group-text bg-dark text-white">{{ $systemSetting?->currency?->symbol ?? null }}</span>                                
+                                        @endif
+                                        <input type="text" name="price" id="price" class="form-control form-control-md price" placeholder="0,00" value="{{ old('price')}}" onkeyup="number_format('{{ $systemSetting?->currency?->thousand_separator ?? null }}', '{{ $systemSetting?->currency?->decimal_separator ?? null }}', this)" required />
+                                        @if ($systemSetting?->currency_position_default == 'suffix')
+                                            <span class="input-group-text bg-dark text-white">{{ $systemSetting?->currency?->symbol ?? null }}</span>                                
+                                        @endif
+                                        <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
                                     </div>
                                 </div>
                             </div>
+                            <div class="row mb-3">
+                                <div class="col-md">
+                                    <label for="stok-awal" class="form-label">Stok Awal <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="number" name="stok" id="stok-awal" placeholder="0" min="0" class="form-control form-control-md" value="{{ old('stok') ?? 0 }}" required />
+                                        <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
+                                    </div>
+                                </div>
+                                <div class="col-md">
+                                    <label for="stok_alert" class="form-label">Peringatan Stok <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="number" name="stok_alert" id="stok_alert" placeholder="0" min="0" class="form-control form-control-md" value="{{ old('stok_alert') ?? 0 }}" required />
+                                        <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md">
+                                    <label for="tax" class="form-label">Pajak (%) <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control form-control-md" id="tax" min="0" name="tax" value="{{ old('tax') ?? 0 }}" required/>
+                                        <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
+                                    </div>
+                                </div>
+                                <div class="col-md">
+                                    <label for="tax_type" class="form-label">Tipe Pajak <span class="text-danger">*</span></label>
+                                    <select class="form-select form-control" id="tax_type" aria-label="Default select example" name="tax_type" required>
+                                        <option value="none" {{ old('tax_type') ? '' : 'selected' }}>None</option>
+                                        <option value="inclusive" {{ old('tax_type') == 'inclusive' ? 'selected' : '' }}>Inclusive</option>
+                                        <option value="exclusive" {{ old('tax_type') == 'exclusive' ? 'selected' : '' }}>Exclusive</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="note" class="form-label">Catatan</label>
+                                <textarea class="form-control" id="note" rows="4" name="note">{{ old('note') }}</textarea>
+                            </div>
                             <div class="col-md-12 mt-4 border-top">
                                 <div class="d-flex justify-content-center mt-4">
-                                    {{-- <a href="{{ route('barang.index') }}" class="btn btn-md btn-danger me-2"><i class="bx bx-left-arrow"></i> Kembali</a> --}}
                                     <button type="submit" class="btn btn-sm btn-success"><i class="bx bx-file"></i> Save & add To Cart</button>
                                 </div>
                             </div>
@@ -158,23 +207,23 @@
                                     <input type="number" class="form-control" name="jumlah" id="jumlah" value="{{ $item['jumlah'] }}" data-encrypt-id="{{ encrypt($item['id']) }}" readonly ondblclick="enableForm(this)">
                                 </td>
                                 <td>{{ $item['satuan'] }}</td>
-                                <td>{{ number_format($item['harga_satuan']) }}</td>
+                                <td>{{ number_format($item['harga_satuan'], 2, $systemSetting?->currency?->decimal_separator, $systemSetting?->currency?->thousand_separator) }}</td>
                                 <td>{{ $item['diskon'] }}</td>
-                                <td class="text-end">{{ number_format($item['total_harga']) }}</td>
+                                <td class="text-end">{{ number_format($item['total_harga'], 2, $systemSetting?->currency?->decimal_separator, $systemSetting?->currency?->thousand_separator) }}</td>
                             </tr>
                             @endforeach
                         @endif
                         <tr class="fw-bold table-secondary fst-italic">
                             <td colspan="7">Subtotal</td>
-                            <td class="text-end subtotal">Rp. -</td>
+                            <td class="text-end subtotal">{{ $systemSetting?->currency?->symbol }} -</td>
                         </tr>
                         <tr class="fw-bold table-secondary fst-italic">
                             <td colspan="7">Diskon</td>
-                            <td class="text-end totalDiskon">Rp. -</td>
+                            <td class="text-end totalDiskon">{{ $systemSetting?->currency?->symbol }} -</td>
                         </tr>
                         <tr class="fw-bold table-secondary fst-italic">
                             <td colspan="7">Total Akhir</td>
-                            <td class="text-end totalAkhir">Rp. -</td>
+                            <td class="text-end totalAkhir">{{ $systemSetting?->currency?->symbol }} -</td>
                         </tr>
                         <tr class="fw-bold table-secondary fst-italic">
                             <td colspan="7">Pembayaran</td>
@@ -185,8 +234,14 @@
                                     <option value="e-wallet">E-Wallet</option>
                                 </select>
                                 <div class="input-group input-group-md">
-                                    <span class="input-group-text">Rp. </span>
-                                    <input type="text" id="jumlahBayar" class="form-control text-end bg-secondary text-white" placeholder="0"/>
+                                    @if ($systemSetting?->currency_position_default == 'prefix')
+                                        <span class="input-group-text bg-primary text-white">{{ $systemSetting?->currency?->symbol }} </span>
+                                    @endif
+                                    <input type="text" class="form-control text-end" placeholder="0,00" onkeyup="jumBayar(this)" required/>
+
+                                    @if ($systemSetting?->currency_position_default == 'suffix')
+                                        <span class="input-group-text bg-primary text-white">{{ $systemSetting?->currency?->symbol }} </span>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -258,8 +313,10 @@
                                     <tr>
                                         <td>{{ $item['name'] ?? '' }}</td>
                                         <td>{{ $item['jumlah'] }}</td>
-                                        <td>{{ $item['harga_satuan'] }}</td>
-                                        <td>{{ $item['total_harga'] }}</td>
+                                        {{-- <td>{{ $item['harga_satuan'] }}</td> --}}
+                                        <td>{{ number_format($item['harga_satuan'], 2, $systemSetting?->currency?->decimal_separator, $systemSetting?->currency?->thousand_separator) }}</td>
+                                        {{-- <td>{{ $item['total_harga'] }}</td> --}}
+                                        <td class="text-end">{{ number_format($item['total_harga'], 2, $systemSetting?->currency?->decimal_separator, $systemSetting?->currency?->thousand_separator) }}</td>
                                     </tr>
                                 @endforeach
                                 <tr>
@@ -280,7 +337,7 @@
                                 </tr>
                                 <tr>
                                     <th colspan="3" class="fw-bold">Total</th>
-                                    <th class="fw-bold totalAkhir">Rp. -</th>
+                                    <th class="fw-bold totalAkhir">{{ $systemSetting?->currency?->symbol }} -</th>
                                 </tr>
                                 <tr>
                                     <th colspan="3">
@@ -294,11 +351,11 @@
                                         <input type="hidden" name="jumlah_bayar" required>
                                         Jumlah bayar
                                     </th>
-                                    <th id="jmlBayar">Rp. -</th>
+                                    <th id="jmlBayar">{{ $systemSetting?->currency?->symbol }} -</th>
                                 </tr>
                                 <tr>
                                     <th colspan="3" class="fw-bold text-uppercase fst-italic">Kembalian</th>
-                                    <th class="kembalian">Rp. -</th>
+                                    <th class="kembalian">{{ $systemSetting?->currency?->symbol }} -</th>
                                 </tr>
                             </tbody>
                         </table>
@@ -317,7 +374,7 @@
 <x-modal-confirm-delete></x-modal-confirm-delete>
 
 
-@section('script')
+@push('scripts')
     <script>
         // add item to cart
         const barcodeInput = document.getElementById('kode-produk');
@@ -374,10 +431,17 @@
                .catch(error => console.error('Error: ', error));
             });
         }
+        // setting global variabel
+        let symbol, position, thouSeparator, decSeparator;
         $(document).ready(function(){
             $('#kode-produk').focus();
             $('#tipeBayar').text($('#metodePembayaran').val());
             $('input[name="tipe_bayar"]').val($('#metodePembayaran').val());
+            const setting = @json($systemSetting);
+            symbol = setting.currency.symbol;
+            position = setting.currency_position_default;
+            thouSeparator = setting.currency.thousand_separator;
+            decSeparator = setting.currency.decimal_separator;
             sumAll();
         });
         
@@ -398,20 +462,10 @@
             // $('#totalItems').val(dataArr.length);
             $('.totalItems').text(dataArr.length);
             $('.totalQty').text(totalQty);
-            $('.totalDiskon').text('Rp. ' + formatterFunct(totalDiskon));
-            $('.subtotal').text('Rp. ' + formatterFunct(totalAkhir));
+            $('.totalDiskon').text(reformatCurrency(totalDiskon.toFixed(2)));
+            $('.subtotal').text(reformatCurrency(totalAkhir.toFixed(2)));
             const totalBayar = totalAkhir-totalDiskon;
-            $('.totalAkhir').text('Rp. ' + formatterFunct(totalBayar));
-
-        }
-
-        function formatterFunct(number){
-            const formatted = number.toLocaleString('id-ID', {
-                style: 'decimal',
-                currency: 'IDR', // opsional
-                currencyDisplay: 'symbol', // opsional
-            });
-            return formatted;
+            $('.totalAkhir').text(reformatCurrency(totalBayar.toFixed(2)));
         }
     </script>
     <script>
@@ -420,17 +474,27 @@
                 $(this).find('form').submit();
             }
         })
-        $('#jumlahBayar').keyup(function (){
-            this.value = formatRupiah(this.value);
-            let formatAsli = this.value.replace(/[^,\d]/g, '').toString();
-            $('#jmlBayar').text('Rp. ' + formatterFunct(parseInt(formatAsli)));
-            const kembalian = parseInt(formatAsli) - totalAkhir;
-            $('.kembalian').text('Rp. ' + formatterFunct(parseInt(kembalian)))
-            $('input[name="jumlah_bayar"]').val(parseInt(formatAsli));
-        });
+        function jumBayar(element){
+            let value = element.value.replace(new RegExp(`[^\\d${decSeparator}]`, 'g'), '');   //"\d" sama dengan [0-9], "^" artinya bukan, dan decimal separator diambil dari variabel
+            element.value = formatRupiah(value,thouSeparator,decSeparator);
+
+            let formatAsli = element.value.replace(new RegExp(`[^\\d${decSeparator}]`, 'g'), '').replace(decSeparator, '.');
+
+            let kembalian = formatAsli - totalAkhir;
+            $('.kembalian').text(reformatCurrency(kembalian.toFixed(2)));
+            $('#jmlBayar').text(reformatCurrency(formatAsli));
+            $('input[name="jumlah_bayar"]').val(formatAsli);
+
+        }
+        
         $('#metodePembayaran').change(function(){
             $('#tipeBayar').text(this.value);
             $('input[name="tipe_bayar"]').val(this.value);
-        })
+        });
+
+        function reformatCurrency(value) {
+            return (position == 'prefix' ? symbol + ' ' : '') + (value.replace(/\B(?=(\d{3})+(?!\d))/g, thouSeparator).replace('.', decSeparator)) + (position == 'suffix' ? ' ' + symbol : '');
+        }
+
     </script>
-@endsection
+@endpush

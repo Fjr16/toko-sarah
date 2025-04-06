@@ -21,9 +21,13 @@ return new class extends Migration
             $table->integer('medium_to_small')->nullable();
             $table->string('big_unit')->nullable();
             $table->integer('big_to_medium')->nullable();
-            $table->decimal('base_price',10,2)->required()->default(0);
+            $table->decimal('cost',10,2)->required()->default(0);   //10,2 ==> 10 digit total, 8 digit sebelum koma dan 2 digit dibelakang koma 10000000.00
+            $table->decimal('price',10,2)->required()->default(0);
             $table->integer('stok')->default(0);
-            // $table->enum('status', ['active', 'deleted'])->default('active');
+            $table->integer('stok_alert')->default(0);
+            $table->integer('tax')->nullable();
+            $table->enum('tax_type', ['exclusive', 'inclusive', 'none'])->default('none');
+            $table->text('note')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });

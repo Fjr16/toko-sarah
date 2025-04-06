@@ -18,4 +18,9 @@ class SystemSetting extends Model
         'company_address',
         'notification_email',
     ];
+
+    public function currency()
+    {
+        return $this->belongsTo(Currency::class);
+    }
 }

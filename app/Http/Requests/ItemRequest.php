@@ -30,8 +30,13 @@ class ItemRequest extends FormRequest
             'medium_to_small' => 'required_with:medium_unit',
             'big_unit' => 'nullable|string',
             'big_to_medium' => 'required_with:big_unit',
-            'base_price' => 'nullable',
-            'stok' => 'nullable',
+            'cost' => 'required',
+            'price' => 'required',
+            'stok' => 'required|integer',
+            'stok_alert' => 'required|integer',
+            'tax' => 'required|integer',
+            'tax_type' => 'required|in:exclusive,inclusive,none',
+            'note' => 'nullable|string',
         ];
     }
 }

@@ -8,6 +8,7 @@ use App\Models\Supplier;
 use Illuminate\Support\Arr;
 use App\Models\ItemCategory;
 use Illuminate\Http\Request;
+use App\Models\SystemSetting;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -35,12 +36,14 @@ class TransactionController extends Controller
         $produks = Item::all();
         $suppliers = Supplier::get();
         $itemCategories = ItemCategory::get();
+        $systemSetting = SystemSetting::first();
         return view('pages.pembelian.create', [
             'title' => 'Pembelian',
             'menu' => 'Pembelian',
             'produks' => $produks,
             'suppliers' => $suppliers,
             'itemCategories' => $itemCategories,
+            'systemSetting' => $systemSetting,
         ]);
     }
 
@@ -74,9 +77,9 @@ class TransactionController extends Controller
                     'name' => $item->name,
                     'jumlah' => $jumlahItem,
                     'satuan' => $item->small_unit,
-                    'harga_satuan' => (int) $item->base_price,
+                    'harga_satuan' => $item->price,
                     'diskon' => 0,
-                    'total_harga' => (int) $item->base_price * $jumlahItem,
+                    'total_harga' => $item->price * $jumlahItem,
                 ];
                 session()->put('data_pembelian', $dataSession);
             }else{
@@ -86,9 +89,9 @@ class TransactionController extends Controller
                     'name' => $item->name,
                     'jumlah' => 1,
                     'satuan' => $item->small_unit,
-                    'harga_satuan' => (int) $item->base_price,
+                    'harga_satuan' => $item->price,
                     'diskon' => 0,
-                    'total_harga' => (int) $item->base_price * 1,
+                    'total_harga' => $item->price * 1,
                 ]);
             }
             session()->flash('success', 'Berhasil Ditambahkan Keranjang');
@@ -152,9 +155,9 @@ class TransactionController extends Controller
                     'name' => $findItem['name'],
                     'jumlah' => $qty,
                     'satuan' => $findItem['satuan'],
-                    'harga_satuan' => (int) $findItem['harga_satuan'],
+                    'harga_satuan' => $findItem['harga_satuan'],
                     'diskon' => 0,
-                    'total_harga' => (int) $findItem['harga_satuan'] * $qty,
+                    'total_harga' => $findItem['harga_satuan'] * $qty,
                 ];
                 session()->put('data_pembelian', $dataSession);
                 session()->flash('success', 'Berhasil memperbarui data');

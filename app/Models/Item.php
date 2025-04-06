@@ -20,9 +20,13 @@ class Item extends Model
         'medium_to_small',
         'big_unit',
         'big_to_medium',
-        'base_price',
+        'cost',
+        'price',
         'stok',
-        // 'status',
+        'stok_alert',
+        'tax',
+        'tax_type',
+        'note',
     ];
 
     public function itemCategory() {

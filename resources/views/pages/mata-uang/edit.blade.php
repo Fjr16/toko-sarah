@@ -43,6 +43,11 @@
                         </div>
                     </div>
                 </div>
+                <div class="row">
+                    <span class="text-danger"><i class="bx bxs-error"></i>
+                        Pemisah ribuan dan pemisah desimal tidak boleh sama, contoh: pemisah ribuan (.) dan pemisah desimal (,) <br>
+                    </span>
+                </div>
                 <div class="col-md-12 mt-4 border-top">
                     <div class="d-flex justify-content-center mt-4">
                         <a href="{{ route('currency.index') }}" class="btn btn-md btn-danger me-2"><i class="bx bx-left-arrow"></i> Kembali</a>

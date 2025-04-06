@@ -51,6 +51,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('barang/store', [ItemController::class, 'store'])->name('barang.store');
     Route::get('barang/edit/{id}', [ItemController::class, 'edit'])->name('barang.edit');
     Route::put('barang/update/{id}', [ItemController::class, 'update'])->name('barang.update');
+    Route::get('barang/show/{id}', [ItemController::class, 'show'])->name('barang.show');
     Route::delete('barang/destroy/{id}', [ItemController::class, 'destroy'])->name('barang.destroy');
     Route::post('barang/restore/{id}', [ItemController::class, 'restore'])->name('barang.restore');
     // store and add to cart
@@ -88,7 +89,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
     // Route::post('cart/store', [CartController::class, 'store'])->name('cart.store');
 
-    // Pembelian
+    // Pembelian 
     // Route::get('pembelian/riwayat', [SalesController::class, 'index'])->name('pembelian/riwayat.index');
     // Route::get('pembelian/riwayat/detail/{id}', [SalesController::class, 'detail'])->name('pembelian/riwayat.detail');
     Route::get('pembelian/create', [TransactionController::class, 'create'])->name('pembelian.create');

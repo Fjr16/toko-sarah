@@ -96,7 +96,7 @@
 @endsection
 <x-modal-confirm-delete></x-modal-confirm-delete>
 
-@section('script')
+@push('scripts')
     <script>
             async function detailPenjualan(idPenjualan) {
                 try {
@@ -113,4 +113,4 @@
                 }
             }
     </script>
-@endsection
+@endpush
