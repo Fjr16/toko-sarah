@@ -9,17 +9,15 @@
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table" id="datatable">
-                    <thead>
+                    <thead class="table-primary">
                         <tr>
                             <th>#</th>
-                            <th>Kode</th>
-                            <th>Nama</th>
-                            <th>Satuan Terkecil</th>
-                            <th>Satuan Menengah</th>
-                            <th>Satuan Terbesar</th>
-                            <th>Harga Awal</th>
+                            <th>Kategori</th>
+                            <th>Produk</th>
+                            <th>Harga Beli</th>
+                            <th>Margin (%)</th>
+                            <th>Harga Jual</th>
                             <th>Stok</th>
-                            <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
@@ -27,27 +25,24 @@
                         @foreach ($data as $item)
                         <tr>
                             <td>{{ $loop->iteration ?? '-' }}</td>
-                            <td>{{ $item->code ?? '-' }}</td>
-                            <td>{{ $item->name ?? '-' }}</td>
-                            <td>{{ $item->small_unit ?? '-' }}</td>
-                            <td>{{ $item->medium_unit ?? '-' }}</td>
-                            <td>{{ $item->big_unit ?? '-' }}</td>
-                            <td>{{ ((int) $item->base_price ?? 0) . ' /' . ($item->small_unit ?? '-') }}</td>
-                            <td>{{ ($item->stok ?? 0) . ' ' . $item->small_unit ?? '-' }}</td>
+                            <td>{{ $item->itemCategory->name ?? '-' }}</td>
                             <td>
-                                <span class="badge bg-{{ $item->status === 'active' ? 'primary' : 'danger' }}">
-                                    {{ $item->status ?? '-' }}
+                                <span class="d-block">{{ $item->name ?? '-' }}</span>
+                                <span class="badge bg-primary">
+                                    <small>{{ $item->code ?? '-' }}</small>
                                 </span>
                             </td>
+                            <td>{{ number_format($item->cost, 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                            <td>{{ $item->margin ?? '-' }}</td>
+                            <td>{{ number_format($item->price, 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                            <td>{{ $item->stok  . ' '. $item->small_unit }}</td>
                             <td class="text-nowrap">
                                 <div class="d-flex">
-                                    <a href="{{ route('barang.edit', encrypt($item->id)) }}" class="btn btn-sm btn-warning me-1"><i class="bx bx-edit"></i></a>
-                                    <form action="{{ route('barang.destroy', encrypt($item->id)) }}" method="POST">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-sm btn-danger" name="status" value="deleted" type="submit"><i class="bx bx-x-circle"></i></button>
-                                        <button class="btn btn-sm btn-success" name="status" value="active" type="submit"><i class="bx bx-check-circle"></i></button>
-                                    </form>
+                                    <a href="{{ route('barang.edit', encrypt($item->id)) }}" class="btn btn-icon btn-outline-warning"><i class="bx bx-edit"></i></a>
+                                    <a href="{{ route('barang.show', encrypt($item->id)) }}" class="btn btn-icon btn-outline-primary mx-2"><i class="bx bxs-show"></i></a>
+                                    <button class="btn btn-icon btn-outline-danger me-1" type="button" data-warning="Hapus Produk" data-url="{{ route('barang.destroy', encrypt($item->id)) }}" onclick="showModalDelete(this)">
+                                        <i class="bx bx-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>

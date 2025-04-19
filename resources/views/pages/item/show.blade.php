@@ -21,11 +21,11 @@
                 </tr>
                 <tr>
                     <th width="30%" class="fw-bold">Harga Beli</th>
-                    <td>Rp. {{ number_format($item->cost, 2, $systemSetting?->currency?->decimal_separator, $systemSetting?->currency?->thousand_separator) }} / {{ $item->small_unit ?? '' }}</td>
+                    <td>Rp. {{ number_format($item->cost, 0) }} <span class="badge bg-danger">{{ $item->small_unit ?? '' }}</span></td>
                 </tr>
                 <tr>
-                    <th width="30%" class="fw-bold">Harga Jual</th>
-                    <td>Rp. {{ number_format($item->price, 2, $systemSetting?->currency?->decimal_separator, $systemSetting?->currency?->thousand_separator) }} / {{ $item->small_unit ?? '' }}</td>
+                    <th width="30%" class="fw-bold">Margin(%) / Harga Jual</th>
+                    <td>{{ $item->margin ?? '-' }} % / Rp. {{ number_format($item->price, 0) }} <span class="badge bg-danger">{{ $item->small_unit ?? '' }}</span></td>
                 </tr>
                 <tr>
                     <th width="30%" class="fw-bold">Stok</th>
@@ -35,14 +35,14 @@
                     <th width="30%" class="fw-bold">Peringatan Stok</th>
                     <td>{{ $item->stok_alert ?? 0 }} {{ $item->small_unit ?? '' }}</td>
                 </tr>
-                <tr>
+                {{-- <tr>
                     <th width="30%" class="fw-bold">Pajak</th>
                     <td>{{ $item->tax ?? 0 }} %</td>
                 </tr>
                 <tr>
                     <th width="30%" class="fw-bold">Tipe Pajak</th>
                     <td>{{ $item->tax_type ?? '-' }}</td>
-                </tr>
+                </tr> --}}
                 <tr>
                     <th width="30%" class="fw-bold">Catatan</th>
                     <td>{!! $item->note ?? '-' !!}</td>

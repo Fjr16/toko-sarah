@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('system_settings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('currency_id')->required();
             $table->enum('currency_position_default', ['prefix', 'suffix'])->default('prefix')->required();
             $table->string('company_name', 50)->required();
             $table->string('company_email', 50)->required();

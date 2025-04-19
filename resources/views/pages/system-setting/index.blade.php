@@ -32,12 +32,8 @@
                                 </div>
                                 <div class="row">
                                     <div class="col-md mb-4">
-                                        <label for="currency_id" class="form-label">Mata Uang Standard</label>
-                                        <select class="form-select" id="currency_id" name="currency_id" aria-label="Default select example">
-                                            @foreach ($data as $curr)
-                                                <option {{ (old('currency_id', $item->currency_id) === $curr->id ? 'selected' : ($loop->first  ? 'selected' : '')) }} value="{{ $curr->id }}">{{ $curr->name ?? '' }}</option>
-                                            @endforeach
-                                        </select>
+                                        <label for="mata_uang" class="form-label">Mata Uang Standard</label>
+                                        <input type="text" class="form-control" id="mata_uang" value="Rupiah" disabled/>
                                     </div>
                                     <div class="col-md mb-4">
                                         <label for="default-currency-position" class="form-label">Posisi Mata Uang</label>

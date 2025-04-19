@@ -21,11 +21,12 @@ class Item extends Model
         'big_unit',
         'big_to_medium',
         'cost',
+        'margin',
         'price',
         'stok',
         'stok_alert',
-        'tax',
-        'tax_type',
+        // 'tax',
+        // 'tax_type',
         'note',
     ];
 

@@ -43,12 +43,12 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Kategori</th>
-                                        <th>Kode</th>
-                                        <th>Nama</th>
+                                        <th>Produk</th>
                                         {{-- <th>Satuan Terkecil</th>
                                         <th>Satuan Menengah</th>
                                         <th>Satuan Terbesar</th> --}}
                                         <th>Harga Beli</th>
+                                        <th>Margin (%)</th>
                                         <th>Harga Jual</th>
                                         <th>Stok</th>
                                         <th>Action</th>
@@ -59,13 +59,18 @@
                                     <tr>
                                         <td>{{ $loop->iteration ?? '-' }}</td>
                                         <td>{{ $item->itemCategory->name ?? '-' }}</td>
-                                        <td>{{ $item->code ?? '-' }}</td>
-                                        <td>{{ $item->name ?? '-' }}</td>
+                                        <td>
+                                            <span class="d-block">{{ $item->name ?? '-' }}</span>
+                                            <span class="badge bg-primary">
+                                                <small>{{ $item->code ?? '-' }}</small>
+                                            </span>
+                                        </td>
                                         {{-- <td>{{ $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->medium_unit ?? '-' }}</td>
                                         <td>{{ $item->big_unit ?? '-' }}</td> --}}
-                                        <td>{{ number_format($item->cost, 2, $systemSetting->currency->decimal_separator, $systemSetting->currency->thousand_separator) . ' /' . $item->small_unit ?? '-' }}</td>
-                                        <td>{{ number_format($item->price, 2, $systemSetting->currency->decimal_separator, $systemSetting->currency->thousand_separator) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ number_format($item->cost, 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ $item->margin ?? '-' }}</td>
+                                        <td>{{ number_format($item->price, 0) . ' /' . $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->stok  . ' '. $item->small_unit }}</td>
                                         <td class="text-nowrap">
                                             <div class="d-flex">
@@ -89,12 +94,12 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Kategori</th>
-                                        <th>Kode</th>
-                                        <th>Nama</th>
+                                        <th>Produk</th>
                                         {{-- <th>Satuan Terkecil</th> --}}
                                         {{-- <th>Satuan Menengah</th> --}}
                                         {{-- <th>Satuan Terbesar</th> --}}
                                         <th>Harga Beli</th>
+                                        <th>Margin (%)</th>
                                         <th>Harga Jual</th>
                                         <th>Stok</th>
                                         <th>Action</th>
@@ -105,13 +110,18 @@
                                     <tr class="text-danger">
                                         <td>{{ $loop->iteration ?? '-' }}</td>
                                         <td>{{ $item->itemCategory->name ?? '-' }}</td>
-                                        <td>{{ $item->code ?? '-' }}</td>
-                                        <td>{{ $item->name ?? '-' }}</td>
+                                        <td>
+                                            <span class="d-block">{{ $item->name ?? '-' }}</span>
+                                            <span class="badge bg-primary">
+                                                <small>{{ $item->code ?? '-' }}</small>
+                                            </span>
+                                        </td>
                                         {{-- <td>{{ $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->medium_unit ?? '-' }}</td>
                                         <td>{{ $item->big_unit ?? '-' }}</td> --}}
-                                        <td>{{ number_format($item->cost ?? 0) . ' /' . $item->small_unit ?? '-' }}</td>
-                                        <td>{{ number_format($item->price ?? 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ number_format($item->cost, 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ $item->margin ?? '-' }}</td>
+                                        <td>{{ number_format($item->price, 0) . ' /' . $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->stok  . ' '. $item->small_unit }}</td>
                                         <td class="text-nowrap">
                                             <form action="{{ route('barang.restore', encrypt($item->id)) }}" method="POST">

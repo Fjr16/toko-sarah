@@ -11,9 +11,16 @@ use Illuminate\Http\Request;
 use App\Models\SystemSetting;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
+
+    // clean currency format before submit to controller
+    private function cleanFormat($val) {
+        $value = preg_replace('/[^\d]/', '', $val); //mengambil angka saja 
+        return $value;
+    }
     /**
      * Display a listing of the resource.
      */
@@ -77,9 +84,11 @@ class TransactionController extends Controller
                     'name' => $item->name,
                     'jumlah' => $jumlahItem,
                     'satuan' => $item->small_unit,
-                    'harga_satuan' => $item->price,
-                    'diskon' => 0,
-                    'total_harga' => $item->price * $jumlahItem,
+                    'harga_satuan' => $item->cost,
+                    'margin' => $item->margin,
+                    'harga_jual' => $item->price,
+                    'stok' => $item->stok,
+                    'total_harga' => $item->cost * $jumlahItem,
                 ];
                 session()->put('data_pembelian', $dataSession);
             }else{
@@ -89,9 +98,11 @@ class TransactionController extends Controller
                     'name' => $item->name,
                     'jumlah' => 1,
                     'satuan' => $item->small_unit,
-                    'harga_satuan' => $item->price,
-                    'diskon' => 0,
-                    'total_harga' => $item->price * 1,
+                    'harga_satuan' => $item->cost,
+                    'margin' => $item->margin,
+                    'harga_jual' => $item->price,
+                    'stok' => $item->stok,
+                    'total_harga' => $item->cost * 1,
                 ]);
             }
             session()->flash('success', 'Berhasil Ditambahkan Keranjang');
@@ -156,7 +167,8 @@ class TransactionController extends Controller
                     'jumlah' => $qty,
                     'satuan' => $findItem['satuan'],
                     'harga_satuan' => $findItem['harga_satuan'],
-                    'diskon' => 0,
+                    'margin' => $findItem['margin'],
+                    'harga_jual' => $findItem['harga_jual'],
                     'total_harga' => $findItem['harga_satuan'] * $qty,
                 ];
                 session()->put('data_pembelian', $dataSession);
@@ -198,5 +210,52 @@ class TransactionController extends Controller
     public function reset(){
         session()->put('data_pembelian', []);
         return back()->with('success', 'Berhasil Direset');
+    }
+
+    public function updatePriceItem(Request $request, $id){
+        DB::beginTransaction();
+        try {
+            $item = Item::findOrFail(decrypt($id));
+            $request['cost'] = $this->cleanFormat($request->cost);
+            $request['price'] = $this->cleanFormat($request->price);
+            $data = $request->validate([
+                'cost' => 'required',
+                'margin' => 'required',
+                'price' => 'required',
+            ]);
+            $item->update($data);
+
+            $dataSession = session()->get('data_pembelian');
+            $findItem = $this->findItem(decrypt($id));
+            if ($findItem) {
+                $index = key(array_filter($dataSession, function ($itemSession) use ($findItem){
+                    return $itemSession['id'] == $findItem['id'];
+                }));
+                $dataSession[$index] = [
+                    'id' => $findItem['id'],
+                    'barcode' => $findItem['barcode'],
+                    'name' => $findItem['name'],
+                    'jumlah' => $findItem['jumlah'],
+                    'satuan' => $findItem['satuan'],
+                    'harga_satuan' => $item->cost,
+                    'margin' => $item->margin,
+                    'harga_jual' => $item->price,
+                    'total_harga' => $item->cost * $findItem['jumlah'],
+                ];
+                session()->put('data_pembelian', $dataSession);
+            }else{
+                DB::rollBack();
+                return back()->with('error', 'Data tidak ditemukan Pada Keranjang');
+            }
+            
+            DB::commit();
+            return back()->with('success', 'Berhasil memperbarui data');
+        } catch (Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal memperbarui data, coba lagi : '.$e->getMessage());
+        } catch (ModelNotFoundException $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal memperbarui data, coba lagi : '.$e->getMessage());
+        }
     }
 }

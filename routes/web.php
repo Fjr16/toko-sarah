@@ -98,18 +98,11 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('pembelian/reset', [TransactionController::class, 'reset'])->name('pembelian.reset');
     Route::put('pembelian/update/{id}', [TransactionController::class, 'update'])->name('pembelian.update');
     Route::get('pembelian/invoice', [TransactionController::class, 'show'])->name('pembelian.invoice');
+    Route::put('update/price/item/{id}', [TransactionController::class, 'updatePriceItem'])->name('update/price.item');
 
     // setting
     Route::get('pengaturan/sistem/index', [SettingController::class, 'index'])->name('pengaturan/sistem.index');
-    Route::post('pengaturan/sistem/store', [SettingController::class, 'store'])->name('pengaturan/sistem.store');
-
-    // Mata Uang
-    Route::get('currency/index', [CurrencyController::class, 'index'])->name('currency.index');
-    Route::get('currency/create', [CurrencyController::class, 'create'])->name('currency.create');
-    Route::post('currency/store', [CurrencyController::class, 'store'])->name('currency.store');
-    Route::get('currency/edit/{id}', [CurrencyController::class, 'edit'])->name('currency.edit');
-    Route::put('currency/update/{id}', [CurrencyController::class, 'update'])->name('currency.update');
-    Route::delete('currency/destroy/{id}', [CurrencyController::class, 'destroy'])->name('currency.destroy');
+    Route::post('pengaturan/sistem/store', [SettingController::class, 'store'])->name('pengaturan/sistem.store');   
 
     // Satuan
     Route::get('unit/index', [UnitController::class, 'index'])->name('unit.index');

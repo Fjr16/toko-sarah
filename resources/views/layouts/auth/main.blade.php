@@ -354,29 +354,38 @@
         })
     </script>
     <script>
-        // reformat input number according currency
-        function number_format(thousandSeparator, decimalSeparator, element) {
-            // let value = element.value.replace(/[^\d,]/g, '');   //"\d" sama dengan [0-9], "^" artinya bukan
-            let value = element.value.replace(new RegExp(`[^\\d${decimalSeparator}]`, 'g'), '');   //"\d" sama dengan [0-9], "^" artinya bukan, dan decimal separator diambil dari variabel
-            element.value = formatRupiah(value,thousandSeparator,decimalSeparator);
-        }
-        function formatRupiah(angka, thou, dec) {
-            var number_string = angka.toString(),
-                split = number_string.split(dec),   //mengambil angka sebelum decimalSeparator
-                sisa = split[0].length % 3,         //mengambil sisa dari panjang angka sebelum koma yang dibagi 3
-                rupiah = split[0].substr(0, sisa),  //mengambil angka sebelum koma dari index 0 sampai sisa
-                ribuan = split[0].substr(sisa).match(/\d{3}/gi);    //mengambil angka setelah koma dari index sisa sampai akhir
-                //match(/\d{3}/gi) artinya ambil 3 digit angka dari index sisa sampai akhir
-                //gi artinya global dan case insensitive
+        // // reformat input number according currency
+        // function number_format(thousandSeparator, element) {
+        //     // let value = element.value.replace(/[^\d,]/g, '');   //"\d" sama dengan [0-9], "^" artinya bukan
+        //     let value = element.value.replace(new RegExp(`[^\\d${decimalSeparator}]`, 'g'), '');   //"\d" sama dengan [0-9], "^" artinya bukan, dan decimal separator diambil dari variabel
+        //     element.value = formatRupiah(value,thousandSeparator,decimalSeparator);
+        // }
+        // function formatRupiah(angka, thou, dec) {
+        //     var number_string = angka.toString(),
+        //         split = number_string.split(dec),   //mengambil angka sebelum decimalSeparator
+        //         sisa = split[0].length % 3,         //mengambil sisa dari panjang angka sebelum koma yang dibagi 3
+        //         rupiah = split[0].substr(0, sisa),  //mengambil angka sebelum koma dari index 0 sampai sisa
+        //         ribuan = split[0].substr(sisa).match(/\d{3}/gi);    //mengambil angka setelah koma dari index sisa sampai akhir
+        //         //match(/\d{3}/gi) artinya ambil 3 digit angka dari index sisa sampai akhir
+        //         //gi artinya global dan case insensitive
                 
-            if (ribuan) {
-                separator = sisa ? thou : ''; //jika sisa ada maka gunakan separator ribuan 
-                rupiah += separator + ribuan.join(thou);    //gabungkan separator ribuan dengan angka ribuan setelah sisa
-            }
+        //     if (ribuan) {
+        //         separator = sisa ? thou : ''; //jika sisa ada maka gunakan separator ribuan 
+        //         rupiah += separator + ribuan.join(thou);    //gabungkan separator ribuan dengan angka ribuan setelah sisa
+        //     }
 
-            rupiah = split[1] != undefined ? rupiah + dec + split[1] : rupiah;  //jika angka sen ada maka sisipkan sen setelah jumlah ribuan dengan separator decimal
-            return rupiah;
+        //     rupiah = split[1] != undefined ? rupiah + dec + split[1] : rupiah;  //jika angka sen ada maka sisipkan sen setelah jumlah ribuan dengan separator decimal
+        //     return rupiah;
+        // }
+        function rupiahFormatter(value) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            }).format(value);
         }
+
     </script>
 
     {{-- @yield('script') --}}

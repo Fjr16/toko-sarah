@@ -10,7 +10,6 @@ class SystemSetting extends Model
     use HasFactory;
 
     protected $fillable = [
-        'currency_id',
         'currency_position_default',
         'company_name',
         'company_email',
@@ -18,9 +17,4 @@ class SystemSetting extends Model
         'company_address',
         'notification_email',
     ];
-
-    public function currency()
-    {
-        return $this->belongsTo(Currency::class);
-    }
 }

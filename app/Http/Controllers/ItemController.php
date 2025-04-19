@@ -21,8 +21,8 @@ class ItemController extends Controller
     }
 
     // clean currency format before submit to controller
-    private function cleanFormat($val, $thousandSep, $decimalSep) {
-        $value = str_replace([$thousandSep, $decimalSep], ['', '.'], $val); //mengambil angka saja dan format sen ganti jadi .
+    private function cleanFormat($val) {
+        $value = preg_replace('/[^\d]/', '', $val); //mengambil angka saja 
         return $value;
     }
 
@@ -61,21 +61,30 @@ class ItemController extends Controller
      */
     public function store(ItemRequest $request)
     {
-        $request['cost'] = $this->cleanFormat($request->cost, $this->systemSetting->currency->thousand_separator, $this->systemSetting->currency->decimal_separator);
-        $request['price'] = $this->cleanFormat($request->price, $this->systemSetting->currency->thousand_separator, $this->systemSetting->currency->decimal_separator);
-        $data = $request->all();
+        DB::beginTransaction();
+        try {
+            $request['cost'] = $this->cleanFormat($request->cost);
+            $request['price'] = $this->cleanFormat($request->price);
+            $data = $request->all();
+    
+            Item::create($data);
 
-        Item::create($data);
-
-        return redirect()->route('barang.index')->with('success', 'Berhasil Ditambahkan');
+            DB::commit();
+            return redirect()->route('barang.index')->with('success', 'Berhasil Ditambahkan');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal Menyimpan Data: ' . $e->getMessage())->withInput();
+            DB::rollBack();
+        }
+        
     }
 
     public function storeAndAddToCart(ItemRequest $request){
         DB::beginTransaction();
         try {
-            $request['cost'] = $this->cleanFormat($request->cost, $this->systemSetting->currency->thousand_separator, $this->systemSetting->currency->decimal_separator);
-            $request['price'] = $this->cleanFormat($request->price, $this->systemSetting->currency->thousand_separator, $this->systemSetting->currency->decimal_separator);
+            $request['cost'] = $this->cleanFormat($request->cost);
+            $request['price'] = $this->cleanFormat($request->price);
             $data = $request->all();
+
             if ($item = Item::create($data)) {
                 $req = Request::create(route('pembelian.store', $item->code), 'GET');
                 $res = app()->handle($req);
@@ -137,8 +146,8 @@ class ItemController extends Controller
     public function update(Request $request, string $id)
     {
         $item = Item::find(decrypt($id));
-        $request['cost'] = $this->cleanFormat($request->cost, $this->systemSetting->currency->thousand_separator, $this->systemSetting->currency->decimal_separator);
-        $request['price'] = $this->cleanFormat($request->price, $this->systemSetting->currency->thousand_separator, $this->systemSetting->currency->decimal_separator);
+        $request['cost'] = $this->cleanFormat($request->cost);
+        $request['price'] = $this->cleanFormat($request->price);
         $data = $request->validate([
             'item_category_id' => 'required|exists:item_categories,id',
             'code' => 'required|unique:items,code,' . $item->id,
@@ -149,11 +158,12 @@ class ItemController extends Controller
             'big_unit' => 'nullable|string',
             'big_to_medium' => 'required_with:big_unit',
             'cost' => 'required',
+            'margin' => 'required',
             'price' => 'required',
             'stok' => 'required|integer',
             'stok_alert' => 'required|integer',
-            'tax' => 'required|integer',
-            'tax_type' => 'required|in:exclusive,inclusive,none',
+            // 'tax' => 'required|integer',
+            // 'tax_type' => 'required|in:exclusive,inclusive,none',
             'note' => 'nullable|string',
         ]);
 

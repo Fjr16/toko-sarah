@@ -53,30 +53,34 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <label for="cost" class="form-label">Harga Beli <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 @if ($systemSetting?->currency_position_default == 'prefix')
-                                    <span class="input-group-text bg-dark text-white">{{ $systemSetting?->currency?->symbol ?? null }}</span>                                
+                                    <span class="input-group-text bg-dark text-white">Rp.</span>                                
                                 @endif
-                                <input type="text" name="cost" id="cost" value="{{ old('cost', number_format($item->cost, 2, $systemSetting?->currency?->decimal_separator, $systemSetting?->currency?->thousand_separator)) }}" class="form-control form-control-md" placeholder="0" onkeyup="number_format('{{ $systemSetting?->currency?->thousand_separator ?? null }}', '{{ $systemSetting?->currency?->decimal_separator ?? null }}', this)" required />
+                                <input type="text" name="cost" id="cost" value="{{ old('cost', number_format($item->cost, 0)) }}" class="form-control form-control-md price" placeholder="0" required />
 
                                 @if ($systemSetting?->currency_position_default == 'suffix')
-                                    <span class="input-group-text bg-dark text-white">{{ $systemSetting?->currency?->symbol ?? null }}</span>                                
+                                    <span class="input-group-text bg-dark text-white">Rp.</span>                                
                                 @endif
                                 <span class="input-group-text get-satuan-kecil bg-primary text-white">/{{ $item->small_unit ?? '' }}</span>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-2">
+                            <label for="margin" class="form-label">Margin (%) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control form-control-md" id="margin" name="margin" value="{{ old('margin', $item->margin ?? '') }}" placeholder="0" min="0" value="{{ old('margin') ?? 0 }}" required />
+                        </div>
+                        <div class="col-md-5">
                             <label for="price" class="form-label">Harga Jual <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 @if ($systemSetting?->currency_position_default == 'prefix')
-                                    <span class="input-group-text bg-dark text-white">{{ $systemSetting?->currency?->symbol ?? null }}</span>                                
+                                    <span class="input-group-text bg-dark text-white">Rp.</span>                                
                                 @endif
-                                <input type="text" name="price" id="price" value="{{ old('price',number_format($item->price, 2, $systemSetting?->currency?->decimal_separator, $systemSetting?->currency?->thousand_separator)) }}" class="form-control form-control-md" placeholder="0" onkeyup="number_format('{{ $systemSetting?->currency?->thousand_separator ?? null }}', '{{ $systemSetting?->currency?->decimal_separator ?? null }}', this)" required />
+                                <input type="text" name="price" id="price" value="{{ old('price', number_format($item->price, 0)) }}" class="form-control form-control-md" placeholder="0" readonly required />
 
                                 @if ($systemSetting?->currency_position_default == 'suffix')
-                                    <span class="input-group-text bg-dark text-white">{{ $systemSetting?->currency?->symbol ?? null }}</span>                                
+                                    <span class="input-group-text bg-dark text-white">Rp.</span>                                
                                 @endif
                                 <span class="input-group-text get-satuan-kecil bg-primary text-white">/{{ $item->small_unit ?? '' }}</span>
                             </div>
@@ -98,7 +102,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row mb-3">
+                    {{-- <div class="row mb-3">
                         <div class="col-md">
                             <label for="tax" class="form-label">Pajak (%) <span class="text-danger">*</span></label>
                             <div class="input-group">
@@ -114,7 +118,7 @@
                                 <option value="exclusive" {{ old('tax_type',$item->tax_type) == 'exclusive' ? 'selected' : '' }}>Exclusive</option>
                             </select>
                         </div>
-                    </div>
+                    </div> --}}
                     <div class="row mb-3">
                         <label for="note" class="form-label">Catatan</label>
                         <textarea class="form-control" id="note" rows="4" name="note">{{ old('note', $item->note ?? '') }}</textarea>
@@ -132,34 +136,33 @@
 @endsection
 
 
-{{-- @push('scripts')
+@push('scripts')
 <script>
-    document.addEventListener('DOMContentLoaded', function(){
-      var satuanTerkecil = document.getElementById('satuan-terkecil');
-      var satuanSedang = document.getElementById('satuan-menengah');
-      var satuanTerbesar = document.getElementById('satuan-terbesar');
-  
-      var setSatuanKecil = document.getElementById('get-satuan-kecil');
-      var setSatuanKecilClass = document.querySelectorAll('.get-satuan-kecil');
-      var setSatuanSedang1 = document.getElementById('get-satuan-sedang-awal');
-      var setSatuanSedang2 = document.getElementById('get-satuan-sedang-akhir');
-      var setSatuanBesar = document.getElementById('get-satuan-besar');
-  
-  
-      satuanTerkecil.addEventListener('keyup', function(){
-          setSatuanKecil.textContent = satuanTerkecil.value;
-          setSatuanKecilClass.forEach(element => {
-            element.textContent = '/' + satuanTerkecil.value;
-          });
-      });
-      satuanTerbesar.addEventListener('keyup', function(){
-          setSatuanBesar.textContent = '1 ' + satuanTerbesar.value + ' =';
-      });
-     
-      satuanSedang.addEventListener('keyup', function(){
-        setSatuanSedang1.textContent = '1 ' + satuanSedang.value + ' =';
-        setSatuanSedang2.textContent = satuanSedang.value;
-      });
-    })
+    document.getElementById('cost').addEventListener('keyup', function() {
+        let cost = this.value.replace(/[^0-9]/g, '');
+        let margin = document.getElementById('margin').value.replace(/[^0-9]/g, '');
+        let price = parseInt(cost) * (parseInt(margin) / 100) + parseInt(cost);
+
+        let harga = rupiahFormatter(price).replace(/[^0-9.]/g, '');
+        document.getElementById('price').value = harga;
+    });
+
+    document.getElementById('margin').addEventListener('keyup', function() {
+        let cost = document.getElementById('cost').value.replace(/[^0-9]/g, '');
+        let margin = this.value.replace(/[^0-9]/g, '');
+        let price = parseInt(cost) * (parseInt(margin) / 100) + parseInt(cost);
+        
+        let harga = rupiahFormatter(price).replace(/[^0-9.]/g, '');
+        document.getElementById('price').value = harga;
+        return this.value = parseInt(margin);
+    });
+    // format rupiah
+    let inputPrice = document.querySelectorAll('.price');
+        inputPrice.forEach(function(input) {
+            input.addEventListener('keyup', function() {
+                let val = rupiahFormatter(input.value.replace(/[^0-9]/g, ''));
+                input.value = val.replace(/[^0-9.]/g, '');
+            });
+        });
   </script>
-@endpush --}}
+@endpush

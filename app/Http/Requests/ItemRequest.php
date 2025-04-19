@@ -31,11 +31,12 @@ class ItemRequest extends FormRequest
             'big_unit' => 'nullable|string',
             'big_to_medium' => 'required_with:big_unit',
             'cost' => 'required',
+            'margin' => 'required',
             'price' => 'required',
             'stok' => 'required|integer',
             'stok_alert' => 'required|integer',
-            'tax' => 'required|integer',
-            'tax_type' => 'required|in:exclusive,inclusive,none',
+            // 'tax' => 'required|integer',
+            // 'tax_type' => 'required|in:exclusive,inclusive,none',
             'note' => 'nullable|string',
         ];
     }

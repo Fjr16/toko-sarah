@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Currency;
 use Illuminate\Http\Request;
 use App\Models\SystemSetting;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -14,20 +13,14 @@ class SettingController extends Controller
     public function index()
     {
         $item = SystemSetting::first();
-        $data = Currency::all();
         if (!$item) {
             $item = new SystemSetting();
-            $item->currency_id = null;
             $item->currency_position_default = null;
             $item->company_name = 'Company Name';
             $item->company_email = 'company@gmail.com';
             $item->company_phone = '';
             $item->company_address = 'Indonesia';
             $item->notification_email = 'company@gmail.com';
-
-            if ($firstCurr = Currency::first()) {
-                $item->currency_id = $firstCurr->id;
-            }
         }
         $position = [
             'prefix' => 'Prefix',
@@ -37,7 +30,6 @@ class SettingController extends Controller
             'title' => 'Pengaturan Sistem',
             'menu' => 'settings',
             'item' => $item,
-            'data' => $data,
             'position' => $position,
         ]);
     }
@@ -46,7 +38,6 @@ class SettingController extends Controller
         DB::beginTransaction();
         try {
             $this->validate($request, [
-                'currency_id' => 'required|exists:currencies,id',
                 'currency_position_default' => 'required|in:prefix,suffix',
                 'company_name' => 'required|string|max:50',
                 'company_email' => 'required|email|max:50',
@@ -61,7 +52,6 @@ class SettingController extends Controller
             if (!$item) {
                 $item = new SystemSetting();
             }
-            $item->currency_id = $data['currency_id'];
             $item->currency_position_default = $data['currency_position_default'];
             $item->company_name = $data['company_name'];
             $item->company_email = $data['company_email'];

@@ -181,11 +181,6 @@
                             <span class="badge bg-danger text-bg-warning ms-2">Pro</span>
                         </a>
                     </li>
-                    <li class="menu-item {{ $title == 'Mata Uang' ? 'active' : '' }}">
-                        <a href="{{ route('currency.index') }}" class="menu-link">
-                            <div>Mata Uang</div>
-                        </a>
-                    </li>
                     <li class="menu-item {{ $title == 'Pengaturan Sistem' ? 'active' : '' }}">
                         <a href="{{ route('pengaturan/sistem.index') }}" class="menu-link">
                             <div>Pengaturan Sistem</div>
