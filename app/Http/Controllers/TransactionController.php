@@ -5,13 +5,16 @@ namespace App\Http\Controllers;
 use Exception;
 use App\Models\Item;
 use App\Models\Supplier;
+use App\Models\Transaction;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 use App\Models\ItemCategory;
 use Illuminate\Http\Request;
 use App\Models\SystemSetting;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class TransactionController extends Controller
 {
@@ -131,12 +134,64 @@ class TransactionController extends Controller
         }
     }
 
+    private function generateRandomId() {
+        $date = now()->format('YmdHis');
+        $randomUniqueString = strtoupper(Str::random(6));
+        return 'PRC-' . $date . '-' . $randomUniqueString;
+    }
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function saveOnTable(Request $request)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $tranId = $this->generateRandomId();
+            $dataTran = $request->validate([
+                'supplier_id' => 'required|exists:suppliers,id',
+                'purchase_date' => 'required|date',
+                'subtotal' => 'required|numeric|max_digits:10',
+                'diskon' => 'required|numeric|max_digits:10',
+                'tax' => 'required|numeric|max_digits:10',
+                'other_cost' => 'required|numeric|max_digits:10',
+                'grand_total' => 'required|numeric|max_digits:10',
+                'status' => 'required|in:pending,ordered,completed',
+                'payment_method' => 'required',
+            ]);
+            $dataTran['transaction_code'] = $tranId;
+    
+            $item = Transaction::create($dataTran);
+            $dataSession = session()->get('data_pembelian');
+            foreach ($dataSession as $itemSession) {
+                $item->transactionDetails()->create([
+                    // 'transaction_id' => $item->id,
+                    'item_id' => $itemSession['id'],
+                    'jumlah' => $itemSession['jumlah'],
+                    'satuan' => $itemSession['satuan'],
+                    'unit_price' => $itemSession['harga_satuan'],
+                    'total' => $itemSession['total_harga'],
+                ]);
+                $productItem = Item::findOrFail($itemSession['id']);
+                $productItem->stok = $productItem->stok + $itemSession['jumlah'];
+                $productItem->save();
+            }
+            DB::commit();
+
+            session()->put('data_pembelian', []);
+            return redirect()->route('pembelian.create')->with('success', 'Berhasil menyimpan data');
+        } catch (Exception $e) {
+            return back()->with('error', 'Gagal menyimpan data: '.$e->getMessage());
+            DB::rollBack();
+        } catch (ValidationException $e) {
+            return back()->with('error', 'Gagal menyimpan data: '.$e->getMessage());
+            DB::rollBack();
+        } catch (ModelNotFoundException $e) {
+            return back()->with('error', 'Gagal menyimpan data: '.$e->getMessage());
+            DB::rollBack();
+        } catch (QueryException $qe){
+            return back()->with('error', 'Terjadi Kesalahan Database:'. $qe->getMessage());
+            DB::rollBack();
+        }
     }
 
     /**

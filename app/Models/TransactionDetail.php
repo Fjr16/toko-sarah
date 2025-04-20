@@ -12,10 +12,14 @@ class TransactionDetail extends Model
     protected $fillable = [
         'transaction_id',
         'item_id',
-        'code',
         'jumlah',
-        'harga_satuan',
-        'total_harga',
-        'harga_jual',
+        'satuan',
+        'unit_price',
+        'total',
     ];
+
+    public function transaction()
+    {
+        return $this->belongsTo(Transaction::class);
+    }
 }

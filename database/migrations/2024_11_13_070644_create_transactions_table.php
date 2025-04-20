@@ -13,12 +13,16 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->string('transaction_code')->required();
             $table->foreignId('supplier_id')->required();
-            $table->decimal('total_kotor', 10,2)->required();
+            $table->date('purchase_date')->required();
+            $table->integer('subtotal')->required();
             $table->integer('diskon')->default(0);
-            $table->integer('pajak')->default(0);
-            $table->decimal('total_bersih', 10,2)->required();
-            $table->enum('status', ['success', 'cancel', 'pending'])->default('pending');
+            $table->integer('tax')->default(0);
+            $table->integer('other_cost')->default(0);
+            $table->integer('grand_total')->required();
+            $table->enum('status', ['pending', 'ordered', 'completed'])->default('pending');
+            $table->string('payment_method', 20)->nullable();
             $table->timestamps();
         });
     }

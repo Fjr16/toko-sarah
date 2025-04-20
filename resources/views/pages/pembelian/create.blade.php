@@ -145,7 +145,7 @@
             <div class="row mb-4">
                 <div class="col-md-8">
                     <label for="defaultInput" class="form-label">Supplier</label>
-                    <select name="supplier_id" id="supplier_id" class="form-select" onchange="updateSupplier(this.options[this.selectedIndex].text)">
+                    <select id="supplier_id" class="form-select" onchange="updateSupplier(this)">
                         @foreach ($suppliers as $sup)
                             @if ($sup->id === old('supplier_id'))
                                 <option value="{{ $sup->id }}" selected>{{ $sup->name ?? '-' }}</option>
@@ -157,7 +157,7 @@
                 </div>
                 <div class="col-md-4">
                     <label for="defaultInput" class="form-label">Tgl. Pembelian</label>
-                    <input id="defaultInput" class="form-control" name="tanggal_pembelian" type="date" value="{{ date('Y-m-d') }}"/>
+                    <input class="form-control" name="tanggal_pembelian" id="tanggal_pembelian" type="date" value="{{ date('Y-m-d') }}" onchange="updatePurchaseDate(this.value)"/>
                 </div>
             </div>
             <div class="row mb-4">
@@ -282,7 +282,7 @@
                             <tr>
                                 <th>Status <span class="text-danger">*</span></th>
                                 <td class="text-end">
-                                    <select name="status" id="status" class="form-select" onchange="updateStatus(this.value)">
+                                    <select id="status" class="form-select" onchange="updateStatus(this.value)">
                                         <option value="pending">Pending</option>
                                         <option value="ordered">Ordered</option>
                                         <option value="completed">Completed</option>
@@ -292,7 +292,7 @@
                             <tr>
                                 <th>Metode Pembayaran <span class="text-danger">*</span></th>
                                 <td class="text-end">
-                                    <select name="payment_method" id="payment_method" onchange="updatePaymentMethod(this.value)" class="form-select">
+                                    <select id="payment_method" onchange="updatePaymentMethod(this.value)" class="form-select">
                                         <option value="Tunai">Tunai</option>
                                         <option value="Kartu Kredit">Kartu Kredit</option>
                                         <option value="Transfer Bank">Transfer Bank</option>
@@ -301,60 +301,10 @@
                                     </select>
                                 </td>
                             </tr>
-                            <tr>
-                                <th>Jumlah Bayar <span class="text-danger">*</span></th>
-                                <td class="text-end">
-                                    <div class="input-group input-group-md">
-                                        @if ($systemSetting?->currency_position_default == 'prefix')
-                                            <span class="input-group-text bg-primary text-white">Rp. </span>
-                                        @endif
-                                        <input type="text" class="form-control text-end" id="amount_paid" name="amount_paid" placeholder="0,00" onkeyup="jumBayar(this)" required/>
-                
-                                        @if ($systemSetting?->currency_position_default == 'suffix')
-                                            <span class="input-group-text bg-primary text-white">Rp. </span>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
                         </table>
                     </div>
                 </div>
             </div>
-            {{-- <div class="row mb-4"> --}}
-                {{-- <div class="col-md-4">
-                    <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
-                    <select name="status" id="status" class="form-select" onchange="updateStatus(this.value)">
-                        <option value="pending">Pending</option>
-                        <option value="ordered">Ordered</option>
-                        <option value="completed">Completed</option>
-                    </select>
-                </div> --}}
-                {{-- <div class="col-md-4">
-                    <label for="payment_method" class="form-label">Metode Pembayaran <span class="text-danger">*</span></label>
-                    <select name="payment_method" id="payment_method" onchange="updatePaymentMethod(this.value)" class="form-select">
-                        <option value="Tunai">Tunai</option>
-                        <option value="Kartu Kredit">Kartu Kredit</option>
-                        <option value="Transfer Bank">Transfer Bank</option>
-                        <option value="E-wallet">E-wallet</option>
-                        <option value="Lainnya">Lainnya</option>
-                    </select>
-                </div> --}}
-                {{-- <div class="col-md-4">
-                    <label for="amount_paid" class="form-label">Jumlah Bayar <span class="text-danger">*</span></label>
-                    <div class="input-group input-group-md">
-                        @if ($systemSetting?->currency_position_default == 'prefix')
-                            <span class="input-group-text bg-primary text-white">Rp. </span>
-                        @endif
-                        <input type="text" class="form-control text-end" id="amount_paid" name="amount_paid" placeholder="0,00" onkeyup="jumBayar(this)" required/>
-
-                        @if ($systemSetting?->currency_position_default == 'suffix')
-                            <span class="input-group-text bg-primary text-white">Rp. </span>
-                        @endif
-                    </div>
-                </div> --}}
-            {{-- </div> --}}
-
-            
 
             <div class="border-top mt-4 ">
                 <div class="d-flex justify-content-center mt-4">
@@ -374,24 +324,28 @@
               {{-- <p class="small my-0 py-0 text-uppercase">Order ID : <span class="fw-bold">4910487129047124</span></p> --}}
               <p class="small my-0 py-0 text-uppercase">Transaction ID : <span class="fw-bold">-</span></p>
             </div>
-            <form action="{{ route('sales.store') }}" method="POST">
+            <form action="{{ route('pembelian/save.all') }}" method="POST">
                 @csrf
                 <div class="modal-body">
                     <div class="table-responsive">
                         <table class="table">
                             <tbody>
                                 <tr>
-                                    {{-- <td>No. Nota : <span>CS/103/241231/0121</span></td> --}}
-                                    <td>No. Nota : <span>-</span></td>
-                                    <td>Tanggal : <span>{{ date('d/m/Y') }}</span></td>
+                                    <td>Tanggal : 
+                                        <span id="purchase_date">-</span>
+                                        <input type="hidden" name="purchase_date" required>
+                                    </td>
+                                    <td>Supplier : 
+                                        <span id="namaSupplier">-</span>
+                                        <input type="hidden" name="supplier_id" required>
+                                    </td>
                                 </tr>
                                 <tr>
-                                    <td>Supplier : <span id="namaSupplier">-</span></td>
                                     <td>Jam : <span>{{ date('H:i') }}</span></td>
-                                </tr>
-                                <tr>
-                                    <td>Status Bayar : <span class="status_bayar text-white">-</span></td>
-                                    <td></td>
+                                    <td>
+                                        Status Bayar : <span class="status_bayar text-white">-</span>
+                                        <input type="hidden" name="status" required>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -419,7 +373,10 @@
                                     </tr>
                                 @endforeach
                                 <tr>
-                                    <th colspan="3">Subtotal</th>
+                                    <th colspan="3">
+                                        <input type="hidden" name="subtotal" required>
+                                        Subtotal
+                                    </th>
                                     <th class="subtotal">Rp. 0</th>
                                 </tr>
                                 <tr>
@@ -431,38 +388,39 @@
                                     <th class="totalQty">Rp. 0</th>
                                 </tr>
                                 <tr>
-                                    <th colspan="3">Pajak</th>
+                                    <th colspan="3">
+                                        <input type="hidden" name="tax" required>
+                                        Pajak
+                                    </th>
                                     <th class="totalPajak">Rp. 0</th>
                                 </tr>
                                 <tr>
-                                    <th colspan="3">Biaya Lainnya</th>
+                                    <th colspan="3">
+                                        <input type="hidden" name="other_cost" required>
+                                        Biaya Lainnya
+                                    </th>
                                     <th class="biayaLainnya">Rp. 0</th>
                                 </tr>
                                 <tr>
-                                    <th colspan="3">Diskon</th>
+                                    <th colspan="3">
+                                        <input type="hidden" name="diskon" required>
+                                        Diskon
+                                    </th>
                                     <th class="totalDiskon">Rp. 0</th>
                                 </tr>
                                 <tr>
-                                    <th colspan="3" class="fw-bold">Total</th>
+                                    <th colspan="3" class="fw-bold">
+                                        <input type="hidden" name="grand_total" required>
+                                        Total
+                                    </th>
                                     <th class="fw-bold totalAkhir">Rp. 0</th>
                                 </tr>
                                 <tr>
                                     <th colspan="3">
-                                        <input type="hidden" name="metode_pembayaran" required>
+                                        <input type="hidden" name="payment_method" required>
                                         Metode Pembayaran
                                     </th>
                                     <th id="metodePembayaran">-</th>
-                                </tr>
-                                <tr>
-                                    <th colspan="3">
-                                        <input type="hidden" name="jumlah_bayar" required>
-                                        Jumlah bayar
-                                    </th>
-                                    <th id="jmlBayar">Rp. 0</th>
-                                </tr>
-                                <tr>
-                                    <th colspan="3" class="fw-bold text-uppercase fst-italic">Kembalian</th>
-                                    <th class="kembalian">Rp. 0</th>
                                 </tr>
                             </tbody>
                         </table>
@@ -580,14 +538,11 @@
             $('#kode-produk').focus();
 
             const selectSupplier = document.getElementById('supplier_id');
-            updateSupplier(selectSupplier.options[selectSupplier.selectedIndex].text);
+            updateSupplier(selectSupplier);
+            console.log($('#tanggal_pembelian').val());
+            updatePurchaseDate($('#tanggal_pembelian').val());
             updatePaymentMethod($('#payment_method').val());
             updateStatus($('#status').val());
-            // const setting = @json($systemSetting);
-            // symbol = setting.currency.symbol;
-            // position = setting.currency_position_default;
-            // thouSeparator = setting.currency.thousand_separator;
-            // decSeparator = setting.currency.decimal_separator;
             sumAll();
         });
         
@@ -610,6 +565,7 @@
             $('.totalItems').text(dataArr.length);
             $('.totalQty').text(totalQty);
             $('.subtotal').text(rupiahFormatter(totalAkhir));
+            $('input[name="subtotal"]').val(totalAkhir);
 
             totalBayar();
         }
@@ -624,6 +580,10 @@
 
             total_bayar = totalAkhir + totalPajak + biayaLainnya - totalDiskon;
             $('.totalAkhir').text(rupiahFormatter(total_bayar));
+            $('input[name="diskon"]').val(totalDiskon);
+            $('input[name="tax"]').val(totalPajak);
+            $('input[name="other_cost"]').val(biayaLainnya);
+            $('input[name="grand_total"]').val(total_bayar);
         }
     </script>
     <script>
@@ -638,18 +598,20 @@
 
             let formatAsli = value.replace(/[^0-9]/g, '');
 
-            let kembalian = formatAsli - total_bayar;
-            $('.kembalian').text(rupiahFormatter(kembalian));
-            $('#jmlBayar').text(value);
             $('input[name="jumlah_bayar"]').val(formatAsli);
         }
         
-        function updateSupplier(value){
-            $('#namaSupplier').text(value);
+        function updateSupplier(selectSupplier){
+            $('#namaSupplier').text(selectSupplier.options[selectSupplier.selectedIndex].text);
+            $('input[name="supplier_id"]').val(selectSupplier.value);
+        }
+        function updatePurchaseDate(value){
+            $('#purchase_date').text(value);
+            $('input[name="purchase_date"]').val(value);
         }
         function updatePaymentMethod(value){
             $('#metodePembayaran').text(value);
-            $('input[name="metode_pembayaran"]').val(value);
+            $('input[name="payment_method"]').val(value);
         }
 
         function updateStatus(value){
@@ -667,6 +629,7 @@
             }else{
                 $('.status_bayar').addClass('badge bg-danger');
             }
+            $('input[name="status"]').val(value);
         }
 
         document.getElementById('cost').addEventListener('keyup', function() {

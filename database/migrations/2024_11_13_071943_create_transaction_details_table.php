@@ -15,11 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('transaction_id')->required();
             $table->foreignId('item_id')->required();
-            $table->string('code')->required(); //barcode pabrik
-            $table->integer('jumlah')->default(0); //barcode pabrik
-            $table->decimal('harga_satuan', 10,2)->default(0); //barcode pabrik
-            $table->decimal('total_harga', 10,2)->default(0); //barcode pabrik
-            $table->decimal('harga_jual', 10,2)->default(0); //barcode pabrik
+            $table->integer('jumlah')->default(0);
+            $table->string('satuan')->default(0);
+            $table->integer('unit_price')->default(0);
+            $table->integer('total')->default(0); 
             $table->timestamps();
         });
     }

@@ -99,6 +99,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('pembelian/update/{id}', [TransactionController::class, 'update'])->name('pembelian.update');
     Route::get('pembelian/invoice', [TransactionController::class, 'show'])->name('pembelian.invoice');
     Route::put('update/price/item/{id}', [TransactionController::class, 'updatePriceItem'])->name('update/price.item');
+    Route::post('pembelian/save/all', [TransactionController::class, 'saveOnTable'])->name('pembelian/save.all');
 
     // setting
     Route::get('pengaturan/sistem/index', [SettingController::class, 'index'])->name('pengaturan/sistem.index');

@@ -10,11 +10,20 @@ class Transaction extends Model
     use HasFactory;
 
     protected $fillable = [
+        'transaction_code',
         'supplier_id',
-        'total_kotor',
+        'purchase_date',
+        'subtotal',
         'diskon',
-        'pajak',
-        'total_bersih',
+        'tax',
+        'other_cost',
+        'grand_total',
         'status',
+        'payment_method',
     ];
+
+    public function transactionDetails()
+    {
+        return $this->hasMany(TransactionDetail::class);
+    }
 }
