@@ -5,6 +5,7 @@ use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ItemCategoryController;
 use App\Http\Controllers\ItemController;
+use App\Http\Controllers\OtherController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SupplierController;
@@ -31,9 +32,18 @@ Route::middleware(['auth'])->group(function () {
             'menu' => 'dashboard',
         ]);
     });
+
+
+    
     // Route::get('/home', function () {
-    //     return view('welcome');
+        //     return view('welcome');
     // });
+
+    // other controller for any licensed function
+    Route::get('product/search', [OtherController::class, 'searchProduct'])->name('product.search');
+    Route::get('product/by-barcode/{code}', [OtherController::class, 'searchProductByCode'])->name('product.by-barcode');
+    Route::get('product/to/cart/{id}', [OtherController::class, 'addProductToCart'])->name('product/to.cart');
+    
 
     // kategori barang
     Route::get('kategori/barang/index', [ItemCategoryController::class, 'index'])->name('kategori/barang.index');
@@ -93,7 +103,7 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('pembelian/riwayat', [SalesController::class, 'index'])->name('pembelian/riwayat.index');
     // Route::get('pembelian/riwayat/detail/{id}', [SalesController::class, 'detail'])->name('pembelian/riwayat.detail');
     Route::get('pembelian/create', [TransactionController::class, 'create'])->name('pembelian.create');
-    Route::get('pembelian/store/{barcode}', [TransactionController::class, 'store'])->name('pembelian.store');
+    Route::get('pembelian/store/{id}', [TransactionController::class, 'store'])->name('pembelian.store');
     Route::delete('pembelian/destroy/{id}', [TransactionController::class, 'destroy'])->name('pembelian.destroy');
     Route::delete('pembelian/reset', [TransactionController::class, 'reset'])->name('pembelian.reset');
     Route::put('pembelian/update/{id}', [TransactionController::class, 'update'])->name('pembelian.update');

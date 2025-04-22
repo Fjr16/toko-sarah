@@ -131,12 +131,8 @@
                 </div>
             </div>
 
-            <div class="row mb-4">
-                <div class="input-group">
-                    <span class="input-group-text bg-label-primary" id="kode-produk-label"><i class="bx bx-search"></i></span>
-                    <input type="text" name="code" id="kode-produk" class="form-control" placeholder="Enter Product Code">
-                </div>
-            </div>
+           
+            <div id="product-select" style="width: 100%"></div>
         </div>
     </div>
     <div class="card">
@@ -478,28 +474,10 @@
 @push('scripts')
     <script>
         // add item to cart
-        const barcodeInput = document.getElementById('kode-produk');
         const name = document.getElementById('nama-produk');
         const stok = document.getElementById('stok-produk');
         const harga = document.getElementById('harga-satuan');
-        barcodeInput.addEventListener('change', function(e){
-            const barcodeValue = this.value.trim();
-            // console.log(barcodeValue);
-            fetch(`/pembelian/store/${barcodeValue}`)
-            .then(response => response.json())
-            .then(res => {
-                if (res.status_code === 200) {
-                    window.location.reload();
-                } else {
-                    name.value = null;
-                    stok.value = null;
-                    harga.value = null;
-                    console.log(res.message);
-                }
-            })
-            .catch(error => console.error('Error: ', error, window.location.reload()));
-            barcodeInput.value = null;
-        });
+  
     </script>
     <script>
         // enable form
@@ -535,8 +513,6 @@
         // setting global variabel
         // let symbol, position, thouSeparator, decSeparator;
         $(document).ready(function(){
-            $('#kode-produk').focus();
-
             const selectSupplier = document.getElementById('supplier_id');
             updateSupplier(selectSupplier);
             console.log($('#tanggal_pembelian').val());
@@ -708,4 +684,5 @@
         }
 
     </script>
+    
 @endpush

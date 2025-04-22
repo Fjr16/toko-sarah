@@ -26,66 +26,13 @@
     {{-- Flat Picker --}}
 
     {{-- css Leaflet untuk maps --}}
-    <link rel="stylesheet" href="{{ asset('assets/vendor/leaflet/leaflet.css') }}">
+    {{-- <link rel="stylesheet" href="{{ asset('assets/vendor/leaflet/leaflet.css') }}"> --}}
     {{-- Leaflet --}}
 
     <style>
-        /* .menu-link:hover {
-            color: #161515 !important;
-        } */
         .btn-success {
             background-color: #49a141 !important;
         }
-
-        #example_filter {
-            margin-bottom: 10px !important;
-        }
-        .multi-line-text {
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-        .ck-editor__editable[role="textbox"] {
-            /* editing area */
-            min-height: 200px;
-        }
-
-        .ck-content .image {
-            /* block images */
-            max-width: 80%;
-            margin: 20px auto;
-        }
-
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        input[type="number"] {
-            -moz-appearance: textfield;
-            /* Untuk Firefox */
-        }
-
-        /* table rme */
-        .outer-wrapper {
-            width: 100% !important;
-            border: 1px solid #49a141;
-            border-radius: 4px;
-            box-shadow: 0px 0px 3px #49a141;
-            max-height: fit-content;
-        }
-
-        .table-wrapper {
-
-            overflow-y: scroll;
-            /* overflow-x: scroll; */
-            height: fit-content;
-            max-height: 66.4vh;
-            margin-top: 22px;
-            margin: 15px;
-            padding-bottom: 20px;
-        }
-        /* /table rme */
 
         /* blok kontent */
         .overlay {
@@ -108,8 +55,6 @@
         }
     </style>
 
-    {{-- dinamis css --}}
-    @yield('css-added')
 
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('/assets/vendor/libs/select2/select2.css') }}" />
@@ -135,7 +80,7 @@
 
 <body>
 
-    <script src="https://cdn.ckeditor.com/ckeditor5/38.1.0/classic/ckeditor.js"></script>
+    {{-- <script src="https://cdn.ckeditor.com/ckeditor5/38.1.0/classic/ckeditor.js"></script> --}}
     <!-- Layout wrapper -->
     <div class="layout-wrapper layout-content-navbar">
         <div class="layout-container">
@@ -242,16 +187,89 @@
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src="{{ asset('/assets/vendor/libs/select2/select2.js') }}"></script>
+
+    {{-- select2 produk ajax --}}
     <script>
-        $('.select2').select2({
-            placeholder : 'Pilih',
+        // search produk manual by name or code
+        $('#product-select').select2({
+            placeholder : 'Search or scan any barcode',
+            ajax : {
+                url : '/product/search',
+                dataType : 'json',
+                delay : 250,
+                data : function(params){
+                    return {
+                        search : params.term,
+                    }
+                },
+                processResults : function(data){
+                    return {
+                        results : data.map(item => {
+                            return {
+                                id : item.id,   //menjadi value pada select
+                                text : item.code + ' - ' + item.name,
+                            }
+                        })
+                    }
+                },
+                cache : true    //respon pencarian ajax akan disimpan pada chace, jika dilakukan pencarian dengan keyword yang sama maka tidak memanggi ulang ajax melainkan diambil dari chace
+            },
+            minimumInputLength : 1,     //pencarian baru akan dilakukan jika terdapat 1 character pada form input select
         });
-        $('.select2-w-placeholder').select2({
-            placeholder : "Pilih Dignosa Sesuai kode ICD 10",
-            allowClear : true
+        setTimeout(() => {
+            $('#product-select').select2('open');
+        }, 300); // Delay kecil untuk pastikan inisialisasi selesai
+
+        // search produk  by code and auto add to cart 
+        // let barcodeBuffer = '';
+        // $('#product-select').on('keypress', function(e){
+        //     barcodeBuffer += e.key;
+        //     console.log(barcodeBuffer);
+        //     if (e.key === 'Enter') {
+        //         e.preventDefault();
+        //         if(barcodeBuffer.length > 0){
+        //             addProdukByCode(barcodeBuffer);
+        //             barcodeBuffer = '';
+        //         }
+        //     }
+        // });
+
+        // // function add produk to selected value 
+        // function addProdukByCode(barcodeBuffer){
+        //     $.ajax({
+        //         url: `/produk/by-barcode/${kode}`,
+        //         method: 'GET',
+        //         success: function(res) {
+        //             // isi Select2 dengan data dari barcode
+        //             let option = new Option(res.text, res.id, true, true);
+        //             $('#produk-select').append(option).trigger('change');
+        //         },
+        //         error: function() {
+        //             alert('Produk dengan barcode tersebut tidak ditemukan.');
+        //         }
+        //     });
+        // }
+        // end search produk  by code and auto add to cart 
+
+        // event ketika value select2 produk diganti, maka simpan data pada keranjang
+        $('#product-select').on('change', function(){
+            fetch(`/pembelian/store/${this.value}`)
+            .then(response => response.json())
+            .then(res => {
+                if (res.status_code === 200) {
+                    window.location.reload();
+                } else {
+                    name.value = null;
+                    stok.value = null;
+                    harga.value = null;
+                    console.log(res.message);
+                }
+            })
+            .catch(error => console.error('Error: ', error, window.location.reload()));
         });
     </script>
-    {{-- get jumlah in multiple input --}}
+    {{-- end select2 produk ajax --}}
+
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         flatpickr("#tanggal-lahir", {
@@ -260,25 +278,6 @@
             // defaultDate: "01-01-1990" // Tanggal default jika input kosong
         });
     </script>
-
-    {{-- start expand collapse table --}}
-    {{-- penggunaan pada fitur export laporan penunjang pk  --}}
-    <script>
-        $(document).ready(function() {
-            // Sembunyikan rincian tambahan saat halaman dimuat
-            $('.details-row').hide();
-
-            // Tambahkan event click pada tombol toggle-details
-            $('.toggle-details').click(function() {
-                // Temukan baris detail terkait
-                var detailsRow = $(this).closest('tr').next('.details-row');
-
-                // Toggle tampilan rincian tambahan
-                detailsRow.toggle();
-            });
-        });
-    </script>
-    {{-- end expand collapse table --}}    
 
     <script>
         // {{-- new alert --}}
@@ -354,29 +353,6 @@
         })
     </script>
     <script>
-        // // reformat input number according currency
-        // function number_format(thousandSeparator, element) {
-        //     // let value = element.value.replace(/[^\d,]/g, '');   //"\d" sama dengan [0-9], "^" artinya bukan
-        //     let value = element.value.replace(new RegExp(`[^\\d${decimalSeparator}]`, 'g'), '');   //"\d" sama dengan [0-9], "^" artinya bukan, dan decimal separator diambil dari variabel
-        //     element.value = formatRupiah(value,thousandSeparator,decimalSeparator);
-        // }
-        // function formatRupiah(angka, thou, dec) {
-        //     var number_string = angka.toString(),
-        //         split = number_string.split(dec),   //mengambil angka sebelum decimalSeparator
-        //         sisa = split[0].length % 3,         //mengambil sisa dari panjang angka sebelum koma yang dibagi 3
-        //         rupiah = split[0].substr(0, sisa),  //mengambil angka sebelum koma dari index 0 sampai sisa
-        //         ribuan = split[0].substr(sisa).match(/\d{3}/gi);    //mengambil angka setelah koma dari index sisa sampai akhir
-        //         //match(/\d{3}/gi) artinya ambil 3 digit angka dari index sisa sampai akhir
-        //         //gi artinya global dan case insensitive
-                
-        //     if (ribuan) {
-        //         separator = sisa ? thou : ''; //jika sisa ada maka gunakan separator ribuan 
-        //         rupiah += separator + ribuan.join(thou);    //gabungkan separator ribuan dengan angka ribuan setelah sisa
-        //     }
-
-        //     rupiah = split[1] != undefined ? rupiah + dec + split[1] : rupiah;  //jika angka sen ada maka sisipkan sen setelah jumlah ribuan dengan separator decimal
-        //     return rupiah;
-        // }
         function rupiahFormatter(value) {
             return new Intl.NumberFormat('id-ID', {
                 style: 'currency',
@@ -388,7 +364,6 @@
 
     </script>
 
-    {{-- @yield('script') --}}
     @stack('scripts')
 
 </body>

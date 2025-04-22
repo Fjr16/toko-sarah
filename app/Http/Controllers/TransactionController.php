@@ -68,11 +68,11 @@ class TransactionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store($barcode)
+    public function store($id)
     {
         try {
             $dataSession = session()->get('data_pembelian');
-            $item = Item::where('code', $barcode)->firstOrFail();
+            $item = Item::findOrFail($id);
             $findItem = $this->findItem($item->id);
             if ($findItem) {
                 // untuk mendapatkan key asli, case misal terdapat array dengan key 0,1,2 ketika array key 1

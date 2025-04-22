@@ -86,7 +86,7 @@ class ItemController extends Controller
             $data = $request->all();
 
             if ($item = Item::create($data)) {
-                $req = Request::create(route('pembelian.store', $item->code), 'GET');
+                $req = Request::create(route('pembelian.store', $item->id), 'GET');
                 $res = app()->handle($req);
                 $message = json_decode($res->getContent(), true)['message'];
                 if ($res->getStatusCode() === 200) {
