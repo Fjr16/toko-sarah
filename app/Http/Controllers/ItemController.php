@@ -6,23 +6,15 @@ use Exception;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use Illuminate\Http\Request;
-use App\Models\SystemSetting;
 use App\Http\Requests\ItemRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ItemController extends Controller
 {
-    protected $systemSetting;
-
-    public function __construct()
-    {
-        $this->systemSetting = SystemSetting::first();
-    }
-
     // clean currency format before submit to controller
     private function cleanFormat($val) {
-        $value = preg_replace('/[^\d]/', '', $val); //mengambil angka saja 
+        $value = preg_replace('/[^\d]/', '', $val); //mengambil angka saja
         return $value;
     }
 
@@ -38,7 +30,6 @@ class ItemController extends Controller
             'menu' => 'item',
             'data' => $data,
             'trashed' => $trashed,
-            'systemSetting' => $this->systemSetting,
         ]);
     }
 
@@ -52,7 +43,6 @@ class ItemController extends Controller
             'title' => 'add-item',
             'menu' => 'item',
             'data' => $data,
-            'systemSetting' => $this->systemSetting,
         ]);
     }
 
@@ -66,7 +56,7 @@ class ItemController extends Controller
             $request['cost'] = $this->cleanFormat($request->cost);
             $request['price'] = $this->cleanFormat($request->price);
             $data = $request->all();
-    
+
             Item::create($data);
 
             DB::commit();
@@ -75,7 +65,7 @@ class ItemController extends Controller
             return back()->with('error', 'Gagal Menyimpan Data: ' . $e->getMessage())->withInput();
             DB::rollBack();
         }
-        
+
     }
 
     public function storeAndAddToCart(ItemRequest $request){
@@ -107,7 +97,7 @@ class ItemController extends Controller
                 'message' => $e->getMessage(),
             ], 500);
         }
-        
+
     }
 
     /**
@@ -120,7 +110,6 @@ class ItemController extends Controller
             'title' => 'Produk',
             'menu' => 'item',
             'item' => $item,
-            'systemSetting' => $this->systemSetting,
         ]);
     }
 
@@ -136,7 +125,6 @@ class ItemController extends Controller
             'menu' => 'item',
             'item' => $item,
             'data' => $data,
-            'systemSetting' => $this->systemSetting,
         ]);
     }
 
@@ -180,7 +168,7 @@ class ItemController extends Controller
         try {
             $item = Item::findOrFail(decrypt($id));
             $item->delete();
-    
+
             return back()->with('success', 'Berhasil Menghapus Data');
         } catch (Exception $e) {
             return back()->with('error', 'Gagal Menghapus Data : ' . $e->getMessage());
@@ -194,7 +182,7 @@ class ItemController extends Controller
         try {
             $item = Item::withTrashed()->findOrFail(decrypt($id));
             $item->restore();
-    
+
             return back()->with('success', 'Berhasil Memulihkan Data');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal Memulihkan Data : ' . $e->getMessage());

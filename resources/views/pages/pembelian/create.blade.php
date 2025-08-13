@@ -70,13 +70,13 @@
                             <div class="col-md-5">
                                 <label for="cost" class="form-label">Harga Beli <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    @if ($systemSetting?->currency_position_default == 'prefix')
-                                        <span class="input-group-text bg-dark text-white">Rp. </span>                                
+                                    @if (setting('currency_position_default', 'prefix') == 'prefix')
+                                        <span class="input-group-text bg-dark text-white">Rp. </span>
                                     @endif
                                     <input type="text" class="form-control form-control-md price" id="cost" name="cost" placeholder="0,00" value="{{ old('cost', 0) }}" required />
-        
-                                    @if ($systemSetting?->currency_position_default == 'suffix')
-                                        <span class="input-group-text bg-dark text-white">Rp. </span>                                
+
+                                    @if (setting('currency_position_default', 'prefix') == 'suffix')
+                                        <span class="input-group-text bg-dark text-white">Rp. </span>
                                     @endif
                                     <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
                                 </div>
@@ -88,14 +88,14 @@
                             <div class="col-md-5">
                                 <label for="price" class="form-label">Harga Jual <span class="text-danger">*</span></label>
                                 <div class="input-group">
-                                    @if ($systemSetting?->currency_position_default == 'prefix')
-                                        <span class="input-group-text bg-dark text-white">Rp. </span>                                
+                                    @if (setting('currency_position_default', 'prefix') == 'prefix')
+                                        <span class="input-group-text bg-dark text-white">Rp. </span>
                                     @endif
-                                    
+
                                     <input type="text" name="price" id="price" class="form-control form-control-md" placeholder="0,00" value="{{ old('price', 0)}}" readonly required />
-        
-                                    @if ($systemSetting?->currency_position_default == 'suffix')
-                                        <span class="input-group-text bg-dark text-white">Rp. </span>                                
+
+                                    @if (setting('currency_position_default', 'prefix') == 'suffix')
+                                        <span class="input-group-text bg-dark text-white">Rp. </span>
                                     @endif
                                     <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
                                 </div>
@@ -131,7 +131,7 @@
                 </div>
             </div>
 
-           
+
             <div id="product-select" style="width: 100%"></div>
         </div>
     </div>
@@ -174,8 +174,8 @@
                             @if (empty(session('data_pembelian')))
                                 <tr>
                                     <td colspan="8" class="text-center fst-italic small fw-bold">-- Belum Ada Produk Dalam Keranjang --</td>
-                                </tr>  
-                            @else    
+                                </tr>
+                            @else
                                 @foreach (session()->get('data_pembelian') as $item)
                                 <tr>
                                     <td>
@@ -327,11 +327,11 @@
                         <table class="table">
                             <tbody>
                                 <tr>
-                                    <td>Tanggal : 
+                                    <td>Tanggal :
                                         <span id="purchase_date">-</span>
                                         <input type="hidden" name="purchase_date" required>
                                     </td>
-                                    <td>Supplier : 
+                                    <td>Supplier :
                                         <span id="namaSupplier">-</span>
                                         <input type="hidden" name="supplier_id" required>
                                     </td>
@@ -356,7 +356,7 @@
                                     <th>Total</th>
                                 </tr>
                             </thead>
-                           
+
                             <tbody>
                                 @foreach (session()->get('data_pembelian') as $item)
                                     <tr>
@@ -447,7 +447,7 @@
                     <div class="row mb-3">
                             <label for="new_cost" class="form-label">Harga Beli <span class="text-danger">*</span></label>
                             <input type="text" class="form-control form-control-md price" id="new_cost" name="cost" placeholder="0,00" value="0" required />
-                    </div>    
+                    </div>
                     <div class="row">
                         <label for="new_margin" class="form-label">Margin (%) <span class="text-danger">*</span></label>
                         <input type="number" class="form-control form-control-md" id="new_margin" name="margin" placeholder="0" min="0" value="0" required />
@@ -477,7 +477,7 @@
         const name = document.getElementById('nama-produk');
         const stok = document.getElementById('stok-produk');
         const harga = document.getElementById('harga-satuan');
-  
+
     </script>
     <script>
         // enable form
@@ -521,7 +521,7 @@
             updateStatus($('#status').val());
             sumAll();
         });
-        
+
         let totalAkhir = 0;
         let totalDiskon = 0;
         let biayaLainnya = 0;
@@ -576,7 +576,7 @@
 
             $('input[name="jumlah_bayar"]').val(formatAsli);
         }
-        
+
         function updateSupplier(selectSupplier){
             $('#namaSupplier').text(selectSupplier.options[selectSupplier.selectedIndex].text);
             $('input[name="supplier_id"]').val(selectSupplier.value);
@@ -620,7 +620,7 @@
             let cost = document.getElementById('cost').value.replace(/[^0-9]/g, '');
             let margin = this.value.replace(/[^0-9]/g, '');
             let price = parseInt(cost) * (parseInt(margin) / 100) + parseInt(cost);
-            
+
             let harga = rupiahFormatter(price).replace(/[^0-9.]/g, '');
             document.getElementById('price').value = harga;
             return this.value = parseInt(margin);
@@ -642,7 +642,7 @@
             $('#smallModal #new_price').val(rupiahFormatter(price).replace(/[^0-9.]/g, ''));
             $('#smallModal form').attr('action', '{{ route("update/price.item", "") }}' + "/" + id);
             $('#smallModal').modal('show');
-            
+
             $('#smallModal #new_cost').keyup(function(){
                 const newCost = this.value.replace(/[^0-9]/g, '');
                 const newMargin = $('#smallModal #new_margin').val().replace(/[^0-9]/g, '');
@@ -680,9 +680,9 @@
                 }
                 return this.value = parseInt(newMargin);
             });
-           
+
         }
 
     </script>
-    
+
 @endpush

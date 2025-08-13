@@ -10,7 +10,6 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use App\Models\ItemCategory;
 use Illuminate\Http\Request;
-use App\Models\SystemSetting;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -21,7 +20,7 @@ class TransactionController extends Controller
 
     // clean currency format before submit to controller
     private function cleanFormat($val) {
-        $value = preg_replace('/[^\d]/', '', $val); //mengambil angka saja 
+        $value = preg_replace('/[^\d]/', '', $val); //mengambil angka saja
         return $value;
     }
     /**
@@ -46,14 +45,12 @@ class TransactionController extends Controller
         $produks = Item::all();
         $suppliers = Supplier::get();
         $itemCategories = ItemCategory::get();
-        $systemSetting = SystemSetting::first();
         return view('pages.pembelian.create', [
             'title' => 'Pembelian',
             'menu' => 'Pembelian',
             'produks' => $produks,
             'suppliers' => $suppliers,
             'itemCategories' => $itemCategories,
-            'systemSetting' => $systemSetting,
         ]);
     }
 
@@ -159,7 +156,7 @@ class TransactionController extends Controller
                 'payment_method' => 'required',
             ]);
             $dataTran['transaction_code'] = $tranId;
-    
+
             $item = Transaction::create($dataTran);
             $dataSession = session()->get('data_pembelian');
             foreach ($dataSession as $itemSession) {
@@ -302,7 +299,7 @@ class TransactionController extends Controller
                 DB::rollBack();
                 return back()->with('error', 'Data tidak ditemukan Pada Keranjang');
             }
-            
+
             DB::commit();
             return back()->with('success', 'Berhasil memperbarui data');
         } catch (Exception $e) {

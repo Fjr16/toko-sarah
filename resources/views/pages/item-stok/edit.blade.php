@@ -56,14 +56,13 @@
                         <div class="col-md-5">
                             <label for="cost" class="form-label">Harga Beli <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                {{-- @if ($systemSetting?->currency_position_default == 'prefix') --}}
-                                @if (setting('currency_position_default', 'prefix') == 'prefix')
-                                    <span class="input-group-text bg-dark text-white">Rp.</span>
+                                @if ($systemSetting?->currency_position_default == 'prefix')
+                                    <span class="input-group-text bg-dark text-white">Rp.</span>                                
                                 @endif
                                 <input type="text" name="cost" id="cost" value="{{ old('cost', number_format($item->cost, 0)) }}" class="form-control form-control-md price" placeholder="0" required />
 
-                                @if (setting('currency_position_default', 'prefix') == 'suffix')
-                                    <span class="input-group-text bg-dark text-white">Rp.</span>
+                                @if ($systemSetting?->currency_position_default == 'suffix')
+                                    <span class="input-group-text bg-dark text-white">Rp.</span>                                
                                 @endif
                                 <span class="input-group-text get-satuan-kecil bg-primary text-white">/{{ $item->small_unit ?? '' }}</span>
                             </div>
@@ -75,13 +74,13 @@
                         <div class="col-md-5">
                             <label for="price" class="form-label">Harga Jual <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                @if (setting('currency_position_default', 'prefix') == 'prefix')
-                                    <span class="input-group-text bg-dark text-white">Rp.</span>
+                                @if ($systemSetting?->currency_position_default == 'prefix')
+                                    <span class="input-group-text bg-dark text-white">Rp.</span>                                
                                 @endif
                                 <input type="text" name="price" id="price" value="{{ old('price', number_format($item->price, 0)) }}" class="form-control form-control-md" placeholder="0" readonly required />
 
-                                @if (setting('currency_position_default', 'prefix') == 'suffix')
-                                    <span class="input-group-text bg-dark text-white">Rp.</span>
+                                @if ($systemSetting?->currency_position_default == 'suffix')
+                                    <span class="input-group-text bg-dark text-white">Rp.</span>                                
                                 @endif
                                 <span class="input-group-text get-satuan-kecil bg-primary text-white">/{{ $item->small_unit ?? '' }}</span>
                             </div>
@@ -124,7 +123,7 @@
                         <label for="note" class="form-label">Catatan</label>
                         <textarea class="form-control" id="note" rows="4" name="note">{{ old('note', $item->note ?? '') }}</textarea>
                     </div>
-
+                
                     <div class="col-md-12 mt-4 border-top">
                         <div class="d-flex justify-content-center mt-4">
                             <a href="{{ route('barang.index') }}" class="btn btn-md btn-danger me-2"><i class="bx bx-left-arrow"></i> Kembali</a>
@@ -152,7 +151,7 @@
         let cost = document.getElementById('cost').value.replace(/[^0-9]/g, '');
         let margin = this.value.replace(/[^0-9]/g, '');
         let price = parseInt(cost) * (parseInt(margin) / 100) + parseInt(cost);
-
+        
         let harga = rupiahFormatter(price).replace(/[^0-9.]/g, '');
         document.getElementById('price').value = harga;
         return this.value = parseInt(margin);

@@ -55,14 +55,13 @@
                     <div class="col-md-5">
                         <label for="cost" class="form-label">Harga Beli <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            {{-- @if ($systemSetting?->currency_position_default == 'prefix') --}}
-                            @if (setting('currency_position_default', 'prefix') == 'prefix')
-                                <span class="input-group-text bg-dark text-white">Rp. </span>
+                            @if ($systemSetting?->currency_position_default == 'prefix')
+                                <span class="input-group-text bg-dark text-white">Rp. </span>                                
                             @endif
                             <input type="text" class="form-control form-control-md price" id="cost" name="cost" placeholder="0,00" value="{{ old('cost', 0) }}" required />
 
-                            @if (setting('currency_position_default', 'prefix') == 'suffix')
-                                <span class="input-group-text bg-dark text-white">Rp. </span>
+                            @if ($systemSetting?->currency_position_default == 'suffix')
+                                <span class="input-group-text bg-dark text-white">Rp. </span>                                
                             @endif
                             <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
                         </div>
@@ -74,14 +73,14 @@
                     <div class="col-md-5">
                         <label for="price" class="form-label">Harga Jual <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            @if (setting('currency_position_default', 'prefix') == 'prefix')
-                                <span class="input-group-text bg-dark text-white">Rp. </span>
+                            @if ($systemSetting?->currency_position_default == 'prefix')
+                                <span class="input-group-text bg-dark text-white">Rp. </span>                                
                             @endif
-
+                            
                             <input type="text" name="price" id="price" class="form-control form-control-md" placeholder="0,00" value="{{ old('price', 0)}}" readonly required />
 
-                            @if (setting('currency_position_default', 'prefix') == 'suffix')
-                                <span class="input-group-text bg-dark text-white">Rp. </span>
+                            @if ($systemSetting?->currency_position_default == 'suffix')
+                                <span class="input-group-text bg-dark text-white">Rp. </span>                                
                             @endif
                             <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
                         </div>
@@ -148,7 +147,7 @@
             let cost = document.getElementById('cost').value.replace(/[^0-9]/g, '');
             let margin = this.value.replace(/[^0-9]/g, '');
             let price = parseInt(cost) * (parseInt(margin) / 100) + parseInt(cost);
-
+            
             let harga = rupiahFormatter(price).replace(/[^0-9.]/g, '');
             document.getElementById('price').value = harga;
             return this.value = parseInt(margin);

@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport"
         content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
-    <title>SPK | {{ $title }}</title>
+    <title>{{ setting('company_name', 'Company Name') }} | {{ $title }}</title>
     <meta name="description" content="" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -220,7 +220,7 @@
             $('#product-select').select2('open');
         }, 300); // Delay kecil untuk pastikan inisialisasi selesai
 
-        // search produk  by code and auto add to cart 
+        // search produk  by code and auto add to cart
         // let barcodeBuffer = '';
         // $('#product-select').on('keypress', function(e){
         //     barcodeBuffer += e.key;
@@ -234,7 +234,7 @@
         //     }
         // });
 
-        // // function add produk to selected value 
+        // // function add produk to selected value
         // function addProdukByCode(barcodeBuffer){
         //     $.ajax({
         //         url: `/produk/by-barcode/${kode}`,
@@ -249,7 +249,7 @@
         //         }
         //     });
         // }
-        // end search produk  by code and auto add to cart 
+        // end search produk  by code and auto add to cart
 
         // event ketika value select2 produk diganti, maka simpan data pada keranjang
         $('#product-select').on('change', function(){
@@ -319,7 +319,7 @@
             const btnSubmit = formDelete.find('button');
             btnSubmit.attr('name', name);
             btnSubmit.attr('value', value);
-            
+
             modal.modal('show');
         }
     </script>
@@ -328,14 +328,14 @@
         var satuanTerkecil = document.getElementById('satuan-terkecil');
         var satuanSedang = document.getElementById('satuan-menengah');
         var satuanTerbesar = document.getElementById('satuan-terbesar');
-    
+
         var setSatuanKecil = document.getElementById('get-satuan-kecil');
         var setSatuanKecilClass = document.querySelectorAll('.get-satuan-kecil');
         var setSatuanSedang1 = document.getElementById('get-satuan-sedang-awal');
         var setSatuanSedang2 = document.getElementById('get-satuan-sedang-akhir');
         var setSatuanBesar = document.getElementById('get-satuan-besar');
-    
-    
+
+
         satuanTerkecil.addEventListener('keyup', function(){
             setSatuanKecil.textContent = satuanTerkecil.value;
             setSatuanKecilClass.forEach(element => {
@@ -345,7 +345,7 @@
         satuanTerbesar.addEventListener('keyup', function(){
             setSatuanBesar.textContent = '1 ' + satuanTerbesar.value + ' =';
         });
-        
+
         satuanSedang.addEventListener('keyup', function(){
             setSatuanSedang1.textContent = '1 ' + satuanSedang.value + ' =';
             setSatuanSedang2.textContent = satuanSedang.value;

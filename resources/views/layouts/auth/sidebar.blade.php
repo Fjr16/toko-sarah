@@ -3,7 +3,7 @@
         <a href="/dashboard" class="app-brand-link">
             <span class="app-brand-logo demo">
             </span>
-            <span class="app-brand-text menu-text fw-bolder fs-4 ms-2 mt-1">TOKO SARAH</span>
+            <span class="app-brand-text menu-text fw-bolder fs-4 ms-2 mt-1">{{ setting('company_name', 'Company Name') }}</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none ">
@@ -55,7 +55,7 @@
         {{-- @can('admin')       --}}
             <li class="menu-header small text-muted">
                 <span class="menu-header-text text-uppercase">Administrator</span>
-            </li> 
+            </li>
             <li class="menu-item {{ $menu == 'item' ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class='menu-icon tf-icons bx bx-box'></i>
@@ -189,6 +189,6 @@
                 </ul>
             </li>
         {{-- @endcan --}}
-        
+
     </ul>
 </aside>

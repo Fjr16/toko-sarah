@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\SystemSetting;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -60,18 +61,20 @@ class SettingController extends Controller
             $item->notification_email = $data['notification_email'];
             $item->save();
 
+            Cache::forget('system_settings');
+
             DB::commit();
 
             return redirect()->route('pengaturan/sistem.index')->with('success', 'Pengaturan sistem berhasil disimpan');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Pengaturan sistem gagal disimpan : ' . $e->getMessage())->withInput();  
+            return back()->with('error', 'Pengaturan sistem gagal disimpan : ' . $e->getMessage())->withInput();
         } catch (ValidationException $e) {
             DB::rollBack();
-            return back()->with('error', $e->getMessage())->withInput();  
+            return back()->with('error', $e->getMessage())->withInput();
         } catch (ModelNotFoundException $e) {
             DB::rollBack();
-            return back()->with('error', $e->getMessage())->withInput();  
+            return back()->with('error', $e->getMessage())->withInput();
         }
     }
 }

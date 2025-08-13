@@ -54,7 +54,7 @@
                                     <td>
                                         <div class="d-flex">
                                             <a href="{{ route('kategori/barang.edit', encrypt($item->id)) }}" class="btn btn-icon btn-outline-warning mx-2"><i class="bx bx-edit"></i></a>
-                                            
+
                                             <button class="btn btn-icon btn-outline-danger me-1" type="button" data-warning="Hapus kategori barang" data-url="{{ route('kategori/barang.destroy', encrypt($item->id)) }}" onclick="showModalDelete(this)">
                                                 <i class="bx bx-trash"></i>
                                             </button>
@@ -102,3 +102,19 @@
     </div>
 @endsection
 <x-modal-confirm-delete></x-modal-confirm-delete>
+
+{{-- @push('scripts')
+    <script>
+        $.ajax({
+            url:'',
+            type:'',
+            data:{
+
+            }, success:function(res){
+
+            }, error:function(xhr){
+
+            }
+        });
+    </script>
+@endpush --}}
