@@ -3,6 +3,9 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -21,11 +24,35 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
-        DB::table('users')->insert([
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::table('user_has_roles')->truncate();
+        DB::table('roles')->truncate();
+        DB::table('users')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        $item = User::create([
             'name' => 'admin',
+            'email' => 'admin@example.com',
             'username' => 'admin',
             'password' => Hash::make('admin123'),
-            'role' => 'administrator',
         ]);
+
+        DB::table('roles')->insert([
+            [
+                'name' => 'administrator',
+                'guard_name' => 'web',
+            ],
+            [
+                'name' => 'cashier',
+                'guard_name' => 'web',
+            ],
+            [
+                'name' => 'manager',
+                'guard_name' => 'web',
+            ]
+        ]);
+
+        $admin = Role::where('name', 'administrator')->first();
+        $item->roles()->attach($admin->id);
     }
 }
