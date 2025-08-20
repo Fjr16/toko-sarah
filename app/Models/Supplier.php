@@ -11,12 +11,20 @@ class Supplier extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'code',
         'name',
-        'email',
+        'company_name',
+        'type',
+        'contact_person',
         'phone',
-        'city',
-        'country',
+        'email',
         'address',
+        'city',
+        'province',
+        'postal_code',
+        'tax_number',
+        'bank_account',
+        'bank_number',
         'status',
     ];
 }
