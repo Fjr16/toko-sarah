@@ -9,14 +9,31 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Customer extends Model
 {
     use HasFactory, SoftDeletes;
-    
+
     protected $fillable = [
         'name',
         'email',
         'phone',
-        'city',
-        'country',
+        'gender',
         'address',
-        'status',
+        'subdistrict',
+        'city',
+        'province',
+        'country',
+        'postal_code',
+        'nik',
+        'member_code',
     ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+    ];
+
+    protected static function booted()
+    {
+        static::created(function($cust){
+            $cust->member_code = 'CUST' . now()->format('ymdHis') . $cust->id;
+            $cust->save();
+        });
+    }
 }

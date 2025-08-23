@@ -6,7 +6,9 @@ use App\Models\Customer;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class CustomerController extends Controller
 {
@@ -41,27 +43,42 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
+        $idToUpdate = $request->customer_id ? $request->customer_id : null;
+        $rules = [
+            'name' => 'required|string|max:50',
+            'email' => ['sometimes','nullable','email','max:50', Rule::unique('customers', 'email')->ignore($idToUpdate)],
+            'phone' => 'string|required|max:20',
+            'address' => 'string|nullable',
+            'subdistrict' => 'string|nullable|max:50',
+            'city' => 'string|nullable|max:50',
+            'country' => 'string|nullable|max:100',
+            'postal_code' => 'string|required|max:20',
+            'nik' => ['required','string','max:20', Rule::unique('customers', 'nik')->ignore($idToUpdate)],
+        ];
+        if ($idToUpdate) {
+            $rules['member_code'] = ['string','required', Rule::unique('customers', 'member_code')->ignore($idToUpdate)];
+        }
         try {
-            $data = $request->validate([
-                'name' => 'string|required',
-                'email' => 'string|email|nullable',
-                'phone' => 'string|required',
-                'city' => 'string|nullable',
-                'country' => 'string|nullable',
-                'address' => 'string|nullable',
-            ]);
-            if ($data['email']) {
-                $request->validate([
-                    'email' => 'unique:customers,email',
-                ]);
+            $data = $request->validate($rules);
+            if(!$idToUpdate){
+
             }
-            Customer::create($data);
+            $item = $idToUpdate ? Customer::findOrFail($idToUpdate) : new Customer();
+            $item->name = $data['name'];
+            $item->email = $data['email'];
+            $item->phone = $data['phone'];
+            $item->address = $data['address'];
+            $item->subdistrict = $data['subdistrict'];
+            $item->city = $data['city'];
+            $item->country = $data['country'];
+            $item->postal_code = $data['postal_code'];
+            $item->nik = $data['nik'];
+            $item->member_code = $data['member_code'];
+            // $item->email_verified_at = $data['email_verified_at'];
+            $item->save();
+
             return redirect()->route('customer.index')->with('success', 'Data berhasil disimpan');
-        } catch (Exception $e) {
-            return back()->with('error', $e->getMessage())->withInput();
-        } catch (ModelNotFoundException $e) {
-            return back()->with('error', $e->getMessage())->withInput();
-        } catch (ValidationException $e) {
+        } catch (Throwable $e) {
             return back()->with('error', $e->getMessage())->withInput();
         }
     }

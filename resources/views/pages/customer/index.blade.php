@@ -42,10 +42,11 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Nama Pelanggan</th>
+                                    <th>NIK</th>
                                     <th>Email</th>
                                     <th>HP / WA</th>
-                                    <th>Kota</th>
-                                    <th>Negara</th>
+                                    <th>Jenis Kelamin</th>
+                                    <th>Kode Member</th>
                                     <th>Alamat</th>
                                     <th>Action</th>
                                 </tr>
@@ -54,16 +55,23 @@
                                 @foreach ($data as $item)
                                 <tr>
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $item->name ?? '' }}</td>
-                                    <td>{{ $item->email ?? '' }}</td>
-                                    <td>{{ $item->phone ?? '' }}</td>
-                                    <td>{{ $item->city ?? '' }}</td>
-                                    <td>{{ $item->country ?? '' }}</td>
-                                    <td>{{ $item->address ?? '' }}</td>
+                                    <td>{{ $item->name ?? '-' }}</td>
+                                    <td>{{ $item->nik ?? '-' }}</td>
+                                    <td>{{ $item->email ?? '-' }}</td>
+                                    <td>{{ $item->phone ?? '-' }}</td>
+                                    <td>{{ $item->gender ?? '-' }}</td>
+                                    <td>{{ $item->member_code ?? '-' }}</td>
+                                    <td class="text-wrap">
+                                        {{
+                                            $item->address ?? '-' . ', ' . $item->subdistrict ?? '-' .
+                                            ', ' . $item->city ?? '-' . ', ' . $item->province ?? '-' .
+                                            ', ' . $item->postal_code ?? '-' . ', ' . $item->country ?? '-'
+                                        }}
+                                    </td>
                                     <td>
                                         <div class="d-flex">
                                             <a href="{{ route('customer.edit', encrypt($item->id)) }}" class="btn btn-icon btn-outline-warning me-1"><i class="bx bx-edit"></i></a>
-        
+
                                             <button class="btn btn-icon btn-outline-danger me-1" type="button" data-value="deleted" data-name="status" data-warning="Hapus Pelanggan" data-url="{{ route('customer.destroy', encrypt($item->id)) }}" onclick="showModalDelete(this)">
                                                     <i class="bx bx-trash"></i>
                                             </button>
@@ -82,10 +90,11 @@
                                 <tr>
                                     <th>#</th>
                                     <th>Nama Pelanggan</th>
+                                    <th>NIK</th>
                                     <th>Email</th>
                                     <th>HP / WA</th>
-                                    <th>Kota</th>
-                                    <th>Negara</th>
+                                    <th>Jenis Kelamin</th>
+                                    <th>Kode Member</th>
                                     <th>Alamat</th>
                                     <th>Action</th>
                                 </tr>
@@ -94,12 +103,19 @@
                                 @foreach ($trashed as $item)
                                 <tr class="text-danger">
                                     <td>{{ $loop->iteration }}</td>
-                                    <td>{{ $item->name ?? '' }}</td>
-                                    <td>{{ $item->email ?? '' }}</td>
-                                    <td>{{ $item->phone ?? '' }}</td>
-                                    <td>{{ $item->city ?? '' }}</td>
-                                    <td>{{ $item->country ?? '' }}</td>
-                                    <td>{{ $item->address ?? '' }}</td>
+                                    <td>{{ $item->name ?? '-' }}</td>
+                                    <td>{{ $item->nik ?? '-' }}</td>
+                                    <td>{{ $item->email ?? '-' }}</td>
+                                    <td>{{ $item->phone ?? '-' }}</td>
+                                    <td>{{ $item->gender ?? '-' }}</td>
+                                    <td>{{ $item->member_code ?? '-' }}</td>
+                                    <td class="text-wrap">
+                                        {{
+                                            $item->address ?? '-' . ', ' . $item->subdistrict ?? '-' .
+                                            ', ' . $item->city ?? '-' . ', ' . $item->province ?? '-' .
+                                            ', ' . $item->postal_code ?? '-' . ', ' . $item->country ?? '-'
+                                        }}
+                                    </td>
                                     <td>
                                         <form action="{{ route('customer.restore', encrypt($item->id)) }}" method="POST">
                                             @csrf
@@ -119,6 +135,6 @@
             </div>
         </div>
     </div>
-    
+
 @endsection
 <x-modal-confirm-delete></x-modal-confirm-delete>
