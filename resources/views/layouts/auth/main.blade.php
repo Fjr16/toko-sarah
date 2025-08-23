@@ -29,6 +29,9 @@
     {{-- <link rel="stylesheet" href="{{ asset('assets/vendor/leaflet/leaflet.css') }}"> --}}
     {{-- Leaflet --}}
 
+    {{-- notyf --}}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
+
     <style>
         .btn-success {
             background-color: #49a141 !important;
@@ -188,6 +191,9 @@
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src="{{ asset('/assets/vendor/libs/select2/select2.js') }}"></script>
 
+    {{-- notyf --}}
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
     {{-- select2 produk ajax --}}
     <script>
         // search produk manual by name or code
@@ -297,6 +303,39 @@
                 $(this).remove();
             });
             window.scrollTo(0, 0);
+        }
+
+        // notyf alert
+        const notif = new Notyf({
+            duration:2000,
+            position: {
+                x:'right',
+                y:'bottom',
+            },
+            types: [
+                {
+                    type: 'warning',
+                    background: 'orange',
+                    icon: {
+                        className: 'material-icons',
+                        tagName: 'i',
+                        text: 'warning'
+                    }
+                },
+                {
+                    type: 'error',
+                    background: 'indianred',
+                    duration: 3000,
+                    dismissible: true
+                },
+            ]
+        });
+
+        function notify(type, message){
+            notif.open({
+                type:type,
+                message:message,
+            });
         }
     </script>
 

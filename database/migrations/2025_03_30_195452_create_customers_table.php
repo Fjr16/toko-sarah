@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('country', 100)->nullable();
             $table->string('postal_code', 20)->nullable(false);
             $table->string('nik', 20)->nullable(false);
-            $table->string('member_code')->nullable(false);
+            $table->string('member_code')->nullable(true);
             $table->timestamp('email_verified_at')->nullable();
             $table->softDeletes();
             $table->timestamps();

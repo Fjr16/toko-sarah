@@ -55,14 +55,11 @@ class CustomerController extends Controller
             'postal_code' => 'string|required|max:20',
             'nik' => ['required','string','max:20', Rule::unique('customers', 'nik')->ignore($idToUpdate)],
         ];
-        if ($idToUpdate) {
-            $rules['member_code'] = ['string','required', Rule::unique('customers', 'member_code')->ignore($idToUpdate)];
-        }
+        // if ($idToUpdate) {
+        //     $rules['member_code'] = ['string','required', Rule::unique('customers', 'member_code')->ignore($idToUpdate)];
+        // }
         try {
             $data = $request->validate($rules);
-            if(!$idToUpdate){
-
-            }
             $item = $idToUpdate ? Customer::findOrFail($idToUpdate) : new Customer();
             $item->name = $data['name'];
             $item->email = $data['email'];
@@ -73,13 +70,26 @@ class CustomerController extends Controller
             $item->country = $data['country'];
             $item->postal_code = $data['postal_code'];
             $item->nik = $data['nik'];
-            $item->member_code = $data['member_code'];
+            // $item->member_code = $data['member_code'];
             // $item->email_verified_at = $data['email_verified_at'];
-            $item->save();
+            if($item->save()){
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Proses Berhasil',
+                ]);
+            }else{
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Proses gagal, Mohon coba lagi dalam beberapa saat',
+                ]);
+            }
 
-            return redirect()->route('customer.index')->with('success', 'Data berhasil disimpan');
         } catch (Throwable $e) {
-            return back()->with('error', $e->getMessage())->withInput();
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ]);
+            // return back()->with('error', $e->getMessage())->withInput();
         }
     }
 

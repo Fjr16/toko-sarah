@@ -34,7 +34,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
 
-    
+
     // Route::get('/home', function () {
         //     return view('welcome');
     // });
@@ -43,7 +43,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('product/search', [OtherController::class, 'searchProduct'])->name('product.search');
     Route::get('product/by-barcode/{code}', [OtherController::class, 'searchProductByCode'])->name('product.by-barcode');
     Route::get('product/to/cart/{id}', [OtherController::class, 'addProductToCart'])->name('product/to.cart');
-    
+
 
     // kategori barang
     Route::get('kategori/barang/index', [ItemCategoryController::class, 'index'])->name('kategori/barang.index');
@@ -54,7 +54,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('kategori/barang/update/{id}', [ItemCategoryController::class, 'update'])->name('kategori/barang.update');
     Route::delete('kategori/barang/destroy/{id}', [ItemCategoryController::class, 'destroy'])->name('kategori/barang.destroy');
     Route::post('kategori/barang/restore/{id}', [ItemCategoryController::class, 'restore'])->name('kategori/barang.restore');
-    
+
     // barang
     Route::get('barang/index', [ItemController::class, 'index'])->name('barang.index');
     Route::get('barang/create', [ItemController::class, 'create'])->name('barang.create');
@@ -84,14 +84,14 @@ Route::middleware(['auth'])->group(function () {
     Route::put('user/update/{id}', [UserController::class, 'update'])->name('user.update');
     Route::delete('user/destroy/{id}', [UserController::class, 'destroy'])->name('user.destroy');
     Route::post('user/restore/{id}', [UserController::class, 'restore'])->name('user.restore');
-    
+
     // Penjualan
     Route::get('sales/riwayat', [SalesController::class, 'index'])->name('sales/riwayat.index');
     Route::get('sales/riwayat/detail/{id}', [SalesController::class, 'detail'])->name('sales/riwayat.detail');
     Route::get('sales/create', [SalesController::class, 'create'])->name('sales.create');
     Route::post('sales/store', [SalesController::class, 'store'])->name('sales.store');
     Route::get('sales/invoice', [SalesController::class, 'show'])->name('sales.invoice');
-    
+
     // cart
     Route::get('cart/store/{barcode}', [CartController::class, 'store'])->name('cart.store');
     Route::delete('cart/destroy/{id}', [CartController::class, 'destroy'])->name('cart.destroy');
@@ -99,7 +99,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
     // Route::post('cart/store', [CartController::class, 'store'])->name('cart.store');
 
-    // Pembelian 
+    // Pembelian
     // Route::get('pembelian/riwayat', [SalesController::class, 'index'])->name('pembelian/riwayat.index');
     // Route::get('pembelian/riwayat/detail/{id}', [SalesController::class, 'detail'])->name('pembelian/riwayat.detail');
     Route::get('pembelian/create', [TransactionController::class, 'create'])->name('pembelian.create');
@@ -113,7 +113,7 @@ Route::middleware(['auth'])->group(function () {
 
     // setting
     Route::get('pengaturan/sistem/index', [SettingController::class, 'index'])->name('pengaturan/sistem.index');
-    Route::post('pengaturan/sistem/store', [SettingController::class, 'store'])->name('pengaturan/sistem.store');   
+    Route::post('pengaturan/sistem/store', [SettingController::class, 'store'])->name('pengaturan/sistem.store');
 
     // Satuan
     Route::get('unit/index', [UnitController::class, 'index'])->name('unit.index');
