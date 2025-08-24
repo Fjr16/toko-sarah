@@ -21,10 +21,21 @@ class Supplier extends Model
         'address',
         'city',
         'province',
+        'country',
         'postal_code',
         'tax_number',
         'bank_account',
         'bank_number',
         'status',
     ];
+
+    protected static function booted()
+    {
+     static::creating(function ($supplier) {
+        $id = (static::max('id') ?? 0) + 1;
+
+        // SUP-001, SUP-012, SUP-123
+        $supplier->code = 'SUP-' . str_pad($id, 3, '0', STR_PAD_LEFT);
+    });  
+    }
 }

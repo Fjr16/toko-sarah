@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Status;
+use App\Enums\SupplierType;
 use Exception;
 use App\Models\Supplier;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
+use Throwable;
 
 class SupplierController extends Controller
 {
@@ -30,9 +34,13 @@ class SupplierController extends Controller
      */
     public function create()
     {
+        $types = SupplierType::cases();
+        $status = Status::cases();
         return view('pages.supplier.create', [
-            'title' => 'Supplier',
+            'title' => 'Tambah Supplier',
             'menu' => 'settings',
+            'types' => $types,
+            'status' => $status,
         ]);
     }
 
@@ -41,28 +49,58 @@ class SupplierController extends Controller
      */
     public function store(Request $request)
     {
+        $idToUpdate = $request->supplier_id ? decrypt($request->supplier_id) : null;
         try {
             $data = $request->validate([
-                'name' => 'string|required|unique:suppliers,name',
-                'email' => 'string|email|nullable',
-                'phone' => 'string|required',
-                'city' => 'string|nullable',
-                'country' => 'string|nullable',
-                'address' => 'string|nullable',
+                'name' => ['required','string','max:100', Rule::unique('suppliers', 'name')->ignore($idToUpdate)],
+                'company_name' => 'nullable|string|max:100',
+                'type' => ['required', new Enum(SupplierType::class)],
+                'contact_person' => 'nullable|string|max:50',
+                'phone' => 'required|string|max:20',
+                'email' => ['nullable','email','max:50', Rule::unique('suppliers', 'email')->ignore($idToUpdate)],
+                'address' => 'nullable|string',
+                'city' => 'nullable|string|max:50',
+                'province' => 'nullable|string|max:100',
+                'country' => 'nullable|string|max:100',
+                'postal_code' => 'nullable|string|max:20',
+                'tax_number' => ['nullable','string','max:50', Rule::unique('suppliers', 'tax_number')->ignore($idToUpdate)],
+                'bank_account' => 'nullable|string|max:50',
+                'bank_number' => 'nullable|string|max:50',
+                'status' => ['required', new Enum(Status::class)],
             ]);
-            if ($data['email']) {
-                $request->validate([
-                    'email' => 'unique:suppliers,email',
+            $item = $idToUpdate ? Supplier::findOrFail($idToUpdate) : new Supplier();
+            $item->name = $data['name'];
+            $item->company_name = $data['company_name'];
+            $item->type = $data['type'];
+            $item->contact_person = $data['contact_person'];
+            $item->phone = $data['phone'];
+            $item->email = $data['email'];
+            $item->address = $data['address'];
+            $item->city = $data['city'];
+            $item->province = $data['province'];
+            $item->country = $data['country'];
+            $item->postal_code = $data['postal_code'];
+            $item->tax_number = $data['tax_number'];
+            $item->bank_account = $data['bank_account'];
+            $item->bank_number = $data['bank_number'];
+            $item->status = $data['status'];
+
+            if($item->save()){
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Proses Berhasil',
+                ]);
+            }else{
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Proses gagal, Mohon coba lagi dalam beberapa saat',
                 ]);
             }
-            Supplier::create($data);
-            return redirect()->route('supplier.index')->with('success', 'Data berhasil disimpan');
-        } catch (Exception $e) {
-            return back()->with('error', $e->getMessage())->withInput();
-        } catch (ModelNotFoundException $e) {
-            return back()->with('error', $e->getMessage())->withInput();
-        } catch (ValidationException $e) {
-            return back()->with('error', $e->getMessage())->withInput();
+        } catch (Throwable $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage(),
+            ]);
         }
     }
 
@@ -72,42 +110,15 @@ class SupplierController extends Controller
     public function edit(string $id)
     {
         $item = Supplier::find(decrypt($id));
-        return view('pages.supplier.edit', [
-            'title' => 'Supplier',
+        $types = SupplierType::cases();
+        $status = Status::cases();
+        return view('pages.supplier.create', [
+            'title' => 'Edit Supplier',
             'menu' => 'settings',
             'item' => $item,
+            'status' => $status,
+            'types' => $types,
         ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        try {
-            $item = Supplier::findOrFail(decrypt($id));
-            $data = $request->validate([
-                'name' => 'string|required|unique:suppliers,name,'. $item->id,
-                'email' => 'string|email|nullable',
-                'phone' => 'string|required',
-                'city' => 'string|nullable',
-                'country' => 'string|nullable',
-                'address' => 'string|nullable',
-            ]);
-            if ($data['email']) {
-                $request->validate([
-                    'email' => 'unique:suppliers,email,'.decrypt($id),
-                ]);
-            }
-            $item->update($data);
-            return redirect()->route('supplier.index')->with('success', 'Data berhasil diperbarui');
-        } catch (Exception $e) {
-            return back()->with('error', $e->getMessage())->withInput();
-        } catch (ModelNotFoundException $e) {
-            return back()->with('error', $e->getMessage())->withInput();
-        } catch (ValidationException $e) {
-            return back()->with('error', $e->getMessage())->withInput();
-        }
     }
 
     /**

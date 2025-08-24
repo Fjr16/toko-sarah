@@ -67,12 +67,11 @@ Route::middleware(['auth'])->group(function () {
     // store and add to cart
     Route::post('item/store/add/to/cart', [ItemController::class, 'storeAndAddToCart'])->name('item/store/add/to.cart');
 
-    // supplier
+    // supplier (DONE)
     Route::get('supplier/index', [SupplierController::class, 'index'])->name('supplier.index');
     Route::get('supplier/create', [SupplierController::class, 'create'])->name('supplier.create');
     Route::post('supplier/store', [SupplierController::class, 'store'])->name('supplier.store');
     Route::get('supplier/edit/{id}', [SupplierController::class, 'edit'])->name('supplier.edit');
-    Route::put('supplier/update/{id}', [SupplierController::class, 'update'])->name('supplier.update');
     Route::delete('supplier/destroy/{id}', [SupplierController::class, 'destroy'])->name('supplier.destroy');
     Route::post('supplier/restore/{id}', [SupplierController::class, 'restore'])->name('supplier.restore');
 
@@ -124,7 +123,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('unit/update/{id}', [UnitController::class, 'update'])->name('unit.update');
     Route::delete('unit/destroy/{id}', [UnitController::class, 'destroy'])->name('unit.destroy');
 
-    // Pelanggan
+    // Pelanggan (DONE)
     Route::get('customer/index', [CustomerController::class, 'index'])->name('customer.index');
     Route::get('customer/create', [CustomerController::class, 'create'])->name('customer.create');
     Route::post('customer/store', [CustomerController::class, 'store'])->name('customer.store');

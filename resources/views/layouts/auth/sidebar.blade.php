@@ -165,12 +165,12 @@
                     <div>Pengaturan</div>
                 </a>
                 <ul class="menu-sub">
-                    <li class="menu-item {{ $title == 'Supplier' ? 'active' : '' }}">
+                    <li class="menu-item {{ Route::is('supplier.*') ? 'active' : '' }}">
                         <a href="{{ route('supplier.index') }}" class="menu-link">
                             <div>Supplier</div>
                         </a>
                     </li>
-                    <li class="menu-item {{ $title == 'Pelanggan' ? 'active' : '' }}">
+                    <li class="menu-item {{ Route::is('customer.*') ? 'active' : '' }}">
                         <a href="{{ route('customer.index') }}" class="menu-link">
                             <div>Pelanggan</div>
                         </a>

@@ -13,21 +13,22 @@ return new class extends Migration
     {
         Schema::create('suppliers', function (Blueprint $table) {
             $table->id();
-            $table->string('code', 20)->nullable(false);
+            $table->string('code', 100)->nullable(false);
             $table->string('name', 100)->nullable(false);
             $table->string('company_name', 100)->nullable(); //jika berbeda dengan nama supplier
             $table->string('type', 50)->nullable(false); //enum SupplierType
-            $table->string('contact_person', 50)->nullable(); //enum SupplierType
+            $table->string('contact_person', 50)->nullable();
             $table->string('phone', 20)->nullable(false);
             $table->string('email', 50)->nullable();
             $table->string('address')->nullable();
-            $table->string('city', 20)->nullable();
-            $table->string('province', 20)->nullable();
+            $table->string('city', 50)->nullable();
+            $table->string('province', 100)->nullable();
+            $table->string('country', 100)->nullable();
             $table->string('postal_code', 20)->nullable();
             $table->string('tax_number', 50)->nullable();//npwp atau identitas pajak
             $table->string('bank_account', 50)->nullable();
             $table->string('bank_number', 50)->nullable();
-            $table->string('status', 50)->nullable(); //enum Status
+            $table->string('status', 50)->nullable(false); //enum Status
             $table->softDeletes();
             $table->timestamps();
         });

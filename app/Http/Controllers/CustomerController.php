@@ -36,7 +36,7 @@ class CustomerController extends Controller
     {
         $genders = Gender::cases();
         return view('pages.customer.create',[
-            'title' => 'Pelanggan',
+            'title' => 'Tambah Pelanggan',
             'menu' => 'settings',
             'genders' => $genders,
         ]);
@@ -110,7 +110,7 @@ class CustomerController extends Controller
             $item = Customer::findOrFail(decrypt($id));
             $genders = Gender::cases();
             return view('pages.customer.create',[
-                'title' => 'Pelanggan',
+                'title' => 'Edit Pelanggan',
                 'menu' => 'settings',
                 'item' => $item,
                 'genders' => $genders,
