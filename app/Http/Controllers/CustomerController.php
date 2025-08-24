@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Gender;
 use App\Models\Customer;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -32,9 +34,11 @@ class CustomerController extends Controller
      */
     public function create()
     {
+        $genders = Gender::cases();
         return view('pages.customer.create',[
             'title' => 'Pelanggan',
             'menu' => 'settings',
+            'genders' => $genders,
         ]);
     }
 
@@ -43,14 +47,16 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
-        $idToUpdate = $request->customer_id ? $request->customer_id : null;
+        $idToUpdate = $request->customer_id ? decrypt($request->customer_id) : null;
         $rules = [
             'name' => 'required|string|max:50',
             'email' => ['sometimes','nullable','email','max:50', Rule::unique('customers', 'email')->ignore($idToUpdate)],
             'phone' => 'string|required|max:20',
+            'gender' => ['required', new Enum(Gender::class)],
             'address' => 'string|nullable',
             'subdistrict' => 'string|nullable|max:50',
             'city' => 'string|nullable|max:50',
+            'province' => 'string|nullable|max:100',
             'country' => 'string|nullable|max:100',
             'postal_code' => 'string|required|max:20',
             'nik' => ['required','string','max:20', Rule::unique('customers', 'nik')->ignore($idToUpdate)],
@@ -64,9 +70,11 @@ class CustomerController extends Controller
             $item->name = $data['name'];
             $item->email = $data['email'];
             $item->phone = $data['phone'];
+            $item->gender = $data['gender'];
             $item->address = $data['address'];
             $item->subdistrict = $data['subdistrict'];
             $item->city = $data['city'];
+            $item->province = $data['province'];
             $item->country = $data['country'];
             $item->postal_code = $data['postal_code'];
             $item->nik = $data['nik'];
@@ -100,46 +108,17 @@ class CustomerController extends Controller
     {
         try {
             $item = Customer::findOrFail(decrypt($id));
-            return view('pages.customer.edit',[
+            $genders = Gender::cases();
+            return view('pages.customer.create',[
                 'title' => 'Pelanggan',
                 'menu' => 'settings',
                 'item' => $item,
+                'genders' => $genders,
             ]);
         } catch (Exception $e) {
             return redirect()->route('customer.index')->with('error', $e->getMessage());
         } catch (ModelNotFoundException $e) {
             return redirect()->route('customer.index')->with('error', $e->getMessage());
-        }
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        try {
-            $item = Customer::findOrFail(decrypt($id));
-            $data = $request->validate([
-                'name' => 'string|required',
-                'email' => 'string|email|nullable',
-                'phone' => 'string|required',
-                'city' => 'string|nullable',
-                'country' => 'string|nullable',
-                'address' => 'string|nullable',
-            ]);
-            if ($data['email']) {
-                $request->validate([
-                    'email' => 'unique:customers,email,'.decrypt($id),
-                ]);
-            }
-            $item->update($data);
-            return redirect()->route('customer.index')->with('success', 'Data berhasil diperbarui');
-        } catch (Exception $e) {
-            return back()->with('error', $e->getMessage())->withInput();
-        } catch (ModelNotFoundException $e) {
-            return back()->with('error', $e->getMessage())->withInput();
-        } catch (ValidationException $e) {
-            return back()->with('error', $e->getMessage())->withInput();
         }
     }
 

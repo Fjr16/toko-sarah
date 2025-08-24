@@ -16,9 +16,11 @@ return new class extends Migration
             $table->string('name', 50)->nullable(false);
             $table->string('email', 50)->nullable();
             $table->string('phone', 20)->nullable(false);
+            $table->string('gender')->nullable(false);
             $table->string('address')->nullable();
             $table->string('subdistrict', 50)->nullable();
             $table->string('city', 50)->nullable();
+            $table->string('province', 100)->nullable();
             $table->string('country', 100)->nullable();
             $table->string('postal_code', 20)->nullable(false);
             $table->string('nik', 20)->nullable(false);

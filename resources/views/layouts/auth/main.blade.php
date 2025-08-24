@@ -56,6 +56,106 @@
             font-size: 1.5rem;
             font-weight: bold;
         }
+
+        /* Wrapper */
+        .fab-wrapper {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        z-index: 1050;
+        }
+
+        /* Container */
+        .fab-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        }
+
+        /* Style umum button */
+        .fab-btn {
+        width: 55px;
+        height: 55px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-size: 22px;
+        cursor: pointer;
+        border: none;
+        outline: none;
+        box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        }
+
+        /* Hover animasi */
+        .fab-btn:hover {
+        transform: translateY(-3px) scale(1.08);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        }
+
+        /* Ripple effect */
+        .fab-btn::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.5);
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.4s ease, height 0.4s ease;
+        }
+
+        .fab-btn:active::after {
+        width: 200%;
+        height: 200%;
+        }
+
+        /* Warna khusus */
+        .fab-main {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .fab-dark {
+        background: linear-gradient(135deg, #232526, #414345);
+        }
+
+        .fab-warning {
+        background: linear-gradient(135deg, #f7971e, #ffd200);
+        }
+
+        .fab-success {
+        background: linear-gradient(135deg, #56ab2f, #a8e063);
+        }
+
+        /* Default: sembunyi semua tombol selain .fab-main */
+        .fab-container a {
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+        }
+
+        /* Saat container open → tampilkan tombol */
+        .fab-container.open a {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        }
+
+        /* Animasi muncul satu-satu */
+        .fab-container.open a:nth-child(1) {
+        transition-delay: 0.05s;
+        }
+        .fab-container.open a:nth-child(2) {
+        transition-delay: 0.1s;
+        }
     </style>
 
 
@@ -193,6 +293,9 @@
 
     {{-- notyf --}}
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
+
+    {{-- btn fab melayang --}}
+    <script src="//unpkg.com/alpinejs" defer></script>
 
     {{-- select2 produk ajax --}}
     <script>
@@ -401,6 +504,20 @@
             }).format(value);
         }
 
+        function toggleFab() {
+             let fabMenu = document.getElementById('fabMenu');
+            let fabIcon = document.getElementById('fabIcon');
+
+            fabMenu.classList.toggle('open');
+
+            if (fabMenu.classList.contains('open')) {
+                fabIcon.classList.remove('bx-expand');
+                fabIcon.classList.add('bx-exit-fullscreen');
+            } else {
+                fabIcon.classList.remove('bx-exit-fullscreen');
+                fabIcon.classList.add('bx-expand');
+            }
+        }
     </script>
 
     @stack('scripts')

@@ -129,7 +129,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('customer/create', [CustomerController::class, 'create'])->name('customer.create');
     Route::post('customer/store', [CustomerController::class, 'store'])->name('customer.store');
     Route::get('customer/edit/{id}', [CustomerController::class, 'edit'])->name('customer.edit');
-    Route::put('customer/update/{id}', [CustomerController::class, 'update'])->name('customer.update');
     Route::delete('customer/destroy/{id}', [CustomerController::class, 'destroy'])->name('customer.destroy');
     Route::post('customer/restore/{id}', [CustomerController::class, 'restore'])->name('customer.restore');
 });

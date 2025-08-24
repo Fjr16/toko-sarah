@@ -2,9 +2,8 @@
 
 @section('content')
     <div class="card">
-        <div class="card-header border-bottom mb-4 d-flex justify-content-between align-items-center">
+        <div class="card-header border-bottom mb-4 align-items-center">
             <h4 class="m-0 p-0">Data {{ $title ?? '' }}</h4>
-            <a href="{{ route('customer.create') }}" class="btn btn-sm btn-primary">+ Tambah {{ $title ?? '' }}</a>
         </div>
         <div class="card-body">
             <div class="nav-align-top nav-tabs-shadow">
@@ -135,6 +134,20 @@
             </div>
         </div>
     </div>
+    
 
 @endsection
+<div class="fab-wrapper">
+  <div class="fab-container" id="fabMenu">
+    <a href="{{ route('customer.create') }}" class="fab-btn fab-dark">
+      <i class="bx bx-plus"></i>
+    </a>
+    {{-- <a href="{{ route('customer.edit', 1) }}" class="fab-btn fab-warning">
+      <i class="bx bx-pencil"></i>
+    </a> --}}
+    <button class="fab-btn fab-main" onclick="toggleFab()">
+      <i id="fabIcon" class="bx bx-expand"></i>
+    </button>
+  </div>
+</div>
 <x-modal-confirm-delete></x-modal-confirm-delete>
