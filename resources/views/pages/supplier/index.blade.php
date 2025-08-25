@@ -66,11 +66,11 @@
                                     <td>{{ $item->phone ?? '-' }}</td>
                                     <td>{{ $item->email ?? '-' }}</td>
                                     <td>
-                                        {{ 
+                                        {{
                                             ($item->address ?? '-') . ', ' .
-                                            ($item->city ?? '-') . ', ' . 
-                                            ($item->province ?? '-') . ', ' . 
-                                            ($item->country ?? '-') . ', ' . 
+                                            ($item->city ?? '-') . ', ' .
+                                            ($item->province ?? '-') . ', ' .
+                                            ($item->country ?? '-') . ', ' .
                                             ($item->postal_code ?? '-')
                                         }}
                                     </td>
@@ -120,11 +120,11 @@
                                     <td>{{ $item->phone ?? '-' }}</td>
                                     <td>{{ $item->email ?? '-' }}</td>
                                     <td class="text-wrap">
-                                        {{ 
+                                        {{
                                             ($item->address ?? '-') . ', ' .
-                                            ($item->city ?? '-') . ', ' . 
-                                            ($item->province ?? '-') . ', ' . 
-                                            ($item->country ?? '-') . ', ' . 
+                                            ($item->city ?? '-') . ', ' .
+                                            ($item->province ?? '-') . ', ' .
+                                            ($item->country ?? '-') . ', ' .
                                             ($item->postal_code ?? '-')
                                         }}
                                     </td>
@@ -147,19 +147,21 @@
             </div>
         </div>
     </div>
+
+    {{-- FAB button melayang --}}
+    <div class="fab-wrapper">
+      <div class="fab-container" id="fabMenu">
+        <a href="{{ route('supplier.create') }}" class="fab-btn fab-dark">
+          <i class="bx bx-plus"></i>
+        </a>
+        {{-- <a href="{{ route('customer.edit', 1) }}" class="fab-btn fab-warning">
+          <i class="bx bx-pencil"></i>
+        </a> --}}
+        <button class="fab-btn fab-main" onclick="toggleFab()">
+          <i id="fabIcon" class="bx bx-expand"></i>
+        </button>
+      </div>
+    </div>
 @endsection
 
-<div class="fab-wrapper">
-  <div class="fab-container" id="fabMenu">
-    <a href="{{ route('supplier.create') }}" class="fab-btn fab-dark">
-      <i class="bx bx-plus"></i>
-    </a>
-    {{-- <a href="{{ route('customer.edit', 1) }}" class="fab-btn fab-warning">
-      <i class="bx bx-pencil"></i>
-    </a> --}}
-    <button class="fab-btn fab-main" onclick="toggleFab()">
-      <i id="fabIcon" class="bx bx-expand"></i>
-    </button>
-  </div>
-</div>
 <x-modal-confirm-delete></x-modal-confirm-delete>

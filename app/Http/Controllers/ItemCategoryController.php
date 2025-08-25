@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Status;
 use App\Models\Item;
 use App\Models\ItemCategory;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Enum;
 
 class ItemCategoryController extends Controller
 {
@@ -29,9 +32,11 @@ class ItemCategoryController extends Controller
      */
     public function create()
     {
+        $status = Status::cases();
         return view('pages.item-category.create', [
-            'title' => 'Kategori Produk',
+            'title' => 'Tambah Kategori',
             'menu' => 'item',
+            'status' => $status,
         ]);
     }
 
@@ -40,14 +45,34 @@ class ItemCategoryController extends Controller
      */
     public function store(Request $request)
     {
-        $data = $request->validate([
-            'name' => 'required|string|unique:item_categories,name',
-        ]);
+        try {
+            $idToUpdate = $request->category_id ?? null;
+            $validators = Validator::make($request->all(), [
+                'name' => 'required|string|max:100',
+                'status' => ['required', new Enum(Status::class)],
+            ]);
+            if($validators->fails()){
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data tidak valid: ' . $validators->errors()->first(),
+                ]);
+            }
 
+            $item = $idToUpdate ? ItemCategory::findOrFail($idToUpdate) : new ItemCategory();
+            $item->name = $request->name;
+            $item->status = $request->status;
+            $item->save();
 
-        ItemCategory::create($data);
-
-        return redirect()->route('kategori/barang.index')->with('success', 'Berhasil Ditambahkan');
+            return response()->json([
+                'status' => true,
+                'message' => 'Proses Berhasil'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi Kesalahan: ' . $th->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -71,26 +96,13 @@ class ItemCategoryController extends Controller
     public function edit(string $id)
     {
         $item = ItemCategory::find(decrypt($id));
-        return view('pages.item-category.edit', [
-            'title' => 'Kategori Produk',
+        $status = Status::cases();
+        return view('pages.item-category.create', [
+            'title' => 'Edit Kategori',
             'menu' => 'item',
             'item' => $item,
+            'status' => $status,
         ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $item = ItemCategory::find(decrypt($id));
-        $data = $request->validate([
-            'name' => 'required|string|unique:item_categories,name,'. $item->id,
-        ]);
-
-        $item->update($data);
-
-        return redirect()->route('kategori/barang.index')->with('success', 'Berhasil Diperbarui');
     }
 
     /**
@@ -100,9 +112,9 @@ class ItemCategoryController extends Controller
     {
         try {
             $item = ItemCategory::findOrFail(decrypt($id));
-    
+
             $item->delete();
-    
+
             return back()->with('success', 'Berhasil Diperbarui');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal Menghapus Data : ' . $e->getMessage());
@@ -121,6 +133,6 @@ class ItemCategoryController extends Controller
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal Memulihkan Data : ' . $e->getMessage());
         }
-        
+
     }
 }

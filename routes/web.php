@@ -45,13 +45,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('product/to/cart/{id}', [OtherController::class, 'addProductToCart'])->name('product/to.cart');
 
 
-    // kategori barang
+    // kategori barang (DONE)
     Route::get('kategori/barang/index', [ItemCategoryController::class, 'index'])->name('kategori/barang.index');
     Route::get('kategori/barang/create', [ItemCategoryController::class, 'create'])->name('kategori/barang.create');
     Route::post('kategori/barang/store', [ItemCategoryController::class, 'store'])->name('kategori/barang.store');
     Route::get('kategori/barang/show/{id}', [ItemCategoryController::class, 'show'])->name('kategori/barang.show');
     Route::get('kategori/barang/edit/{id}', [ItemCategoryController::class, 'edit'])->name('kategori/barang.edit');
-    Route::put('kategori/barang/update/{id}', [ItemCategoryController::class, 'update'])->name('kategori/barang.update');
     Route::delete('kategori/barang/destroy/{id}', [ItemCategoryController::class, 'destroy'])->name('kategori/barang.destroy');
     Route::post('kategori/barang/restore/{id}', [ItemCategoryController::class, 'restore'])->name('kategori/barang.restore');
 

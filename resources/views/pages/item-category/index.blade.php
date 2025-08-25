@@ -2,9 +2,8 @@
 
 @section('content')
     <div class="card">
-        <div class="card-header border-bottom mb-4 d-flex justify-content-between align-items-center">
-            <h4 class="m-0 p-0">Data {{ $title ?? ''  }}</h4>
-            <a href="{{ route('kategori/barang.create') }}" class="btn btn-sm btn-primary">+ Tambah {{ $title ?? '' }}</a>
+        <div class="card-header border-bottom mb-4 align-items-center">
+            <h4 class="m-0 p-0">{{ $title ?? ''  }}</h4>
         </div>
         <div class="card-body">
 
@@ -42,20 +41,24 @@
                             <thead class="table-primary">
                                 <tr>
                                     <th>#</th>
-                                    <th>Nama Kategori</th>
+                                    <th>Kode</th>
+                                    <th>Nama</th>
+                                    <th>Status</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($data as $item)
-                                <tr>
-                                    <td onclick="window.location.href='{{ route('kategori/barang.show', encrypt($item->id)) }}';" style="cursor: pointer;">{{ $loop->iteration }}</td>
-                                    <td onclick="window.location.href='{{ route('kategori/barang.show', encrypt($item->id)) }}';" style="cursor: pointer;">{{ $item->name ?? '-' }}</td>
+                                <tr onclick="window.location.href='{{ route('kategori/barang.show', encrypt($item->id)) }}';" style="cursor: pointer;">
+                                    <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $item->code ?? '-' }}</td>
+                                    <td>{{ $item->name ?? '-' }}</td>
+                                    <td><span class="badge bg-{{ $item->status == 'In Active' ? 'danger' : 'info' }}">{{ $item->status ?? '-' }}</span></td>
                                     <td>
                                         <div class="d-flex">
-                                            <a href="{{ route('kategori/barang.edit', encrypt($item->id)) }}" class="btn btn-icon btn-outline-warning mx-2"><i class="bx bx-edit"></i></a>
+                                            <a href="{{ route('kategori/barang.edit', encrypt($item->id)) }}" class="btn btn-icon btn-outline-warning mx-2" onclick="event.stopPropagation();"><i class="bx bx-edit"></i></a>
 
-                                            <button class="btn btn-icon btn-outline-danger me-1" type="button" data-warning="Hapus kategori barang" data-url="{{ route('kategori/barang.destroy', encrypt($item->id)) }}" onclick="showModalDelete(this)">
+                                            <button class="btn btn-icon btn-outline-danger me-1" type="button" data-warning="Hapus kategori barang" data-url="{{ route('kategori/barang.destroy', encrypt($item->id)) }}" onclick="event.stopPropagation(); showModalDelete(this)">
                                                 <i class="bx bx-trash"></i>
                                             </button>
                                         </div>
@@ -72,7 +75,9 @@
                             <thead class="table-danger">
                                 <tr>
                                     <th>#</th>
-                                    <th>Nama Kategori</th>
+                                    <th>Kode</th>
+                                    <th>Nama</th>
+                                    <th>Status</th>
                                     <th>Action</th>
                                 </tr>
                             </thead>
@@ -80,11 +85,13 @@
                                 @foreach ($trashed as $item)
                                 <tr class="text-danger">
                                     <td>{{ $loop->iteration }}</td>
+                                    <td>{{ $item->code ?? '-' }}</td>
                                     <td>{{ $item->name ?? '-' }}</td>
+                                    <td><span class="badge bg-{{ $item->status == 'in active' ? 'danger' : 'info' }}">{{ $item->status ?? '-' }}</span></td>
                                     <td>
-                                        <form action="{{ route('kategori/barang.restore', encrypt($item->id)) }}" method="POST">
+                                        <form action="{{ route('kategori/barang.restore', encrypt($item->id)) }}" method="POST" class="d-inline">
                                             @csrf
-                                            <button class="btn btn-sm btn-warning me-1" type="submit">
+                                            <button class="btn btn-sm btn-warning d-flex align-items-center justify-content-center gap-1" type="submit">
                                                 <i class='bx bx-refresh'></i>
                                                 Restore
                                             </button>
@@ -100,21 +107,15 @@
             </div>
         </div>
     </div>
+    <div class="fab-wrapper">
+        <div class="fab-container" id="fabMenu">
+          <a href="{{ route('kategori/barang.create') }}" class="fab-btn fab-dark">
+            <i class="bx bx-plus"></i>
+          </a>
+          <button class="fab-btn fab-main" onclick="toggleFab()">
+            <i id="fabIcon" class="bx bx-expand"></i>
+          </button>
+        </div>
+    </div>
 @endsection
 <x-modal-confirm-delete></x-modal-confirm-delete>
-
-{{-- @push('scripts')
-    <script>
-        $.ajax({
-            url:'',
-            type:'',
-            data:{
-
-            }, success:function(res){
-
-            }, error:function(xhr){
-
-            }
-        });
-    </script>
-@endpush --}}

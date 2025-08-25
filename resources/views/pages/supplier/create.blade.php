@@ -25,7 +25,7 @@
                         <label for="company_name" class="form-label">Nama Perusahaan</label>
                         <input type="text" class="form-control form-control-md" id="company_name" name="company_name" placeholder="Nama Perusahaan" value="{{ old('company_name', $item?->company_name ?? null) }}" />
                     </div>
-                    
+
                     <div class="col-md mb-3">
                         <label for="tax_number" class="form-label">Identitas Pajak (NPWP)</label>
                         <input type="text" class="form-control form-control-md" id="tax_number" name="tax_number" placeholder="NPWP" value="{{ old('tax_number', $item?->tax_number ?? null) }}"/>
@@ -34,7 +34,7 @@
                 <div class="row">
                     <div class="col-md mb-3">
                         <label for="contact_person" class="form-label">Contact Person</label>
-                        <input type="text" class="form-control form-control-md" id="contact_person" name="contact_person" placeholder="supplier@gmail.com" value="{{ old('contact_person', $item?->contact_person ?? null) }}"/>
+                        <input type="text" class="form-control form-control-md" id="contact_person" name="contact_person" placeholder="Contact Person" value="{{ old('contact_person', $item?->contact_person ?? null) }}"/>
                     </div>
                     <div class="col-md mb-3">
                         <label for="phone" class="form-label">Telp / HP</label>
@@ -82,9 +82,9 @@
                 <div class="row">
                     <label for="status" class="form-label">Status Supplier</label>
                     <div class="col-md mb-3">
-                        @foreach ($status as $stts)    
+                        @foreach ($status as $stts)
                         <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="status" id="status_{{ $stts->value }}" value="{{ $stts->value }}" {{ (isset($item) ? ($item?->status === $stts->value ? 'checked' : '') : ($stts->value === 'Active' ? 'checked' : '')) }}>
+                            <input class="form-check-input" type="radio" name="status" id="status_{{ $stts->value }}" value="{{ $stts->value }}" {{ (isset($item) ? ($item?->status === $stts->value ? 'checked' : '') : ($stts->name === 'active' ? 'checked' : '')) }}>
                             <label class="form-check-label" for="status_{{ $stts->value }}">
                                 {{ $stts->value }}
                             </label>

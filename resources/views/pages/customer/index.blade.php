@@ -134,20 +134,20 @@
             </div>
         </div>
     </div>
-    
 
+
+    <div class="fab-wrapper">
+      <div class="fab-container" id="fabMenu">
+        <a href="{{ route('customer.create') }}" class="fab-btn fab-dark">
+          <i class="bx bx-plus"></i>
+        </a>
+        {{-- <a href="{{ route('customer.edit', 1) }}" class="fab-btn fab-warning">
+          <i class="bx bx-pencil"></i>
+        </a> --}}
+        <button class="fab-btn fab-main" onclick="toggleFab()">
+          <i id="fabIcon" class="bx bx-expand"></i>
+        </button>
+      </div>
+    </div>
 @endsection
-<div class="fab-wrapper">
-  <div class="fab-container" id="fabMenu">
-    <a href="{{ route('customer.create') }}" class="fab-btn fab-dark">
-      <i class="bx bx-plus"></i>
-    </a>
-    {{-- <a href="{{ route('customer.edit', 1) }}" class="fab-btn fab-warning">
-      <i class="bx bx-pencil"></i>
-    </a> --}}
-    <button class="fab-btn fab-main" onclick="toggleFab()">
-      <i id="fabIcon" class="bx bx-expand"></i>
-    </button>
-  </div>
-</div>
 <x-modal-confirm-delete></x-modal-confirm-delete>
