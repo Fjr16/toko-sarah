@@ -35,8 +35,8 @@ class ItemRequest extends FormRequest
             'price' => 'required',
             'stok' => 'required|integer',
             'stok_alert' => 'required|integer',
-            // 'tax' => 'required|integer',
-            // 'tax_type' => 'required|in:exclusive,inclusive,none',
+            'image' => 'nullable|file|image:png,jpg,jpeg',
+            'description' => 'nullable|string',
             'note' => 'nullable|string',
         ];
     }

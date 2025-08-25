@@ -13,22 +13,22 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('item_category_id')->required();
-            $table->string('code')->required();    //barcode pabrik
-            $table->string('name')->required();
-            $table->string('small_unit')->required();
+            $table->foreignId('item_category_id')->constrained()->nullable(false);
+            $table->string('code')->nullable(false);    //barcode pabrik
+            $table->string('name')->nullable(false);
+            $table->string('small_unit')->nullable(false);
             $table->string('medium_unit')->nullable();
-            $table->integer('medium_to_small')->nullable();
             $table->string('big_unit')->nullable();
+            $table->integer('medium_to_small')->nullable();
             $table->integer('big_to_medium')->nullable();
-            $table->decimal('cost',10,0)->required()->default(0);   //10,2 ==> 10 digit total, 8 digit sebelum koma dan 2 digit dibelakang koma 10000000.00
-            $table->integer('margin')->required()->default(0);
-            $table->decimal('price',10,0)->required()->default(0);
-            $table->integer('stok')->default(0);
+            $table->decimal('default_cost',10,2)->nullable(false)->default(0);   //10,2 ==> 10 digit total, 8 digit sebelum koma dan 2 digit dibelakang koma 10000000.00
+            $table->integer('margin')->nullable(false)->default(0);
+            $table->decimal('default_price',10,2)->nullable(false)->default(0);
+            $table->integer('all_stok')->default(0);
             $table->integer('stok_alert')->default(0);
-            // $table->integer('tax')->nullable();
-            // $table->enum('tax_type', ['exclusive', 'inclusive', 'none'])->default('none');
-            $table->text('note')->nullable();
+            $table->string('image')->nullable();
+            $table->string('description')->nullable();
+            $table->string('status', 20)->nullable(false);
             $table->softDeletes();
             $table->timestamps();
         });

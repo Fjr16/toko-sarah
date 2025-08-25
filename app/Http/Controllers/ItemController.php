@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Status;
+use App\Helpers\CustomHelpers;
 use Exception;
 use App\Models\Item;
 use App\Models\ItemCategory;
@@ -53,7 +55,8 @@ class ItemController extends Controller
     {
         DB::beginTransaction();
         try {
-            $request['cost'] = $this->cleanFormat($request->cost);
+            // $request['cost'] = $this->cleanFormat($request->cost);
+            $request['cost'] = CustomHelpers::cleanCurrency($request->cost);
             $request['price'] = $this->cleanFormat($request->price);
             $data = $request->all();
 

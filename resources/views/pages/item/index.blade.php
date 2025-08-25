@@ -2,9 +2,8 @@
 
 @section('content')
     <div class="card">
-        <div class="card-header border-bottom mb-4 d-flex justify-content-between align-items-center">
+        <div class="card-header border-bottom mb-4 align-items-center">
             <h4 class="m-0 p-0">Data {{ $title ?? '' }}</h4>
-            <a href="{{ route('barang.create') }}" class="btn btn-sm btn-primary">+ Tambah {{ $title ?? '' }}</a>
         </div>
         <div class="card-body">
 
@@ -68,9 +67,9 @@
                                         {{-- <td>{{ $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->medium_unit ?? '-' }}</td>
                                         <td>{{ $item->big_unit ?? '-' }}</td> --}}
-                                        <td>{{ number_format($item->cost, 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ number_format($item->default_cost, 2) . ' /' . $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->margin ?? '-' }}</td>
-                                        <td>{{ number_format($item->price, 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ number_format($item->default_price, 2) . ' /' . $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->stok  . ' '. $item->small_unit }}</td>
                                         <td class="text-nowrap">
                                             <div class="d-flex">
@@ -119,9 +118,9 @@
                                         {{-- <td>{{ $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->medium_unit ?? '-' }}</td>
                                         <td>{{ $item->big_unit ?? '-' }}</td> --}}
-                                        <td>{{ number_format($item->cost, 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ number_format($item->default_cost, 2) . ' /' . $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->margin ?? '-' }}</td>
-                                        <td>{{ number_format($item->price, 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ number_format($item->default_price, 2) . ' /' . $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->stok  . ' '. $item->small_unit }}</td>
                                         <td class="text-nowrap">
                                             <form action="{{ route('barang.restore', encrypt($item->id)) }}" method="POST">
@@ -140,8 +139,17 @@
                   </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            
+    <div class="fab-wrapper">
+        <div class="fab-container" id="fabMenu">
+          <a href="{{ route('barang.create') }}" class="fab-btn fab-dark">
+            <i class="bx bx-plus"></i>
+          </a>
+          <button class="fab-btn fab-main" onclick="toggleFab()">
+            <i id="fabIcon" class="bx bx-expand"></i>
+          </button>
         </div>
     </div>
 @endsection

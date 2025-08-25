@@ -134,6 +134,10 @@
         background: linear-gradient(135deg, #56ab2f, #a8e063);
         }
 
+        .fab-primary {
+        background: linear-gradient(135deg, #3c7ef9, #3675e9);
+        }
+
         /* Default: sembunyi semua tombol selain .fab-main */
         .fab-container a {
         opacity: 0;
@@ -156,8 +160,21 @@
         .fab-container.open a:nth-child(2) {
         transition-delay: 0.1s;
         }
+
+        /* menghilangkan panah atas bawah di input number */
+        .form-control::-webkit-outer-spin-button,
+        .form-control::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Firefox */
+        .form-control[type=number] {
+            -moz-appearance: textfield;
+        }
     </style>
 
+    @stack('styles')
 
     <!-- Core CSS -->
     <link rel="stylesheet" href="{{ asset('/assets/vendor/libs/select2/select2.css') }}" />
