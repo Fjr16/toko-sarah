@@ -23,9 +23,6 @@
       color: #aaa;
       font-size: 14px;
     }
-    input[type="file"] {
-      display: none; /* sembunyikan bawaan browser */
-    }
     </style>
 @endpush
 @section('content')
@@ -34,9 +31,9 @@
             <h4 class="m-0 p-0">Tambah Produk</h4>
         </div>
         <div class="card-body">
-            <form action="{{ route("barang.store") }}" method="POST" id="post-form">
-                @csrf
+            <form id="add-product-form" enctype="multipart/form-data">
                 <div class="row mb-3">
+                    <input type="hidden" class="form-control form-control-md" id="item_id" name="item_id" value="{{ $item?->id ?? null }}"/>
                     <div class="col-md-10">
                         <div class="mb-3">
                             <label for="kategori-barang" class="form-label">Kategori Barang <span class="text-danger">*</span></label>
@@ -84,10 +81,10 @@
                     </div>
                     <div class="col-md-2 d-flex justify-content-center align-items-center">
                         <label for="fotoProduk" class="upload-box" id="uploadBox">
-                            <span>+ Upload Foto</span>
+                            <span id="uploadText">+ Upload Foto</span>
                             <img id="previewImg" alt="Preview"/>
                         </label>
-                        <input type="file" id="fotoProduk" name="image" accept="image/*">
+                        <input type="file" id="fotoProduk" name="image" accept="image/*" style="display: none;">
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -151,7 +148,7 @@
                 <div class="col-md-12 mt-4 border-top">
                     <div class="d-flex justify-content-center mt-4">
                         <a href="{{ route('barang.index') }}" class="btn btn-md btn-danger me-2"><i class="bx bx-left-arrow"></i> Kembali</a>
-                        <button type="submit" class="btn btn-md btn-success"><i class="bx bx-file"></i> Simpan</button>
+                        <button type="button" class="btn btn-md btn-success" id="product_submit"><i class="bx bx-file"></i> Simpan</button>
                     </div>
                 </div>
             </form>
@@ -186,5 +183,84 @@
                 input.value = val.replace(/[^0-9.]/g, '');
             });
         });
+    </script>
+
+    <script>
+        // preview image
+        const inputImage = document.getElementById('fotoProduk');
+        const previewImg = document.getElementById('previewImg');
+        const uploadText = document.getElementById('uploadText');
+
+        inputImage.addEventListener('change', function(){
+            // validation image
+            const maxSize = 200 * 1024; //max 200 kb
+            const allowedExtensions = ['image/png', 'image/jpeg', 'image/webp']
+
+            const file = this.files[0];
+            if (!file) return;
+
+            const isImage = file.type.startsWith('image/');
+            const isTrueEks = allowedExtensions.includes(file.type);
+            const isTrueSize = file.size <= maxSize;
+
+            if (isImage && isTrueEks && isTrueSize) {
+                const reader = new FileReader();
+                reader.onload = function(e){
+                    previewImg.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+                uploadText.style.display='none';
+                previewImg.style.display = 'block';
+            }else{
+                this.value = '';
+                previewImg.src = '';
+                uploadText.style.display='block';
+                previewImg.style.display = 'none';
+
+                let message;
+                const messageImage = isImage == false ? 'File bukan image !' : '';
+                const messageEks = isTrueEks == false ? 'Ekstensi yang diterima hanya jpg, png, dan webp !' : '';
+                const messageSize = isTrueSize == false ? 'Ukuran file tidak lebih dari 200 KB !' : '';
+                if (isImage == false && isTrueEks == false && isTrueSize == false) {
+                    message = 'pastikan file berupa gambar dengan ekstensi jpeg, png atau webp berukuran maksimal : 200 KB !';
+                }else{
+                    message = (messageImage ?? '') + (messageEks ? '<br>' + messageEks : '') + (messageSize ?  '<br>' + messageSize : '');
+                }
+                notify('error', message);
+            }
+        });
+
+        // submit form
+        document.getElementById('product_submit').addEventListener('click', async function () {
+            const form = document.getElementById('add-product-form');
+            const formData = new FormData(form);
+            const url = "{{ route('barang.store') }}";
+
+            let res = await fetch(url, {
+                method : 'POST',
+                headers: {
+                    'X-CSRF-TOKEN' : "{{ csrf_token() }}"
+                },
+                body: formData,
+            });
+
+            if (!res.ok) {
+                notify('error', res.status);
+            }
+
+            let result = await res.json();
+
+            if (result.status) {
+                notify('success', result.message);
+                form.reset();
+                setTimeout(() => {
+                    window.location.href = "{{ route('barang.index') }}"
+                }, 1800);
+            }else{
+                console.log(result.message);
+                notify('error', result.message.slice(0,150));
+            }
+        });
+
     </script>
 @endpush

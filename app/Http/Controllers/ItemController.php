@@ -11,15 +11,12 @@ use Illuminate\Http\Request;
 use App\Http\Requests\ItemRequest;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class ItemController extends Controller
 {
-    // clean currency format before submit to controller
-    private function cleanFormat($val) {
-        $value = preg_replace('/[^\d]/', '', $val); //mengambil angka saja
-        return $value;
-    }
-
     /**
      * Display a listing of the resource.
      */
@@ -42,7 +39,7 @@ class ItemController extends Controller
     {
         $data = ItemCategory::get();
         return view('pages.item.create', [
-            'title' => 'add-item',
+            'title' => 'Tambah Produk',
             'menu' => 'item',
             'data' => $data,
         ]);
@@ -53,19 +50,57 @@ class ItemController extends Controller
      */
     public function store(ItemRequest $request)
     {
-        DB::beginTransaction();
-        try {
-            // $request['cost'] = $this->cleanFormat($request->cost);
-            $request['cost'] = CustomHelpers::cleanCurrency($request->cost);
-            $request['price'] = $this->cleanFormat($request->price);
-            $data = $request->all();
+        $idToUpdate = $request->item_id ?? null;
+        $validators = Validator::make($request->all(), [
+            'code' => ['required', Rule::unique('items', 'code')->ignore($idToUpdate)],
+        ]);
+        if($validators->fails()){
+            return response()->json([
+                'status' => false,
+                'message' => $validators->errors()->first()
+            ]);
+        }
 
-            Item::create($data);
+        try {
+            DB::beginTransaction();
+            $item = $idToUpdate ? Item::findOrFail($idToUpdate) : new Item();
+            $request['cost'] = CustomHelpers::cleanCurrency($request->cost);
+            $request['price'] = CustomHelpers::cleanCurrency($request->price);
+            $item->item_category_id = $request->item_category_id;
+            $item->code = $request->code;
+            $item->name = $request->name;
+            $item->small_unit = $request->small_unit;
+            $item->medium_unit = $request->medium_unit ?? null;
+            $item->big_unit = $request->big_unit ?? null;
+            $item->medium_to_small = $request->medium_to_small ?? null;
+            $item->big_to_medium = $request->big_to_medium ?? null;
+            $item->default_cost = $request->cost;
+            $item->margin = $request->margin;
+            $item->default_price = $request->price;
+            $item->all_stok = $request->stok;
+            $item->stok_alert = $request->stok_alert;
+            if ($request->hasFile('image')) {
+                if($idToUpdate && $item->image){
+                    Storage::disk('public')->delete($item->image);
+                }
+                $item->image = $request->file('image')->store('product', 'public');
+            }
+            $item->description = $request->description ?? null;
+            if (!$idToUpdate) {
+                $item->status = Status::active;
+            }
+            $item->save();
 
             DB::commit();
-            return redirect()->route('barang.index')->with('success', 'Berhasil Ditambahkan');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Gagal Menyimpan Data: ' . $e->getMessage())->withInput();
+            return response()->json([
+                'status' => true,
+                'message' => 'Proses Berhasil'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Terjadi Kesalahan: ' . $th->getMessage()
+            ]);
             DB::rollBack();
         }
 
@@ -74,8 +109,8 @@ class ItemController extends Controller
     public function storeAndAddToCart(ItemRequest $request){
         DB::beginTransaction();
         try {
-            $request['cost'] = $this->cleanFormat($request->cost);
-            $request['price'] = $this->cleanFormat($request->price);
+            $request['cost'] = CustomHelpers::cleanCurrency($request->cost);
+            $request['price'] = CustomHelpers::cleanCurrency($request->price);
             $data = $request->all();
 
             if ($item = Item::create($data)) {
@@ -137,8 +172,8 @@ class ItemController extends Controller
     public function update(Request $request, string $id)
     {
         $item = Item::find(decrypt($id));
-        $request['cost'] = $this->cleanFormat($request->cost);
-        $request['price'] = $this->cleanFormat($request->price);
+        $request['cost'] = CustomHelpers::cleanCurrency($request->cost);
+        $request['price'] = CustomHelpers::cleanCurrency($request->price);
         $data = $request->validate([
             'item_category_id' => 'required|exists:item_categories,id',
             'code' => 'required|unique:items,code,' . $item->id,

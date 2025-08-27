@@ -7,7 +7,7 @@ class CustomHelpers {
         if (empty($val)) {
             return null;
         }
-        $cleaned = preg_replace('/[^d]/', '', $val);
+        $cleaned = preg_replace('/[^\d]/', '', $val);
         return $cleaned;
     }
 }

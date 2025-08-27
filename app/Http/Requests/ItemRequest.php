@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class ItemRequest extends FormRequest
 {
@@ -23,21 +25,30 @@ class ItemRequest extends FormRequest
     {
         return [
             'item_category_id' => 'required|exists:item_categories,id',
-            'code' => 'required|unique:items,code',
-            'name' => 'required|string|unique:items,name',
+            'name' => 'required|string',
             'small_unit' => 'required|string',
             'medium_unit' => 'nullable|string',
-            'medium_to_small' => 'required_with:medium_unit',
             'big_unit' => 'nullable|string',
+            'medium_to_small' => 'required_with:medium_unit',
             'big_to_medium' => 'required_with:big_unit',
             'cost' => 'required',
             'margin' => 'required',
             'price' => 'required',
             'stok' => 'required|integer',
             'stok_alert' => 'required|integer',
-            'image' => 'nullable|file|image:png,jpg,jpeg',
+            'image' => 'nullable|file|image:png,jpg,jpeg,webp',
             'description' => 'nullable|string',
-            'note' => 'nullable|string',
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(
+            response()->json([
+                'status' => false,
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors()
+            ])
+        );
     }
 }

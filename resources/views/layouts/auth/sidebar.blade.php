@@ -67,7 +67,7 @@
                             <div>Kategori</div>
                         </a>
                     </li>
-                    <li class="menu-item {{ $title == 'add-item' ? 'active' : '' }}">
+                    <li class="menu-item {{ Route::is('barang.create') ? 'active' : '' }}">
                         <a href="{{ route('barang.create') }}" class="menu-link">
                             <div>Tambah Produk</div>
                         </a>
