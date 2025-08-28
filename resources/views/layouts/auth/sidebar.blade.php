@@ -72,7 +72,7 @@
                             <div>Tambah Produk</div>
                         </a>
                     </li>
-                    <li class="menu-item {{ $title == 'Produk' ? 'active' : '' }}">
+                    <li class="menu-item {{ Route::is(['barang.index', 'barang.edit', 'barang.show']) == 'Produk' ? 'active' : '' }}">
                         <a href="{{ route('barang.index') }}" class="menu-link">
                             <div>All Produk</div>
                         </a>

@@ -17,7 +17,6 @@
     .upload-box img {
       max-width: 100%;
       max-height: 100%;
-      display: none;
     }
     .upload-box span {
       color: #aaa;
@@ -28,7 +27,7 @@
 @section('content')
     <div class="card">
         <div class="card-header mb-4 border-bottom">
-            <h4 class="m-0 p-0">Tambah Produk</h4>
+            <h4 class="m-0 p-0">{{ $title ?? '-' }}</h4>
         </div>
         <div class="card-body">
             <form id="add-product-form" enctype="multipart/form-data">
@@ -39,73 +38,77 @@
                             <label for="kategori-barang" class="form-label">Kategori Barang <span class="text-danger">*</span></label>
                             <select class="form-select" id="kategori-barang" aria-label="Default select example" name="item_category_id" required>
                                 <option selected disabled>-- Pilih Kategori --</option>
-                                @foreach ($data as $item)
-                                <option value="{{ $item->id }}" {{ old('item_category_id') == $item->id ? 'selected' : '' }}>{{ $item->name ?? '-' }}</option>
+                                @foreach ($data as $category)
+                                <option value="{{ $category->id }}" {{ old('item_category_id', $item?->item_category_id ?? null) == $category->id ? 'selected' : '' }}>{{ $category->name ?? '-' }}</option>
                                 @endforeach
                             </select>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-7">
                                 <label for="nama-barang" class="form-label">Nama Barang <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control form-control-md" id="nama-barang" name="name" placeholder="Input Nama Barang" value="{{ old('name') }}" required />
+                                <input type="text" class="form-control form-control-md" id="nama-barang" name="name" placeholder="Input Nama Barang" value="{{ old('name', $item?->name ?? null) }}" required />
                             </div>
                             <div class="col-md-5">
                                 <label for="kode-barang" class="form-label">Kode Barang <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control form-control-md" id="kode-barang" name="code" placeholder="Input / scan kode barang disini" value="{{ old('code') }}" required />
+                                <input type="text" class="form-control form-control-md" id="kode-barang" name="code" placeholder="Input / scan kode barang disini" value="{{ old('code', $item?->code ?? null) }}" required />
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-2">
                                 <label for="satuan-terkecil" class="form-label">Satuan Terkecil <span class="text-danger">*</span></label>
-                                <input name="small_unit" class="form-control form-control-md" id="satuan-terkecil" placeholder="Input Satuan Terkecil" required></input>
+                                <input name="small_unit" class="form-control form-control-md" id="satuan-terkecil" placeholder="Input Satuan Terkecil" value="{{ old('small_unit', $item?->small_unit ?? null) }}" required></input>
                             </div>
                             <div class="col-md-5">
                                 <label for="satuan-menengah" class="form-label">Satuan Menengah</label>
                                 <div class="input-group input-group-merge">
-                                    <input type="text" class="form-control" placeholder="Input Satuan Menengah" id="satuan-menengah" name="medium_unit"/>
-                                    <span class="input-group-text" id="get-satuan-sedang-awal">-</span>
-                                    <input type="number" class="form-control" placeholder="nilai konversi ke satuan terkecil" name="medium_to_small"/>
-                                    <span class="input-group-text" id="get-satuan-kecil">-</span>
+                                    <input type="text" class="form-control" placeholder="Input Satuan Menengah" id="satuan-menengah" name="medium_unit" value="{{ old('medium_unit', $item?->medium_unit ?? null) }}"/>
+                                    <span class="input-group-text" id="get-satuan-sedang-awal">{{ old('medium_unit', $item?->medium_unit ?? null) ? '1 ' . old('medium_unit', $item?->medium_unit) . ' =' : '-' }}</span>
+                                    <input type="number" class="form-control" placeholder="nilai konversi ke satuan terkecil" name="medium_to_small" value="{{ old('medium_to_small', $item?->medium_to_small ?? null) }}"/>
+                                    <span class="input-group-text" id="get-satuan-kecil">{{ old('small_unit', $item?->small_unit ?? '-') }}</span>
                                 </div>
                             </div>
                             <div class="col-md-5">
                                 <label for="satuan-terbesar" class="form-label">Satuan Terbesar</label>
                                 <div class="input-group input-group-merge">
-                                    <input type="text" class="form-control" placeholder="Input Satuan Terbesar" id="satuan-terbesar" name="big_unit" />
-                                    <span class="input-group-text" id="get-satuan-besar">-</span>
-                                    <input type="number" class="form-control" placeholder="nilai konversi ke satuan menengah" name="big_to_medium"/>
-                                    <span class="input-group-text" id="get-satuan-sedang-akhir">-</span>
+                                    <input type="text" class="form-control" placeholder="Input Satuan Terbesar" id="satuan-terbesar" name="big_unit" value="{{ old('big_unit', $item?->big_unit ?? null) }}" />
+                                    <span class="input-group-text" id="get-satuan-besar">{{ old('big_unit', $item?->big_unit ?? null) ? '1 ' . old('big_unit', $item?->big_unit) . ' =' : '-' }}</span>
+                                    <input type="number" class="form-control" placeholder="nilai konversi ke satuan menengah" name="big_to_medium" value="{{ old('big_to_medium', $item?->big_to_medium ?? null) }}"/>
+                                    <span class="input-group-text" id="get-satuan-sedang-akhir">{{ old('medium_unit', $item?->medium_unit ?? '-') }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-2 d-flex justify-content-center align-items-center">
                         <label for="fotoProduk" class="upload-box" id="uploadBox">
-                            <span id="uploadText">+ Upload Foto</span>
-                            <img id="previewImg" alt="Preview"/>
+                            @if (isset($item) && $item->image)
+                                <span id="uploadText" style="display:none;">+ Upload Foto</span>
+                                <img id="previewImg" src="{{ Storage::url($item->image) }}" alt="Preview" style="display:'block';"/>
+                            @else
+                                <span id="uploadText" style="display:block;">+ Upload Foto</span>
+                                <img id="previewImg" alt="Preview" style="display:none;"/>
+                            @endif
                         </label>
-                        <input type="file" id="fotoProduk" name="image" accept="image/*" style="display: none;">
+                        <input type="file" id="fotoProduk" value="{{ isset($item) && $item->image ? Storage::url($item->image) : null }}" name="image" accept="image/*" style="display: none;">
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-5">
                         <label for="cost" class="form-label">Harga Beli <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            {{-- @if ($systemSetting?->currency_position_default == 'prefix') --}}
                             @if (setting('currency_position_default', 'prefix') == 'prefix')
                                 <span class="input-group-text bg-dark text-white">Rp. </span>
                             @endif
-                            <input type="text" class="form-control form-control-md price" id="cost" name="cost" placeholder="0,00" value="{{ old('cost', 0) }}" required />
+                            <input type="text" class="form-control form-control-md price" id="cost" name="cost" placeholder="0,00" value="{{ old('cost', isset($item) && $item->default_cost ? number_format($item->default_cost, 0, ',', '.') : 0) }}" required />
 
                             @if (setting('currency_position_default', 'prefix') == 'suffix')
                                 <span class="input-group-text bg-dark text-white">Rp. </span>
                             @endif
-                            <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
+                            <span class="input-group-text get-satuan-kecil bg-primary text-white">/{{ old('small_unit', $item?->small_unit ?? null) }}</span>
                         </div>
                     </div>
                     <div class="col-md-2">
                         <label for="margin" class="form-label">Margin (%) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control form-control-md" id="margin" name="margin" placeholder="0" min="0" value="{{ old('margin') ?? 0 }}" required />
+                        <input type="number" class="form-control form-control-md" id="margin" name="margin" placeholder="0" min="0" value="{{ old('margin', $item?->margin ?? 0) }}" required />
                     </div>
                     <div class="col-md-5">
                         <label for="price" class="form-label">Harga Jual <span class="text-danger">*</span></label>
@@ -114,12 +117,12 @@
                                 <span class="input-group-text bg-dark text-white">Rp. </span>
                             @endif
 
-                            <input type="text" name="price" id="price" class="form-control form-control-md" placeholder="0,00" value="{{ old('price', 0)}}" readonly required />
+                            <input type="text" name="price" id="price" class="form-control form-control-md" placeholder="0,00" value="{{ old('price', isset($item) && $item->default_price ? number_format($item->default_price, 0, ',', '.') : 0)}}" readonly required />
 
                             @if (setting('currency_position_default', 'prefix') == 'suffix')
                                 <span class="input-group-text bg-dark text-white">Rp. </span>
                             @endif
-                            <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
+                            <span class="input-group-text get-satuan-kecil bg-primary text-white">/{{ old('small_unit', $item?->small_unit ?? null) }}</span>
                         </div>
                     </div>
                 </div>
@@ -127,22 +130,22 @@
                     <div class="col-md">
                         <label for="stok-awal" class="form-label">Total stok / Stok awal <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <input type="number" name="stok" id="stok-awal" placeholder="0" min="0" class="form-control form-control-md" value="{{ old('stok') ?? 0 }}" required />
-                            <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
+                            <input type="number" name="stok" id="stok-awal" placeholder="0" min="0" class="form-control form-control-md" value="{{ old('stok', $item?->all_stok ?? 0) }}" required />
+                            <span class="input-group-text get-satuan-kecil bg-primary text-white">/{{ old('small_unit', $item?->small_unit ?? null) }}</span>
                         </div>
                     </div>
                     <div class="col-md">
                         <label for="stok_alert" class="form-label">Peringatan Stok <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <input type="number" name="stok_alert" id="stok_alert" placeholder="0" min="0" class="form-control form-control-md" value="{{ old('stok_alert') ?? 0 }}" required />
-                            <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
+                            <input type="number" name="stok_alert" id="stok_alert" placeholder="0" min="0" class="form-control form-control-md" value="{{ old('stok_alert', $item?->stok_alert ?? 0) }}" required />
+                            <span class="input-group-text get-satuan-kecil bg-primary text-white">/{{ old('small_unit', $item?->small_unit ?? null) }}</span>
                         </div>
                     </div>
                 </div>
                 <div class="row mb-3">
                     <div class="col-md-12">
                         <label for="description" class="form-label">Deskripsi</label>
-                        <textarea class="form-control" id="description" rows="4" name="description">{{ old('description') }}</textarea>
+                        <textarea class="form-control" id="description" rows="4" name="description">{{ old('description', $item?->description ?? null) }}</textarea>
                     </div>
                 </div>
                 <div class="col-md-12 mt-4 border-top">

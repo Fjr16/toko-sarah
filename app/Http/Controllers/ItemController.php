@@ -145,7 +145,7 @@ class ItemController extends Controller
     {
         $item = Item::find(decrypt($id));
         return view('pages.item.show', [
-            'title' => 'Produk',
+            'title' => 'Detail Produk',
             'menu' => 'item',
             'item' => $item,
         ]);
@@ -158,44 +158,12 @@ class ItemController extends Controller
     {
         $data = ItemCategory::all();
         $item = Item::find(decrypt($id));
-        return view('pages.item.edit', [
-            'title' => 'Produk',
+        return view('pages.item.create', [
+            'title' => 'Edit Produk',
             'menu' => 'item',
             'item' => $item,
             'data' => $data,
         ]);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        $item = Item::find(decrypt($id));
-        $request['cost'] = CustomHelpers::cleanCurrency($request->cost);
-        $request['price'] = CustomHelpers::cleanCurrency($request->price);
-        $data = $request->validate([
-            'item_category_id' => 'required|exists:item_categories,id',
-            'code' => 'required|unique:items,code,' . $item->id,
-            'name' => 'required|string|unique:items,name,' . $item->id,
-            'small_unit' => 'required|string',
-            'medium_unit' => 'nullable|string',
-            'medium_to_small' => 'required_with:medium_unit',
-            'big_unit' => 'nullable|string',
-            'big_to_medium' => 'required_with:big_unit',
-            'cost' => 'required',
-            'margin' => 'required',
-            'price' => 'required',
-            'stok' => 'required|integer',
-            'stok_alert' => 'required|integer',
-            // 'tax' => 'required|integer',
-            // 'tax_type' => 'required|in:exclusive,inclusive,none',
-            'note' => 'nullable|string',
-        ]);
-
-        $item->update($data);
-
-        return redirect()->route('barang.index')->with('success', 'Berhasil Diperbarui');
     }
 
     /**

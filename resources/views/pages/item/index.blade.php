@@ -37,15 +37,12 @@
                 <div class="tab-content">
                     <div class="tab-pane fade show active" id="navs-top-home" role="tabpanel">
                         <div class="table-responsive">
-                            <table class="table datatable">
+                            <table class="table table-hover datatable">
                                 <thead class="table-primary">
                                     <tr>
                                         <th>#</th>
                                         <th>Kategori</th>
                                         <th>Produk</th>
-                                        {{-- <th>Satuan Terkecil</th>
-                                        <th>Satuan Menengah</th>
-                                        <th>Satuan Terbesar</th> --}}
                                         <th>Harga Beli</th>
                                         <th>Margin (%)</th>
                                         <th>Harga Jual</th>
@@ -55,7 +52,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($data as $item)
-                                    <tr>
+                                    <tr onclick="window.location.href='{{ route('barang.show', encrypt($item->id)) }}';" style="cursor: pointer;">
                                         <td>{{ $loop->iteration ?? '-' }}</td>
                                         <td>{{ $item->itemCategory->name ?? '-' }}</td>
                                         <td>
@@ -64,17 +61,13 @@
                                                 <small>{{ $item->code ?? '-' }}</small>
                                             </span>
                                         </td>
-                                        {{-- <td>{{ $item->small_unit ?? '-' }}</td>
-                                        <td>{{ $item->medium_unit ?? '-' }}</td>
-                                        <td>{{ $item->big_unit ?? '-' }}</td> --}}
-                                        <td>{{ number_format($item->default_cost, 2) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ 'Rp. '. number_format($item->default_cost, 2) . ' /' . $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->margin ?? '-' }}</td>
-                                        <td>{{ number_format($item->default_price, 2) . ' /' . $item->small_unit ?? '-' }}</td>
-                                        <td>{{ $item->stok  . ' '. $item->small_unit }}</td>
+                                        <td>{{ 'Rp. ' . number_format($item->default_price, 2) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ $item->all_stok  . ' '. $item->small_unit }}</td>
                                         <td class="text-nowrap">
-                                            <div class="d-flex">
+                                            <div class="d-flex gap-1">
                                                 <a href="{{ route('barang.edit', encrypt($item->id)) }}" class="btn btn-icon btn-outline-warning"><i class="bx bx-edit"></i></a>
-                                                <a href="{{ route('barang.show', encrypt($item->id)) }}" class="btn btn-icon btn-outline-primary mx-2"><i class="bx bxs-show"></i></a>
                                                 <button class="btn btn-icon btn-outline-danger me-1" type="button" data-warning="Hapus Produk" data-url="{{ route('barang.destroy', encrypt($item->id)) }}" onclick="showModalDelete(this)">
                                                     <i class="bx bx-trash"></i>
                                                 </button>
@@ -94,9 +87,6 @@
                                         <th>#</th>
                                         <th>Kategori</th>
                                         <th>Produk</th>
-                                        {{-- <th>Satuan Terkecil</th> --}}
-                                        {{-- <th>Satuan Menengah</th> --}}
-                                        {{-- <th>Satuan Terbesar</th> --}}
                                         <th>Harga Beli</th>
                                         <th>Margin (%)</th>
                                         <th>Harga Jual</th>
@@ -115,13 +105,10 @@
                                                 <small>{{ $item->code ?? '-' }}</small>
                                             </span>
                                         </td>
-                                        {{-- <td>{{ $item->small_unit ?? '-' }}</td>
-                                        <td>{{ $item->medium_unit ?? '-' }}</td>
-                                        <td>{{ $item->big_unit ?? '-' }}</td> --}}
-                                        <td>{{ number_format($item->default_cost, 2) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ 'Rp. ' . number_format($item->default_cost, 2) . ' /' . $item->small_unit ?? '-' }}</td>
                                         <td>{{ $item->margin ?? '-' }}</td>
-                                        <td>{{ number_format($item->default_price, 2) . ' /' . $item->small_unit ?? '-' }}</td>
-                                        <td>{{ $item->stok  . ' '. $item->small_unit }}</td>
+                                        <td>{{ 'Rp. ' . number_format($item->default_price, 2) . ' /' . $item->small_unit ?? '-' }}</td>
+                                        <td>{{ $item->all_stok  . ' '. $item->small_unit }}</td>
                                         <td class="text-nowrap">
                                             <form action="{{ route('barang.restore', encrypt($item->id)) }}" method="POST">
                                                 @csrf

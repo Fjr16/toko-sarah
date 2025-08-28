@@ -59,7 +59,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('barang/create', [ItemController::class, 'create'])->name('barang.create');
     Route::post('barang/store', [ItemController::class, 'store'])->name('barang.store');
     Route::get('barang/edit/{id}', [ItemController::class, 'edit'])->name('barang.edit');
-    Route::put('barang/update/{id}', [ItemController::class, 'update'])->name('barang.update');
     Route::get('barang/show/{id}', [ItemController::class, 'show'])->name('barang.show');
     Route::delete('barang/destroy/{id}', [ItemController::class, 'destroy'])->name('barang.destroy');
     Route::post('barang/restore/{id}', [ItemController::class, 'restore'])->name('barang.restore');
