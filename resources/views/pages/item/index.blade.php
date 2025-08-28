@@ -68,7 +68,7 @@
                                         <td class="text-nowrap">
                                             <div class="d-flex gap-1">
                                                 <a href="{{ route('barang.edit', encrypt($item->id)) }}" class="btn btn-icon btn-outline-warning"><i class="bx bx-edit"></i></a>
-                                                <button class="btn btn-icon btn-outline-danger me-1" type="button" data-warning="Hapus Produk" data-url="{{ route('barang.destroy', encrypt($item->id)) }}" onclick="showModalDelete(this)">
+                                                <button class="btn btn-icon btn-outline-danger me-1" type="button" data-warning="Hapus Produk" data-url="{{ route('barang.destroy', encrypt($item->id)) }}" onclick="event.stopPropagation(); showModalDelete(this)">
                                                     <i class="bx bx-trash"></i>
                                                 </button>
                                             </div>

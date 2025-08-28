@@ -22,7 +22,7 @@
       color: #aaa;
       font-size: 14px;
     }
-    </style>
+</style>
 @endpush
 @section('content')
     <div class="card">

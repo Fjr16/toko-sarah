@@ -1,7 +1,30 @@
 @extends('layouts.auth.main')
 
+@push('styles')
+<style>
+    .upload-box {
+      width: 200px;
+      height: 200px;
+      border: 2px dashed #ccc;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: hidden;
+      background: #fafafa;
+    }
+    .upload-box img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .upload-box span {
+      color: #aaa;
+      font-size: 14px;
+    }
+</style>
+@endpush
 @section('content')
-{{-- @dd(session()->all()) --}}
     <div class="card mb-4">
         <div class="card-header mb-4 border-bottom d-flex justify-content-between">
             <h4 class="m-0 p-0">{{ $title ?? 'Pembelian' }}</h4>
@@ -15,57 +38,64 @@
             </div>
             <div class="collapse mb-3" id="newProduct">
                 <div class="card bg-label-primary">
-                    <form action="{{ route('item/store/add/to.cart') }}" method="POST">
-                    @csrf
+                    <form id="product-form">
                     <div class="card-body">
                         <div class="row mb-3">
-                            <label for="kategori-barang" class="form-label col-form-label col-sm-2">Kategori Barang <span class="text-danger">*</span></label>
-                            <div class="col-sm-10">
-                                <select class="form-select form-control" id="kategori-barang" aria-label="Default select example" name="item_category_id" required>
-                                <option selected disabled>-- Pilih Kategori --</option>
-                                @foreach ($itemCategories as $cat)
-                                    <option value="{{ $cat->id }}" {{ old('item_category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name ?? '-' }}</option>
-                                @endforeach
-                                </select>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label for="nama-barang" class="form-label col-form-label col-sm-2">Nama Barang <span class="text-danger">*</span></label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control form-control-md" id="nama-barang" name="name" placeholder="Input Nama Barang" value="{{ old('name') }}" required />
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label for="kode-barang" class="form-label col-form-label col-sm-2">Kode Barang <span class="text-danger">*</span></label>
-                            <div class="col-sm-10">
-                                <input type="text" class="form-control form-control-md" id="kode-barang" name="code" placeholder="Input / scan kode barang disini" value="{{ old('code') }}" required />
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-md-4">
-                                <label for="satuan-terkecil" class="form-label">Satuan Terkecil <span class="text-danger">*</span></label>
-                                <input name="small_unit" class="form-control form-control-md" id="satuan-terkecil" placeholder="Input Satuan Terkecil" required></input>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="satuan-menengah" class="form-label">Satuan Menengah</label>
-                                <div class="input-group input-group-merge">
-                                    <input type="text" class="form-control" placeholder="Input Satuan Menengah" id="satuan-menengah" name="medium_unit"/>
-                                    <span class="input-group-text" id="get-satuan-sedang-awal">-</span>
-                                    <input type="number" class="form-control" placeholder="nilai konversi ke satuan terkecil" name="medium_to_small"/>
-                                    <span class="input-group-text" id="get-satuan-kecil">-</span>
+                            <div class="col-md-10">
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <select class="form-select form-control" id="kategori-barang" aria-label="Default select example" name="item_category_id" required>
+                                        <option selected disabled>-- Pilih Kategori --</option>
+                                        @foreach ($itemCategories as $cat)
+                                            <option value="{{ $cat->id }}" {{ old('item_category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name ?? '-' }}</option>
+                                        @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-7">
+                                        <label for="nama-barang" class="form-label">Nama Barang <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-md" id="nama-barang" name="name" placeholder="Input Nama Barang" value="{{ old('name') }}" required />
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label for="kode-barang" class="form-label">Kode Barang <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-md" id="kode-barang" name="code" placeholder="Input / scan kode barang disini" value="{{ old('code') }}" required />
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label for="satuan-terkecil" class="form-label">Satuan Terkecil <span class="text-danger">*</span></label>
+                                        <input name="small_unit" class="form-control form-control-md" id="satuan-terkecil" placeholder="Input Satuan Terkecil" required></input>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="satuan-menengah" class="form-label">Satuan Menengah</label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" placeholder="Input Satuan Menengah" id="satuan-menengah" name="medium_unit"/>
+                                            <span class="input-group-text" id="get-satuan-sedang-awal">-</span>
+                                            <input type="number" class="form-control" placeholder="nilai konversi ke satuan terkecil" name="medium_to_small"/>
+                                            <span class="input-group-text" id="get-satuan-kecil">-</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="satuan-terbesar" class="form-label">Satuan Terbesar</label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" placeholder="Input Satuan Terbesar" id="satuan-terbesar" name="big_unit" />
+                                            <span class="input-group-text" id="get-satuan-besar">-</span>
+                                            <input type="mumber" class="form-control" placeholder="nilai konversi ke satuan menengah" name="big_to_medium"/>
+                                            <span class="input-group-text" id="get-satuan-sedang-akhir">-</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-md-4">
-                                <label for="satuan-terbesar" class="form-label">Satuan Terbesar</label>
-                                <div class="input-group input-group-merge">
-                                    <input type="text" class="form-control" placeholder="Input Satuan Terbesar" id="satuan-terbesar" name="big_unit" />
-                                    <span class="input-group-text" id="get-satuan-besar">-</span>
-                                    <input type="mumber" class="form-control" placeholder="nilai konversi ke satuan menengah" name="big_to_medium"/>
-                                    <span class="input-group-text" id="get-satuan-sedang-akhir">-</span>
-                                </div>
+                            <div class="col-md-2 d-flex justify-content-center align-items-center pt-0">
+                                <label for="fotoProduk" class="upload-box" id="uploadBox">
+                                    <span id="uploadText" style="display:block;">+ Upload Foto</span>
+                                    <img id="previewImg" alt="Preview" style="display:none;"/>
+                                </label>
+                                <input type="file" id="fotoProduk" name="image" accept="image/*" style="display: none;">
                             </div>
                         </div>
-
+                        
                         <div class="row mb-3">
                             <div class="col-md-5">
                                 <label for="cost" class="form-label">Harga Beli <span class="text-danger">*</span></label>
@@ -103,7 +133,7 @@
                         </div>
                         <div class="row mb-3">
                             <div class="col-md">
-                                <label for="stok-awal" class="form-label">Stok Awal <span class="text-danger">*</span></label>
+                                <label for="stok-awal" class="form-label">Total stok / Stok Awal <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <input type="number" name="stok" id="stok-awal" placeholder="0" min="0" class="form-control form-control-md" value="{{ old('stok') ?? 0 }}" required />
                                     <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
@@ -118,12 +148,12 @@
                             </div>
                         </div>
                         <div class="row mb-3">
-                            <label for="note" class="form-label">Catatan</label>
-                            <textarea class="form-control" id="note" rows="4" name="note">{{ old('note') }}</textarea>
+                            <label for="description" class="form-label">Deskripsi</label>
+                            <textarea class="form-control" id="description" rows="4" name="description">{{ old('description') }}</textarea>
                         </div>
                         <div class="col-md-12 mt-4 border-top">
                             <div class="d-flex justify-content-center mt-4">
-                                <button type="submit" class="btn btn-sm btn-success"><i class="bx bx-file"></i> Save & add To Cart</button>
+                                <button type="button" class="btn btn-sm btn-success" id="product_submit"><i class="bx bx-file"></i> Save & add To Cart</button>
                             </div>
                         </div>
                     </div>
@@ -201,22 +231,9 @@
                                         <button type="button" class="btn btn-icon text-warning" onclick="openModalUpdatePrice('{{ encrypt($item['id']) }}', '{{ $item['name'] }}', {{ $item['harga_satuan'] }}, {{ $item['margin'] ?? 0 }}, {{ $item['harga_jual'] ?? 0 }})">
                                             <i class="bx bx-edit"></i>
                                           </button>
-                                        {{-- <a class="" href=""><i class="bx bx-edit"></i></a> --}}
-                                        {{-- <div class="input-group">
-                                            <input type="text" class="form-control price" id="harga-satuan_{{ $loop->iteration }}" name="harga_satuan[]" value="{{ number_format($item['harga_satuan'], 0) }}"/>
-                                            <span class="input-group-text">+</span>
-                                            <input type="number" class="form-control" value="{{ old('margin', $item['margin'] ?? 0) }}" name="margin" id="margin" placeholder="0"/>
-                                        </div> --}}
                                     </td>
-                                    {{-- <td>
-                                        <div class="input-group">
-                                            <input type="number" class="form-control" value="{{ old('margin', $item['margin'] ?? 0) }}" name="margin" id="margin" placeholder="0"/>
-                                            <span class="input-group-text">%</span>
-                                        </div>
-                                    </td> --}}
                                     <td class="text-nowrap">
                                         Rp {{ number_format($item['harga_jual'], 0) }}
-                                        {{-- <input type="text" class="form-control" value="" id="harga_jual" required disabled/> --}}
                                     </td>
                                     <td>
                                         <div class="input-group">
@@ -317,7 +334,6 @@
           <div class="modal-content">
             <div class="modal-header border-bottom d-block">
               <h5 class="modal-title" id="modalLongTitle">Konfirmasi Pembelian</h5>
-              {{-- <p class="small my-0 py-0 text-uppercase">Order ID : <span class="fw-bold">4910487129047124</span></p> --}}
               <p class="small my-0 py-0 text-uppercase">Transaction ID : <span class="fw-bold">-</span></p>
             </div>
             <form action="{{ route('pembelian/save.all') }}" method="POST">
@@ -362,9 +378,7 @@
                                     <tr>
                                         <td>{{ $item['name'] ?? '' }}</td>
                                         <td>{{ $item['jumlah'] }}</td>
-                                        {{-- <td>{{ $item['harga_satuan'] }}</td> --}}
                                         <td>Rp. {{ number_format($item['harga_satuan'], 0) }}</td>
-                                        {{-- <td>{{ $item['total_harga'] }}</td> --}}
                                         <td>Rp. {{ number_format($item['total_harga'], 0) }}</td>
                                     </tr>
                                 @endforeach
@@ -683,6 +697,82 @@
 
         }
 
+    </script>
+
+    <script>
+        // preview image
+        const inputImage = document.getElementById('fotoProduk');
+        const previewImg = document.getElementById('previewImg');
+        const uploadText = document.getElementById('uploadText');
+
+        inputImage.addEventListener('change', function(){
+            // validation image
+            const maxSize = 200 * 1024; //max 200 kb
+            const allowedExtensions = ['image/png', 'image/jpeg', 'image/webp']
+
+            const file = this.files[0];
+            if (!file) return;
+
+            const isImage = file.type.startsWith('image/');
+            const isTrueEks = allowedExtensions.includes(file.type);
+            const isTrueSize = file.size <= maxSize;
+
+            if (isImage && isTrueEks && isTrueSize) {
+                const reader = new FileReader();
+                reader.onload = function(e){
+                    previewImg.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+                uploadText.style.display='none';
+                previewImg.style.display = 'block';
+            }else{
+                this.value = '';
+                previewImg.src = '';
+                uploadText.style.display='block';
+                previewImg.style.display = 'none';
+
+                let message;
+                const messageImage = isImage == false ? 'File bukan image !' : '';
+                const messageEks = isTrueEks == false ? 'Ekstensi yang diterima hanya jpg, png, dan webp !' : '';
+                const messageSize = isTrueSize == false ? 'Ukuran file tidak lebih dari 200 KB !' : '';
+                if (isImage == false && isTrueEks == false && isTrueSize == false) {
+                    message = 'pastikan file berupa gambar dengan ekstensi jpeg, png atau webp berukuran maksimal : 200 KB !';
+                }else{
+                    message = (messageImage ?? '') + (messageEks ? '<br>' + messageEks : '') + (messageSize ?  '<br>' + messageSize : '');
+                }
+                notify('error', message);
+            }
+        });
+
+        // submit form
+        document.getElementById('product_submit').addEventListener('click', async function () {
+            const form = document.getElementById('product-form');
+            const formData = new FormData(form);
+            const url = "{{ route('item/store/add/to.cart') }}";
+
+            let res = await fetch(url, {
+                method : 'POST',
+                headers: {
+                    'X-CSRF-TOKEN' : "{{ csrf_token() }}"
+                },
+                body: formData,
+            });
+
+            if (!res.ok) {
+                notify('error', res.status);
+            }
+
+            let result = await res.json();
+
+            if (result.status) {
+                notify('success', result.message);
+                form.reset();
+                location.reload();
+            }else{
+                console.log(result.message);
+                notify('error', result.message.slice(0,150));
+            }
+        });
     </script>
 
 @endpush

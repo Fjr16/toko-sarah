@@ -24,4 +24,8 @@ class ItemCategory extends Model
             $prodCategory->code = 'PRC-' . str_pad($id, 3, '0', STR_PAD_LEFT);
         });
     }
+
+    public function items(){
+        return $this->hasMany(Item::class);
+    }
 }

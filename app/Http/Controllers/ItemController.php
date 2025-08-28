@@ -107,33 +107,70 @@ class ItemController extends Controller
     }
 
     public function storeAndAddToCart(ItemRequest $request){
+        $validators = Validator::make($request->all(), [
+            'code' => 'required|unique:items,code',
+        ]);
+        if($validators->fails()){
+            return response()->json([
+                'status' => false,
+                'message' => $validators->errors()->first()
+            ]);
+        }
         DB::beginTransaction();
         try {
             $request['cost'] = CustomHelpers::cleanCurrency($request->cost);
             $request['price'] = CustomHelpers::cleanCurrency($request->price);
-            $data = $request->all();
 
-            if ($item = Item::create($data)) {
+            $item = new Item();
+            $item->item_category_id = $request->item_category_id;
+            $item->code = $request->code;
+            $item->name = $request->name;
+            $item->small_unit = $request->small_unit;
+            $item->medium_unit = $request->medium_unit ?? null;
+            $item->big_unit = $request->big_unit ?? null;
+            $item->medium_to_small = $request->medium_to_small ?? null;
+            $item->big_to_medium = $request->big_to_medium ?? null;
+            $item->default_cost = $request->cost;
+            $item->margin = $request->margin;
+            $item->default_price = $request->price;
+            $item->all_stok = $request->stok;
+            $item->stok_alert = $request->stok_alert;
+            if ($request->hasFile('image')) {
+                $item->image = $request->file('image')->store('product', 'public');
+            }
+            $item->description = $request->description ?? null;
+            $item->status = Status::active;
+
+            if ($item->save()) {
                 $req = Request::create(route('pembelian.store', $item->id), 'GET');
                 $res = app()->handle($req);
                 $message = json_decode($res->getContent(), true)['message'];
                 if ($res->getStatusCode() === 200) {
                     DB::commit();
-                    return redirect()->route('pembelian.create')->with('success', $message);
+                    return response()->json([
+                        'status' => true,
+                        'message' => $message
+                    ]);
                 }else{
                     DB::rollBack();
-                    return redirect()->route('pembelian.create')->with('error', $message);
+                    return response()->json([
+                        'status' => false,
+                        'message' => $message
+                    ]);
                 }
             }else{
                 DB::rollBack();
-                return back()->with('error', 'Gagal Menyimpan Data, coba lagi');
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Terjadi Kesalahan: Gagal Menyimpan Data, coba lagi atau hubungi admin'
+                ]);
             }
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json([
-                'status_code' => 500,
+                'status_code' => false,
                 'message' => $e->getMessage(),
-            ], 500);
+            ]);
         }
 
     }

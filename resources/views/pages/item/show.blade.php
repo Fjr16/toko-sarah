@@ -48,24 +48,24 @@
                             <td>{{ $item->stok_alert ?? 0 }} {{ $item->small_unit ?? '' }}</td>
                         </tr>
                         <tr>
-                            <th width="30%" class="fw-bold">Catatan</th>
-                            <td>{{ $item->description ?? '-' }}</td>
-                        </tr>
-                        <tr>
                             <th width="30%" class="fw-bold">Satuan Terkecil</th>
                             <td>{{ $item->small_unit ?? '-' }}</td>
                         </tr>
                         <tr>
                             <th width="30%" class="fw-bold">Satuan Menengah</th>
-                            <td>{{ $item->medium_unit ?? '-' }} (x {{ $item->medium_to_small ?? 0 }} {{ $item->small_unit }})</td>
+                            <td>{{ $item->medium_unit ?? '-' }} (x {{ $item->medium_to_small ?? '-' }} {{ $item->small_unit }})</td>
                         </tr>
                         <tr>
                             <th width="30%" class="fw-bold">Satuan Terbesar</th>
-                            <td>{{ $item->big_unit ?? '-' }} (x {{ $item->big_to_medium ?? 0 }} {{ $item->medium_unit }})</td>
+                            <td>{{ $item->big_unit ?? '-' }} (x {{ $item->big_to_medium ?? '-' }} {{ $item->medium_unit }})</td>
                         </tr>
                         <tr>
                             <th width="30%" class="fw-bold">Status</th>
                             <td><span class="badge bg-{{ $item->status == 'Active' ? 'primary' : 'danger' }}">{{ $item->status ?? '-' }}</span></td>
+                        </tr>
+                        <tr>
+                            <th width="30%" class="fw-bold">Deskripsi</th>
+                            <td>{{ $item->description ?? '-' }}</td>
                         </tr>
                     </table>
                 </div>

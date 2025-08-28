@@ -84,11 +84,11 @@ class TransactionController extends Controller
                     'name' => $item->name,
                     'jumlah' => $jumlahItem,
                     'satuan' => $item->small_unit,
-                    'harga_satuan' => $item->cost,
+                    'harga_satuan' => $item->default_cost,
                     'margin' => $item->margin,
-                    'harga_jual' => $item->price,
-                    'stok' => $item->stok,
-                    'total_harga' => $item->cost * $jumlahItem,
+                    'harga_jual' => $item->default_price,
+                    'stok' => $item->all_stok,
+                    'total_harga' => $item->default_cost * $jumlahItem,
                 ];
                 session()->put('data_pembelian', $dataSession);
             }else{
@@ -98,11 +98,11 @@ class TransactionController extends Controller
                     'name' => $item->name,
                     'jumlah' => 1,
                     'satuan' => $item->small_unit,
-                    'harga_satuan' => $item->cost,
+                    'harga_satuan' => $item->default_cost,
                     'margin' => $item->margin,
-                    'harga_jual' => $item->price,
-                    'stok' => $item->stok,
-                    'total_harga' => $item->cost * 1,
+                    'harga_jual' => $item->default_price,
+                    'stok' => $item->all_stok,
+                    'total_harga' => $item->default_cost * 1,
                 ]);
             }
             session()->flash('success', 'Berhasil Ditambahkan Keranjang');
@@ -169,7 +169,7 @@ class TransactionController extends Controller
                     'total' => $itemSession['total_harga'],
                 ]);
                 $productItem = Item::findOrFail($itemSession['id']);
-                $productItem->stok = $productItem->stok + $itemSession['jumlah'];
+                $productItem->all_stok = $productItem->all_stok + $itemSession['jumlah'];
                 $productItem->save();
             }
             DB::commit();
@@ -275,7 +275,10 @@ class TransactionController extends Controller
                 'margin' => 'required',
                 'price' => 'required',
             ]);
-            $item->update($data);
+            $item->default_cost = $request->cost;
+            $item->margin = $request->margin;
+            $item->default_price = $request->price;
+            $item->save();
 
             $dataSession = session()->get('data_pembelian');
             $findItem = $this->findItem(decrypt($id));
@@ -289,10 +292,10 @@ class TransactionController extends Controller
                     'name' => $findItem['name'],
                     'jumlah' => $findItem['jumlah'],
                     'satuan' => $findItem['satuan'],
-                    'harga_satuan' => $item->cost,
+                    'harga_satuan' => $item->default_cost,
                     'margin' => $item->margin,
-                    'harga_jual' => $item->price,
-                    'total_harga' => $item->cost * $findItem['jumlah'],
+                    'harga_jual' => $item->default_price,
+                    'total_harga' => $item->default_cost * $findItem['jumlah'],
                 ];
                 session()->put('data_pembelian', $dataSession);
             }else{
