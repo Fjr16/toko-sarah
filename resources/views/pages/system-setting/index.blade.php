@@ -31,21 +31,49 @@
                                     </div>
                                 </div>
                                 <div class="row">
-                                    <div class="col-md mb-4">
+                                    {{-- <div class="col-md mb-4">
                                         <label for="mata_uang" class="form-label">Mata Uang Standard</label>
                                         <input type="text" class="form-control" id="mata_uang" value="Rupiah" disabled/>
+                                    </div> --}}
+                                    <div class="col-md mb-4">
+                                        <label for="currency_symbol" class="form-label">Simbol Mata Uang</label>
+                                        <input type="text" class="form-control" id="currency_symbol" name="currency_symbol" placeholder="Rp" value="{{ old('currency_symbol', $item?->currency_symbol) }}"/>
                                     </div>
                                     <div class="col-md mb-4">
                                         <label for="default-currency-position" class="form-label">Posisi Mata Uang</label>
                                         <select class="form-select" id="default-currency-position" name="currency_position_default" aria-label="Default select example">
                                             @foreach ($position as $index => $pos)
-                                                <option {{ (old('currency_position_default', $item->currency_position_default) === $index ? 'selected' : ($loop->first ? 'selected' : '')) }} value="{{ $index }}">{{ $pos ?? '' }}</option>
+                                                <option {{ (old('currency_position_default', $item->currency_position_default ?? '') === $index ? 'selected' : ($loop->first ? 'selected' : '')) }} value="{{ $index }}">{{ $pos ?? '' }}</option>
                                             @endforeach
                                         </select>
                                     </div>
+                                    <div class="col-md mb-2">
+                                        <label for="thousand_separator" class="form-label">Pemisah Ribuan</label>
+                                        <select class="form-select" id="thousand_separator" name="thousand_separator" aria-label="Default select example">
+                                            <option disabled>Pilih</option>
+                                            @foreach ($separator as $sep)
+                                                <option {{ (old('thousand_separator', $item->thousand_separator ?? '') === $sep ? 'selected' : '' )}} value="{{ $sep }}">{{ $sep ?? '' }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md mb-2">
+                                        <label for="decimal_separator" class="form-label">Pemisah Desimal</label>
+                                        <select class="form-select" id="decimal_separator" name="decimal_separator" aria-label="Default select example">
+                                            <option disabled>Pilih</option>
+                                            @foreach ($separator as $sep)
+                                                <option {{ (old('thousand_separator', $item->thousand_separator ?? '') === $sep ? 'selected' : '' )}} value="{{ $sep }}">{{ $sep ?? '' }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
                                     <div class="col-md mb-4">
                                         <label for="notification-email" class="form-label">Email Notifikasi</label>
                                         <input type="text" class="form-control" name="notification_email" id="notification-email" placeholder="email@test.com" value="{{ old('notification_email', $item->notification_email ?? '') }}"/>
+                                    </div>
+                                    <div class="col-md mb-4">
+                                        <label for="language" class="form-label">Bahasa</label>
+                                        <input type="text" class="form-control" name="language" id="language" placeholder="Indonesia" value="{{ old('language', $item->language ?? '') }}"/>
                                     </div>
                                 </div>
                                 <div class="row">

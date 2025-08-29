@@ -13,17 +13,17 @@ return new class extends Migration
     {
         Schema::create('system_settings', function (Blueprint $table) {
             $table->id();
-            $table->string('company_name', 50)->nullable(false);
+            $table->string('company_name', 50)->nullable();
             $table->string('company_logo')->nullable();
-            $table->string('company_email', 100)->nullable(false);
-            $table->string('company_address')->nullable(false);
-            $table->string('company_phone', 20)->nullable(false);
-            $table->string('company_code', 50)->nullable(false);
-            $table->string('currency_symbol', 10)->nullable(false);
+            $table->string('company_email', 100)->nullable();
+            $table->string('company_address')->nullable();
+            $table->string('company_phone', 20)->nullable();
+            $table->string('company_code', 20)->nullable();
+            $table->string('currency_symbol', 10)->nullable();
             $table->enum('currency_position_default', ['prefix', 'suffix'])->default('prefix')->required();
             $table->enum('decimal_separator', ['.', ','])->default(',');
             $table->enum('thousand_separator', ['.', ','])->default('.');
-            $table->string('notification_email', 50)->nullable(false);
+            $table->string('notification_email', 50)->nullable();
             $table->string('language', 100)->nullable();
             $table->timestamps();
         });

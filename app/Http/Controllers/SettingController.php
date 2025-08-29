@@ -4,34 +4,28 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\SystemSetting;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\ValidationException;
 
 class SettingController extends Controller
 {
     public function index()
     {
         $item = SystemSetting::first();
-        if (!$item) {
-            $item = new SystemSetting();
-            $item->currency_position_default = null;
-            $item->company_name = 'Company Name';
-            $item->company_email = 'company@gmail.com';
-            $item->company_phone = '';
-            $item->company_address = 'Indonesia';
-            $item->notification_email = 'company@gmail.com';
-        }
         $position = [
             'prefix' => 'Prefix',
             'suffix' => 'Suffix',
+        ];
+        $separator = [
+            '.',
+            ',',
         ];
         return view('pages.system-setting.index', [
             'title' => 'Pengaturan Sistem',
             'menu' => 'settings',
             'item' => $item,
             'position' => $position,
+            'separator' => $separator,
         ]);
     }
 
@@ -39,12 +33,18 @@ class SettingController extends Controller
         DB::beginTransaction();
         try {
             $this->validate($request, [
-                'currency_position_default' => 'required|in:prefix,suffix',
-                'company_name' => 'required|string|max:50',
-                'company_email' => 'required|email|max:50',
-                'company_phone' => 'required|string|max:20',
-                'company_address' => 'required|string',
-                'notification_email' => 'required|email|max:50',
+                'company_name' => 'nullable|string|max:50',
+                'company_logo' => 'nullable|file|image:png,jpg,webp',
+                'company_email' => 'nullable|email',
+                'company_address' => 'nullable|string',
+                'company_phone' => 'nullable|string|max:20',
+                'currency_symbol' => 'nullable|string|max:10',
+                'currency_code' => 'nullable|string|max:20',
+                'currency_position_default' => 'nullable|in:prefix,suffix',
+                'decimal_separator' => 'nullable',
+                'thousand_separator' => 'nullable',
+                'notification_email' => 'nullable|email|max:50',
+                'language' => 'nullable|string|max:100',
             ]);
 
             $data = $request->all();
@@ -53,12 +53,18 @@ class SettingController extends Controller
             if (!$item) {
                 $item = new SystemSetting();
             }
-            $item->currency_position_default = $data['currency_position_default'];
-            $item->company_name = $data['company_name'];
-            $item->company_email = $data['company_email'];
-            $item->company_phone = $data['company_phone'];
-            $item->company_address = $data['company_address'];
-            $item->notification_email = $data['notification_email'];
+            $item->company_name = $data['company_name'] ?? null;
+            $item->company_logo = $data['company_logo'] ?? null;
+            $item->company_email = $data['company_email'] ?? null;
+            $item->company_address = $data['company_address'] ?? null;
+            $item->company_phone = $data['company_phone'] ?? null;
+            $item->company_code = $data['company_code'] ?? null;
+            $item->currency_symbol = $data['currency_symbol'] ?? null;
+            $item->currency_position_default = $data['currency_position_default'] ?? null;
+            $item->decimal_separator = $data['decimal_separator'] ?? null;
+            $item->thousand_separator = $data['thousand_separator'] ?? null;
+            $item->notification_email = $data['notification_email'] ?? null;
+            $item->language = $data['language'] ?? null;
             $item->save();
 
             Cache::forget('system_settings');
@@ -66,15 +72,9 @@ class SettingController extends Controller
             DB::commit();
 
             return redirect()->route('pengaturan/sistem.index')->with('success', 'Pengaturan sistem berhasil disimpan');
-        } catch (\Exception $e) {
+        } catch (\Throwable $th) {
             DB::rollBack();
-            return back()->with('error', 'Pengaturan sistem gagal disimpan : ' . $e->getMessage())->withInput();
-        } catch (ValidationException $e) {
-            DB::rollBack();
-            return back()->with('error', $e->getMessage())->withInput();
-        } catch (ModelNotFoundException $e) {
-            DB::rollBack();
-            return back()->with('error', $e->getMessage())->withInput();
+            return back()->with('error', $th->getMessage())->withInput();
         }
     }
 }
