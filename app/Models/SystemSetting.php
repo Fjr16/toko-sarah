@@ -10,11 +10,17 @@ class SystemSetting extends Model
     use HasFactory;
 
     protected $fillable = [
-        'currency_position_default',
         'company_name',
+        'company_logo',
         'company_email',
-        'company_phone',
         'company_address',
+        'company_phone',
+        'currency_code',
+        'currency_symbol',
+        'currency_position_default',
+        'decimal_separator',
+        'thousand_separator',
         'notification_email',
+        'language',
     ];
 }
