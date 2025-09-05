@@ -87,17 +87,17 @@
             <li class="menu-item {{ $menu == 'stok' ? 'open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class='menu-icon tf-icons bx bx-trending-up'></i>
-                    <div>Penambahan Stok</div>
+                    <div>Pencatatan Stok</div>
                 </a>
                 <ul class="menu-sub">
-                    <li class="menu-item {{ $title == 'add-stok' ? 'active' : '' }}">
-                        <a href="" class="menu-link">
-                            <div>Tambah Stok</div>
+                    <li class="menu-item {{ Route::is('stok/barang.index') ? 'active' : '' }}">
+                        <a href="{{ route('stok/barang.index') }}" class="menu-link">
+                            <div>Stok Produk</div>
                         </a>
                     </li>
-                    <li class="menu-item {{ $title == 'all-stok' ? 'active' : '' }}">
+                    <li class="menu-item {{ $title == 'add-stok' ? 'active' : '' }}">
                         <a href="" class="menu-link">
-                            <div>Riwayat Penambahan</div>
+                            <div>Adjustment Stok</div>
                         </a>
                     </li>
                 </ul>
@@ -155,6 +155,11 @@
                     <li class="menu-item {{ $title == 'Return Penjualan' ? 'active' : '' }}">
                         <a href="" class="menu-link">
                             <div>Keuntungan / Kerugian</div>
+                        </a>
+                    </li>
+                    <li class="menu-item {{ $title == 'all-stok' ? 'active' : '' }}">
+                        <a href="" class="menu-link">
+                            <div>Aliran Stok</div>
                         </a>
                     </li>
                 </ul>

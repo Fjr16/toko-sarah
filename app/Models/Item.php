@@ -33,4 +33,7 @@ class Item extends Model
     public function itemCategory() {
         return $this->belongsTo(ItemCategory::class);
     }
+    public function productBatchs(){
+        return $this->hasMany(ProductBatch::class);
+    }
 }

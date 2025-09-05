@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ItemCategoryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\OtherController;
+use App\Http\Controllers\ProductStockController;
 use App\Http\Controllers\SalesController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\SupplierController;
@@ -128,6 +129,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('customer/edit/{id}', [CustomerController::class, 'edit'])->name('customer.edit');
     Route::delete('customer/destroy/{id}', [CustomerController::class, 'destroy'])->name('customer.destroy');
     Route::post('customer/restore/{id}', [CustomerController::class, 'restore'])->name('customer.restore');
+
+    // stok barang
+    Route::get('stok/barang', [ProductStockController::class, 'index'])->name('stok/barang.index');
+    Route::get('stok/barang/create', [ProductStockController::class, 'create'])->name('stok/barang.create');
+    Route::post('stok/barang/store', [ProductStockController::class, 'store'])->name('stok/barang.store');
+    Route::get('stok/barang/edit/{id}', [ProductStockController::class, 'edit'])->name('stok/barang.edit');
+    Route::get('stok/barang/show/{id}', [ProductStockController::class, 'show'])->name('stok/barang.show');
+    Route::delete('stok/barang/destroy/{id}', [ProductStockController::class, 'destroy'])->name('stok/barang.destroy');
 });
 
 require __DIR__.'/auth.php';

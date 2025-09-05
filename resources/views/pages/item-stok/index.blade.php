@@ -2,146 +2,79 @@
 
 @section('content')
     <div class="card">
-        <div class="card-header border-bottom mb-4 d-flex justify-content-between align-items-center">
-            <h4 class="m-0 p-0">Data {{ $title ?? '' }}</h4>
-            <a href="{{ route('barang.create') }}" class="btn btn-sm btn-primary">+ Tambah {{ $title ?? '' }}</a>
+        <div class="card-header border-bottom mb-4">
+            <h4 class="m-0 p-0 mb-4">{{ $title ?? '' }}</h4>
+            {{-- form filter stok --}}
+            <form action="{{ route('stok/barang.index') }}" method="GET" class="d-flex align-items-center gap-2 mb-0">
+                <select name="product_id" id="product_id" class="form-control form-control-md">
+                    <option disabled selected>Pilih</option>
+                    @foreach ($products as $product)
+                        <option value="{{ $product->id }}" @selected(request('product_id') == $product->id)>{{ $product->name ?? '-' }} / {{ $product->code ?? '-' }}</option>
+                    @endforeach
+                </select>
+                <input type="text" name="batch_number" value="{{ request('batch_number') }}" class="form-control form-control-md" placeholder="No Batch">
+                <input type="date" name="exp_date" value="{{ request('exp_date') }}" class="form-control form-control-md">
+
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <i class="bx bx-search"></i>
+                </button>
+                <a href="{{ route('stok/barang.index') }}" class="btn btn-sm btn-secondary">
+                    <i class="bx bx-reset"></i>
+                </a>
+            </form>
+            {{-- end form filter stok --}}
         </div>
         <div class="card-body">
-
-            <div class="nav-align-top nav-tabs-shadow">
-                <ul class="nav nav-pills nav-tabs" role="tablist">
-                  <li class="nav-item">
-                    <button
-                      type="button"
-                      class="nav-link active"
-                      role="tab"
-                      data-bs-toggle="tab"
-                      data-bs-target="#navs-top-home"
-                      aria-controls="navs-top-home"
-                      aria-selected="true">
-                      Data {{ $title ?? '' }}
-                    </button>
-                  </li>
-                  <li class="nav-item">
-                    <button
-                      type="button"
-                      class="nav-link"
-                      role="tab"
-                      data-bs-toggle="tab"
-                      data-bs-target="#navs-top-profile"
-                      aria-controls="navs-top-profile"
-                      aria-selected="false">
-                      Restore {{ $title ?? '' }}
-                    </button>
-                  </li>
-                </ul>
-                <div class="tab-content">
-                    <div class="tab-pane fade show active" id="navs-top-home" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table datatable">
-                                <thead class="table-primary">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Kategori</th>
-                                        <th>Produk</th>
-                                        {{-- <th>Satuan Terkecil</th>
-                                        <th>Satuan Menengah</th>
-                                        <th>Satuan Terbesar</th> --}}
-                                        <th>Harga Beli</th>
-                                        <th>Margin (%)</th>
-                                        <th>Harga Jual</th>
-                                        <th>Stok</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($data as $item)
-                                    <tr>
-                                        <td>{{ $loop->iteration ?? '-' }}</td>
-                                        <td>{{ $item->itemCategory->name ?? '-' }}</td>
-                                        <td>
-                                            <span class="d-block">{{ $item->name ?? '-' }}</span>
-                                            <span class="badge bg-primary">
-                                                <small>{{ $item->code ?? '-' }}</small>
-                                            </span>
-                                        </td>
-                                        {{-- <td>{{ $item->small_unit ?? '-' }}</td>
-                                        <td>{{ $item->medium_unit ?? '-' }}</td>
-                                        <td>{{ $item->big_unit ?? '-' }}</td> --}}
-                                        <td>{{ number_format($item->cost, 0) . ' /' . $item->small_unit ?? '-' }}</td>
-                                        <td>{{ $item->margin ?? '-' }}</td>
-                                        <td>{{ number_format($item->price, 0) . ' /' . $item->small_unit ?? '-' }}</td>
-                                        <td>{{ $item->stok  . ' '. $item->small_unit }}</td>
-                                        <td class="text-nowrap">
-                                            <div class="d-flex">
-                                                <a href="{{ route('barang.edit', encrypt($item->id)) }}" class="btn btn-icon btn-outline-warning"><i class="bx bx-edit"></i></a>
-                                                <a href="{{ route('barang.show', encrypt($item->id)) }}" class="btn btn-icon btn-outline-primary mx-2"><i class="bx bxs-show"></i></a>
-                                                <button class="btn btn-icon btn-outline-danger me-1" type="button" data-warning="Hapus Produk" data-url="{{ route('barang.destroy', encrypt($item->id)) }}" onclick="showModalDelete(this)">
-                                                    <i class="bx bx-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="navs-top-profile" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table datatable">
-                                <thead class="table-danger">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Kategori</th>
-                                        <th>Produk</th>
-                                        {{-- <th>Satuan Terkecil</th> --}}
-                                        {{-- <th>Satuan Menengah</th> --}}
-                                        {{-- <th>Satuan Terbesar</th> --}}
-                                        <th>Harga Beli</th>
-                                        <th>Margin (%)</th>
-                                        <th>Harga Jual</th>
-                                        <th>Stok</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach ($trashed as $item)
-                                    <tr class="text-danger">
-                                        <td>{{ $loop->iteration ?? '-' }}</td>
-                                        <td>{{ $item->itemCategory->name ?? '-' }}</td>
-                                        <td>
-                                            <span class="d-block">{{ $item->name ?? '-' }}</span>
-                                            <span class="badge bg-primary">
-                                                <small>{{ $item->code ?? '-' }}</small>
-                                            </span>
-                                        </td>
-                                        {{-- <td>{{ $item->small_unit ?? '-' }}</td>
-                                        <td>{{ $item->medium_unit ?? '-' }}</td>
-                                        <td>{{ $item->big_unit ?? '-' }}</td> --}}
-                                        <td>{{ number_format($item->cost, 0) . ' /' . $item->small_unit ?? '-' }}</td>
-                                        <td>{{ $item->margin ?? '-' }}</td>
-                                        <td>{{ number_format($item->price, 0) . ' /' . $item->small_unit ?? '-' }}</td>
-                                        <td>{{ $item->stok  . ' '. $item->small_unit }}</td>
-                                        <td class="text-nowrap">
-                                            <form action="{{ route('barang.restore', encrypt($item->id)) }}" method="POST">
-                                                @csrf
-                                                <button type="submit" class="btn btn-sm btn-warning me-1">
-                                                    <i class="bx bx-refresh"></i>
-                                                    Restore
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                  </div>
-                </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>#</th>
+                            <th>Produk</th>
+                            <th>No Batch</th>
+                            <th>Tanggal Expire</th>
+                            <th>Jumlah</th>
+                            <th>Harga Satuan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($data as $item)
+                        <tr>
+                            <td>{{ $loop->iteration ?? '-' }}</td>
+                            <td>
+                                <span class="d-block">{{ $item->product->name ?? '-' }}</span>
+                                <span class="badge bg-primary">
+                                    <small>{{ $item->product->code ?? '-' }}</small>
+                                </span>
+                            </td>
+                            <td>{{ $item->batch_number ?? '-' }}</td>
+                            <td>{{ $item->exp_date ?? '-' }}</td>
+                            <td>{{ $item->stock ?? '-' }}</td>
+                            <td>Rp. {{ number_format($item->unit_cost, 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                        </tr>
+                        @empty
+                         <tr>
+                            <td colspan="6" class="text-center">Tidak ada data</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
+            <!-- Pagination dengan filter tetap -->
+            <div class="mt-3">
+                {{ $data->appends(request()->all())->links() }}
+            </div>
+        </div>
+    </div>
 
-            
+    <div class="fab-wrapper">
+        <div class="fab-container" id="fabMenu">
+          <a href="{{ route('stok/barang.create') }}" class="fab-btn fab-dark">
+            <i class="bx bx-plus"></i>
+          </a>
+          <button class="fab-btn fab-main" onclick="toggleFab()">
+            <i id="fabIcon" class="bx bx-expand"></i>
+          </button>
         </div>
     </div>
 @endsection
