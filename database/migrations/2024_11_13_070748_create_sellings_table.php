@@ -13,19 +13,18 @@ return new class extends Migration
     {
         Schema::create('sellings', function (Blueprint $table) {
             $table->id();
-            $table->string('selling_id')->required();
-            $table->foreignId('user_id')->required();
-            // $table->foreignId('member_id')->nullable();
-            $table->decimal('total_diskon', 10,2)->default(0);
-            $table->decimal('total_kotor', 10,2)->default(0)->required();
-            // $table->decimal('total_pajak', 10,2)->default(0);
-            $table->decimal('total_bersih', 10,2)->default(0)->required();
-            $table->integer('items')->required();
-            $table->integer('total_item')->required();
-            $table->string('metode_bayar', 20)->required();
-            $table->decimal('jumlah_bayar', 10,2)->required();
-            $table->decimal('kembalian', 10,2)->required();
-            $table->enum('status', ['paid', 'unpaid', 'pending'])->default('pending');
+            $table->foreignId('user_id')->nullable(false);
+            $table->foreignId('customer_id')->nullable();
+            $table->foreignId('invoice_number')->nullable();
+            $table->date('sale_date')->nullable(false);
+            $table->decimal('total_amount', 10,2)->default(0)->nullable(false);
+            $table->string('payment_method', 50)->nullable(false);
+            $table->decimal('amount_paid', 10,2)->default(0)->nullable(false);
+            $table->decimal('change_due', 10,2)->default(0)->nullable(false); //kembalian
+            $table->string('sale_status', 50)->nullable(false);
+            $table->string('note')->nullable();
+            $table->string('additional_cost_name')->nullable(); //untuk custom biaya tambahan
+            $table->decimal('additional_cost')->nullable();
             $table->timestamps();
         });
     }
