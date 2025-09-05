@@ -14,21 +14,8 @@ use Illuminate\Support\Facades\Session;
 
 class SalesController extends Controller
 {
-
-    private function generateSellingId() {
-        $idCs = str_pad(Auth::user()->id, 2, '0', STR_PAD_LEFT);
-        $currentDate = now();
-        $nextOrderNumber = (Selling::whereDate('created_at', $currentDate->format('Y-m-d'))->count() ?? 0) + 1;
-        $kodeOrder = 'CS/' . $idCs . '/' . $currentDate->format('d/m/Y') . '/' . str_pad($nextOrderNumber, 3, '0', STR_PAD_LEFT);
-        return $kodeOrder;
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        // session()->forget('data');
         if (session('data')) {
             session()->put('data', session('data'));
         }else{
@@ -42,6 +29,17 @@ class SalesController extends Controller
             'produks' => $produks,
         ]);
     }
+
+    // public function getProduct(Request $r){
+    //     $keyword = request('keyword');
+    //     $data = Item::where('code', $keyword)
+    //             ->orWhere('name', 'like', '%{$keyword}%')
+    //             ->limit(10)->get([
+    //                 'id', 'code', 'name', 'small_unit'
+    //             ]);
+    //     return response()->json($data);
+
+    // }
 
     /**
      * Store a newly created resource in storage.
@@ -70,9 +68,9 @@ class SalesController extends Controller
                 $kembalian = $jumlahBayar - $totalAkhir;
                 if ($subtotal > 0 || $totalItems > 0 || $totalAkhir > 0 || $kembalian >= 0) {
                     $item = Selling::create([
-                        'selling_id' => $this->generateSellingId(),
                         'user_id' => auth()->user()->id,
-                        'member_id' => auth()->user()->id,
+                        'customer_id' => auth()->user()->id,
+                        'sale_date' => auth()->user()->id,
                         'total_diskon' => $totalDiskon,
                         'total_kotor' => $subtotal,
                         'total_bersih' => $totalAkhir,
@@ -83,7 +81,7 @@ class SalesController extends Controller
                         'kembalian' => $kembalian,
                         'status' => 'paid',
                     ]);
-    
+
                     foreach ($dataSession as $key => $detail) {
                         SellingDetail::create([
                             'selling_id' => $item->id,
