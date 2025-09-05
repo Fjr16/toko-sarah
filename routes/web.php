@@ -32,7 +32,7 @@ Route::middleware(['auth'])->group(function () {
             'title' => 'Dashboard',
             'menu' => 'dashboard',
         ]);
-    });
+    })->name('dashboard');
 
 
 
