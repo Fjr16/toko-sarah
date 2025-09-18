@@ -95,7 +95,7 @@
                                 <input type="file" id="fotoProduk" name="image" accept="image/*" style="display: none;">
                             </div>
                         </div>
-                        
+
                         <div class="row mb-3">
                             <div class="col-md-5">
                                 <label for="cost" class="form-label">Harga Beli <span class="text-danger">*</span></label>
@@ -772,6 +772,23 @@
                 console.log(result.message);
                 notify('error', result.message.slice(0,150));
             }
+        });
+
+        // event ketika value select2 produk diganti, maka simpan data pada keranjang
+        $('#product-select').on('change', function(){
+            fetch(`/pembelian/store/${this.value}`)
+            .then(response => response.json())
+            .then(res => {
+                if (res.status_code === 200) {
+                    window.location.reload();
+                } else {
+                    name.value = null;
+                    stok.value = null;
+                    harga.value = null;
+                    console.log(res.message);
+                }
+            })
+            .catch(error => console.error('Error: ', error, window.location.reload()));
         });
     </script>
 

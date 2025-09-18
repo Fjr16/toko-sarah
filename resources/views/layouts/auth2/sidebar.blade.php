@@ -46,7 +46,7 @@
         </a>
          <div class="{{ $menu == 'stok' ? 'expand' : 'collapse' }} ps-4" id="submenuCatatanStok" data-bs-parent="#sidebarMenu">
             <a class="nav-link {{ Route::is('stok/barang.index') ? 'active' : '' }}" href="{{ route('stok/barang.index') }}">Stok Produk</a>
-            <a class="nav-link " href="">Adjustment Stok</a>
+            <a class="nav-link {{ Route::is('stok/barang.create') ? 'active' : '' }}" href="{{ route('stok/barang.create') }}">Adjustment Stok</a>
         </div>
         {{-- end pencatatan stok --}}
 

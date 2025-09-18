@@ -7,7 +7,7 @@
             {{-- form filter stok --}}
             <form action="{{ route('stok/barang.index') }}" method="GET" class="d-flex align-items-center gap-2 mb-0">
                 <select name="product_id" id="product_id" class="form-control form-control-md">
-                    <option disabled selected>Pilih</option>
+                    <option value="" @selected(!request('product_id'))>Semua</option>
                     @foreach ($products as $product)
                         <option value="{{ $product->id }}" @selected(request('product_id') == $product->id)>{{ $product->name ?? '-' }} / {{ $product->code ?? '-' }}</option>
                     @endforeach

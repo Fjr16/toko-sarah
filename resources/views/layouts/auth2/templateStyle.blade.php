@@ -84,29 +84,63 @@
       .pos-content { grid-column: 1 / span 2; padding: 0 !important; }
     }
     @media (max-width: 768px) {
-    .pos-wrapper {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr auto;
+        .pos-wrapper {
+            grid-template-columns: 1fr;
+            grid-template-rows: auto 1fr auto;
+        }
+
+        .pos-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            height: 100%;
+            z-index: 1050;
+            width: var(--pos-sidebar-width);
+            background: var(--bs-body-bg);
+            transition: left .3s ease;
+        }
+
+        .pos-wrapper.sidebar-open .pos-sidebar {
+            left: 0;
+        }
+
+        .pos-topbar, .pos-content, .pos-checkout {
+            grid-column: 1;
+        }
     }
 
-    .pos-sidebar {
-        position: fixed;
-        top: 0;
-        left: -100%;
-        height: 100%;
-        z-index: 1050;
-        width: var(--pos-sidebar-width);
-        background: var(--bs-body-bg);
-        transition: left .3s ease;
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection {
+        background-color: #2b2b2b;
+        color: #fff;
+        border-color: #444;
+    }
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered {
+        padding: 0;
+        font-weight: 400;
+        line-height: 1.5;
+        color: #fff;
+    }
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered .select2-selection__placeholder {
+        font-weight: 400;
+        line-height: 1.5;
+        color: #c6d4e0
     }
 
-    .pos-wrapper.sidebar-open .pos-sidebar {
-        left: 0;
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-selection__placeholder {
+        color: #aaa;
     }
 
-    .pos-topbar, .pos-content, .pos-checkout {
-        grid-column: 1;
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-dropdown {
+        background-color: #2b2b2b;
+        color: #fff;
+        border-color: #444;
     }
+
+    [data-bs-theme="dark"] .select2-container--bootstrap-5 .select2-results__option--highlighted {
+        background-color: #495057;
+        color: #fff;
     }
+
+
 
 </style>

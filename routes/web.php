@@ -42,8 +42,10 @@ Route::middleware(['auth'])->group(function () {
 
     // other controller for any licensed function
     Route::get('product/search', [OtherController::class, 'searchProduct'])->name('product.search');
-    Route::get('product/by-barcode/{code}', [OtherController::class, 'searchProductByCode'])->name('product.by-barcode');
-    Route::get('product/to/cart/{id}', [OtherController::class, 'addProductToCart'])->name('product/to.cart');
+    Route::get('product/show/by-id/{item_id}', [OtherController::class, 'showDetailProductById'])->name('product/show.by-id');
+    Route::get('product/get/data/batch', [OtherController::class, 'getDataBatch'])->name('product/get/data.batch');
+    Route::get('product/get/item/batch/{batchId}', [OtherController::class, 'getItemBatch'])->name('product/get/item.batch');
+    // Route::get('product/to/cart/{id}', [OtherController::class, 'addProductToCart'])->name('product/to.cart');
 
 
     // kategori barang (DONE)

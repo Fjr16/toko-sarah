@@ -15,12 +15,15 @@
   {{-- custom --}}
     <!-- Icons. Uncomment required icon fonts -->
     <link rel="stylesheet" href="{{ asset('/assets/vendor/fonts/boxicons.css') }}" />
+    {{-- <link rel="stylesheet" href="{{ asset('/assets/vendor/libs/select2/select2.css') }}" /> --}}
     {{-- Flat Picker --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     {{-- notyf --}}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
     <!-- Datatables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.2/css/jquery.dataTables.css">
+    {{-- select2 css --}}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <style>
         .btn-success {
@@ -49,37 +52,37 @@
 
         /* Wrapper */
         .fab-wrapper {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        z-index: 1050;
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1050;
         }
 
         /* Container */
         .fab-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
         }
 
         /* Style umum button */
         .fab-btn {
-        width: 55px;
-        height: 55px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        font-size: 22px;
-        cursor: pointer;
-        border: none;
-        outline: none;
-        box-shadow: 0 5px 12px rgba(0,0,0,0.2);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 22px;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            box-shadow: 0 5px 12px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         /* Hover animasi */
@@ -169,7 +172,7 @@
     @include('layouts.auth2.sidebar')
 
     @include('layouts.auth2.topbar')
-  
+
 
   {{-- Main content --}}
   <main class="pos-content p-3">
@@ -266,8 +269,6 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-@include('layouts.auth2.scriptTemplate')
 
 {{-- custom --}}
     <script>
@@ -280,6 +281,10 @@
     <script src="{{ asset('/assets/vendor/libs/jquery/jquery.js') }}"></script>
     <script src="{{ asset('/assets/vendor/libs/jquery/jquery.blockUI.js') }}"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @include('layouts.auth2.scriptTemplate')
+
+
     {{-- Datatables --}}
     <script src="https://cdn.datatables.net/1.13.2/js/jquery.dataTables.min.js"></script>
     <script>
@@ -290,6 +295,8 @@
     <!-- Place this tag in your head or just before your close body tag. -->
     <script async defer src="https://buttons.github.io/buttons.js"></script>
     <script src="{{ asset('/assets/vendor/libs/select2/select2.js') }}"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
 
     {{-- notyf --}}
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
@@ -298,9 +305,11 @@
     <script src="//unpkg.com/alpinejs" defer></script>
 
     {{-- select2 produk ajax --}}
+    {{-- <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script> --}}
     <script>
         // search produk manual by name or code
         $('#product-select').select2({
+            theme: 'bootstrap-5',
             placeholder : 'Search or scan any barcode',
             ajax : {
                 url : '/product/search',
@@ -316,7 +325,7 @@
                         results : data.map(item => {
                             return {
                                 id : item.id,   //menjadi value pada select
-                                text : item.code + ' - ' + item.name,
+                                text : '['+item.code+'] ' + item.name,
                             }
                         })
                     }
@@ -329,53 +338,7 @@
             $('#product-select').select2('open');
         }, 300); // Delay kecil untuk pastikan inisialisasi selesai
 
-        // search produk  by code and auto add to cart
-        // let barcodeBuffer = '';
-        // $('#product-select').on('keypress', function(e){
-        //     barcodeBuffer += e.key;
-        //     console.log(barcodeBuffer);
-        //     if (e.key === 'Enter') {
-        //         e.preventDefault();
-        //         if(barcodeBuffer.length > 0){
-        //             addProdukByCode(barcodeBuffer);
-        //             barcodeBuffer = '';
-        //         }
-        //     }
-        // });
-
-        // // function add produk to selected value
-        // function addProdukByCode(barcodeBuffer){
-        //     $.ajax({
-        //         url: `/produk/by-barcode/${kode}`,
-        //         method: 'GET',
-        //         success: function(res) {
-        //             // isi Select2 dengan data dari barcode
-        //             let option = new Option(res.text, res.id, true, true);
-        //             $('#produk-select').append(option).trigger('change');
-        //         },
-        //         error: function() {
-        //             alert('Produk dengan barcode tersebut tidak ditemukan.');
-        //         }
-        //     });
-        // }
-        // end search produk  by code and auto add to cart
-
-        // event ketika value select2 produk diganti, maka simpan data pada keranjang
-        $('#product-select').on('change', function(){
-            fetch(`/pembelian/store/${this.value}`)
-            .then(response => response.json())
-            .then(res => {
-                if (res.status_code === 200) {
-                    window.location.reload();
-                } else {
-                    name.value = null;
-                    stok.value = null;
-                    harga.value = null;
-                    console.log(res.message);
-                }
-            })
-            .catch(error => console.error('Error: ', error, window.location.reload()));
-        });
+        // end search produk  by code
     </script>
     {{-- end select2 produk ajax --}}
 

@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use Exception;
 use App\Models\Item;
+use App\Models\ProductBatch;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-
+use Yajra\DataTables\Facades\DataTables;
 
 class OtherController extends Controller
 {
@@ -23,12 +25,74 @@ class OtherController extends Controller
     public function searchProductByCode($code)
     {
         try {
-            $item = Item::where('id', $code)->first();    
+            $item = Item::where('id', $code)->first();
             return response()->json($item);
         } catch (\Exception $e) {
             return response()->json('error', $e->getMessage());
         } catch (ModelNotFoundException $e){
             return response()->json('error', $e->getMessage());
         }
+    }
+
+    public function showDetailProductById($productId){
+        try {
+            $item = Item::where('id', $productId)->first();
+
+            return response()->json([
+                'status' => true,
+                'message'=> 'success',
+                'data'=> $item
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => false,
+                'message' => substr($e->getMessage(), 0,150),
+                'data'=> null
+            ]);
+        }
+    }
+
+    public function getDataBatch(){
+        $productId = request()->get('product_id');
+
+        $data = ProductBatch::query()
+        ->where('item_id', $productId);
+
+        return DataTables::of($data)
+        ->addColumn('action', function($row){
+            if ($row) {
+                return '<button class="btn btn-sm btn-primary" onclick="useBatch('.$row->batch_number.')">Gunakan</button>';
+            }
+        })
+        ->editColumn('exp_date', function($row){
+            if ($row && $row->exp_date) {
+                return Carbon::parse($row->exp_date)->format('d F Y');
+            }
+        })
+        ->editColumn('unit_cost', function($row){
+            if ($row && $row->unit_cost) {
+                return 'Rp. ' . number_format($row->unit_cost);
+            }
+        })
+        ->rawColumns(['actions'])
+        ->make(true);
+    }
+
+    public function getItemBatch($batch_id) {
+        try {
+            $item = ProductBatch::findOrFail($batch_id);
+            return response()->json([
+                'status' => true,
+                'message' => 'success',
+                'data' => $item
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => true,
+                'message' => substr($th->getMessage(),0,150),
+                'data' => null
+            ]);
+        }
+
     }
 }
