@@ -16,8 +16,9 @@ class InventoryMovement extends Model
         'flag',
         'qty',
         'unit',
-        'reference_type',
-        'reference_id',
+        // diisi otomatis karena menggunkan relasi polyMorph
+        // 'reference_type',
+        // 'reference_id',
         'note',
     ];
 

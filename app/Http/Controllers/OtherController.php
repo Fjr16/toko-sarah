@@ -61,7 +61,7 @@ class OtherController extends Controller
         return DataTables::of($data)
         ->addColumn('action', function($row){
             if ($row) {
-                return '<button class="btn btn-sm btn-primary" onclick="useBatch('.$row->batch_number.')">Gunakan</button>';
+                return '<button class="btn btn-sm btn-primary" type="button" onclick="useBatch('.$row->id.')">Gunakan</button>';
             }
         })
         ->editColumn('exp_date', function($row){
@@ -74,25 +74,24 @@ class OtherController extends Controller
                 return 'Rp. ' . number_format($row->unit_cost);
             }
         })
-        ->rawColumns(['actions'])
+        ->rawColumns(['action'])
         ->make(true);
     }
 
     public function getItemBatch($batch_id) {
         try {
-            $item = ProductBatch::findOrFail($batch_id);
+            $item = ProductBatch::where('id',$batch_id)->first();
             return response()->json([
-                'status' => true,
-                'message' => 'success',
+                'status' => (bool) $item,
+                'message' => $item ? 'success' : 'No batch Tidak dikenali',
                 'data' => $item
             ]);
         } catch (\Throwable $th) {
             return response()->json([
-                'status' => true,
+                'status' => false,
                 'message' => substr($th->getMessage(),0,150),
                 'data' => null
             ]);
         }
-
     }
 }

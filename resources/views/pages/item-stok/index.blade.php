@@ -5,15 +5,10 @@
         <div class="card-header border-bottom mb-4">
             <h4 class="m-0 p-0 mb-4">{{ $title ?? '' }}</h4>
             {{-- form filter stok --}}
-            <form action="{{ route('stok/barang.index') }}" method="GET" class="d-flex align-items-center gap-2 mb-0">
-                <select name="product_id" id="product_id" class="form-control form-control-md">
-                    <option value="" @selected(!request('product_id'))>Semua</option>
-                    @foreach ($products as $product)
-                        <option value="{{ $product->id }}" @selected(request('product_id') == $product->id)>{{ $product->name ?? '-' }} / {{ $product->code ?? '-' }}</option>
-                    @endforeach
-                </select>
-                <input type="text" name="batch_number" value="{{ request('batch_number') }}" class="form-control form-control-md" placeholder="No Batch">
-                <input type="date" name="exp_date" value="{{ request('exp_date') }}" class="form-control form-control-md">
+            <form action="{{ route('stok/barang.index') }}" method="GET" class="d-flex flex-wrap align-items-center gap-2 mb-0">
+                <select name="product_id" id="product-select" class="form-control form-control-md" style="flex:1 1 200px;"></select>
+                <input type="text" name="batch_number" value="{{ request('batch_number') }}" class="form-control form-control-md" placeholder="No Batch" style="flex:1 1 150px;">
+                <input type="date" name="exp_date" value="{{ request('exp_date') }}" class="form-control form-control-md" style="flex:1 1 150px;">
 
                 <button type="submit" class="btn btn-sm btn-primary">
                     <i class="bx bx-search"></i>
@@ -50,7 +45,7 @@
                             <td>{{ $item->batch_number ?? '-' }}</td>
                             <td>{{ $item->exp_date ?? '-' }}</td>
                             <td>{{ $item->stock ?? '-' }}</td>
-                            <td>Rp. {{ number_format($item->unit_cost, 0) . ' /' . $item->small_unit ?? '-' }}</td>
+                            <td>Rp. {{ number_format($item->unit_cost, 0) . ' /' . $item->product->small_unit ?? '-' }}</td>
                         </tr>
                         @empty
                          <tr>
@@ -69,13 +64,22 @@
 
     <div class="fab-wrapper">
         <div class="fab-container" id="fabMenu">
-          <a href="{{ route('stok/barang.create') }}" class="fab-btn fab-dark">
-            <i class="bx bx-plus"></i>
+          <a href="{{ route('stok/barang.create') }}" class="fab-btn fab-main">
+            <i class="bx bx-book-add" style="font-size:22px;"></i>
           </a>
-          <button class="fab-btn fab-main" onclick="toggleFab()">
+          <button class="fab-btn fab-primary" onclick="toggleFab()">
             <i id="fabIcon" class="bx bx-expand"></i>
           </button>
         </div>
     </div>
 @endsection
+@push('scripts')
+    <script>
+        let selectedProd = @json($selectedProduct);
+        if (selectedProd) {
+            let option = new Option("["+selectedProd.code+"] " + selectedProd.name, selectedProd.id, true, true);
+            $('#product-select').append(option).trigger('change');
+        }
+    </script>
+@endpush
 <x-modal-confirm-delete></x-modal-confirm-delete>

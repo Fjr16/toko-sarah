@@ -8,18 +8,53 @@
 	<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
 
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-	
+
 	<link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
 
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh; /* supaya penuh 1 layar */
+            background: url("assets/img/bg.jpg") no-repeat center center;
+            background-size: cover; /* gambar menyesuaikan layar */
+            background-attachment: fixed; /* supaya tidak ikut scroll (opsional) */
+        }
+        .ftco-section {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
+        .login-wrap {
+            padding: 30px 25px;
+            border-radius: 12px;
+            background: rgba(243, 243, 243, 0.071);
+        }
+
+        @media (max-width: 576px) {
+             .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            .login-wrap {
+                padding: 20px !important;
+            }
+
+            h2.heading-section {
+                font-size: 20px !important;
+            }
+        }
+    </style>
 	</head>
-	<body class="img row" style="background-image: url(assets/img/bg.jpg);">
-	{{-- <body class="img row"> --}}
-        <div class="col-md-12 img body" style="background: overlay;">
+	<body>
+        <div class="col-md-12 img body">
             <section class="ftco-section">
                 <div class="container">
                     <div class="row justify-content-center">
-                        <div class="col-lg-6">
+                        <div class="col-lg-6 col-md-9 col-sm-10">
                             <div>
                                 @if (session()->has('error'))
                                 <div class="alert alert-dark d-flex mb-4" role="alert">
@@ -27,18 +62,18 @@
                                 </div>
                                 @endif
                             </div>
-                            <div class="col-md-12 text-center mb-4">
-                                <h2 class="heading-section mb-4">TOKO SARAH KOSMETIK</h2>
+                            <div class="text-center mb-4">
+                                <h2 class="heading-section">TOKO SARAH KOSMETIK</h2>
                             </div>
-                            <div class="login-wrap p-0">
+                            <div class="login-wrap">
                                 <form action="{{ route('login') }}" class="signin-form" method="POST">
                                     @csrf
                                     <div class="form-group">
                                         <input type="text" class="form-control" placeholder="Username" name="username" value="{{ old('username') }}" required>
                                     </div>
-                                    <div class="form-group">
-                                    <input id="password-field" type="password" class="form-control" placeholder="Password" name="password" required>
-                                    <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                                    <div class="form-group position-relative">
+                                        <input id="password-field" type="password" class="form-control" placeholder="Password" name="password" required>
+                                        <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
                                     </div>
                                     <div class="form-group">
                                         <button type="submit" class="form-control btn btn-primary submit px-3">Sign In</button>
@@ -50,7 +85,7 @@
                 </div>
             </section>
         </div>
-        
+
         <script src="{{ asset('assets/guest/js/jquery.min.js') }}"></script>
         <script src="{{ asset('assets/guest/js/popper.js') }}"></script>
         <script src="{{ asset('assets/guest/js/bootstrap.min.js') }}"></script>

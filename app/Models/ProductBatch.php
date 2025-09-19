@@ -22,7 +22,7 @@ class ProductBatch extends Model
     ];
 
     public function product(){
-        return $this->belongsTo(Item::class);
+        return $this->belongsTo(Item::class, 'item_id', 'id');
     }
 
     // untuk pencatatan log adjustment stok

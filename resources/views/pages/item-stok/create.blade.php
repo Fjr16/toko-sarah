@@ -6,8 +6,7 @@
             <h4 class="m-0 p-0">{{ $title ?? '-' }}</h4>
         </div>
         <div class="card-body">
-            <form action="{{ route('stok/barang.store') }}" method="POST" id="post-form">
-                @csrf
+            <form method="POST" id="post-form">
                 <div class="row mb-3">
                     <div class="col-md-12">
                         <label for="product-select" class="form-label">Produk <span class="text-danger">*</span></label>
@@ -46,10 +45,17 @@
                     <div class="col-md">
                         <label for="total_stok" class="form-label">Total Stok Sekarang</label>
                         <div class="input-group">
-                            <input class="form-control form-control-md" id="total_stok" value="" required disabled></input>
+                            <input class="form-control form-control-md" id="total_stok" value="" disabled></input>
                             <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
                         </div>
                     </div>
+                    {{-- <div class="col-md">
+                        <label for="jumlah_stok_batch" class="form-label">Jumlah Stok Batch</label>
+                        <div class="input-group">
+                            <input class="form-control form-control-md" id="jumlah_stok_batch" value="" disabled></input>
+                            <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
+                        </div>
+                    </div> --}}
                     <div class="col-md">
                         <label for="stock" class="form-label">Stok ditambahkan<span class="text-danger">*</span></label>
                         <div class="input-group">
@@ -77,7 +83,7 @@
                 <div class="col-md-12 mt-4 border-top">
                     <div class="d-flex justify-content-center mt-4">
                         <a href="{{ route('barang.index') }}" class="btn btn-md btn-danger me-2"><i class="bx bx-left-arrow"></i> Kembali</a>
-                        <button type="submit" class="btn btn-md btn-success"><i class="bx bx-file"></i> Simpan</button>
+                        <button type="button" id="btn-submit-stok" class="btn btn-md btn-success"><i class="bx bx-file"></i> Simpan</button>
                     </div>
                 </div>
             </form>
@@ -101,7 +107,7 @@
             $('#product-select').on('change', function(){
                 productId = $(this).val();
 
-                $.get(`{{ url('product/show/by-id/${productId}') }}`, function(res){
+                $.get("{{ url('product/show/by-id') }}/" + productId , function(res){
                     if (res && res.status) {
                         if (!res.data) {
                             notify('error','Data Not Found');
@@ -144,19 +150,18 @@
             });
 
             // submit form
-            var form = document.getElementById('post-form');
-            $(form).on('submit', function(){
-                $(this).preventDefault();
-                const formData = new FormData(form);
-                const url = "{{ route('stok/barang.store') }}";
+            $('#btn-submit-stok').on('click', function(){
+                const form = document.getElementById('post-form');
+                let formData = new FormData(form);
+                formData.append('_token', "{{ csrf_token() }}");
 
                 $.ajax({
-                    url:url,
+                    url:"{{ route('stok/barang.store') }}",
                     type:'POST',
                     data:formData,
                     processData:false,
                     contentType:false,
-                    // dataType:'json',
+                    dataType:'json',
                     success:function(res){
                         if (res.status) {
                             notify('success', res.message);
@@ -167,8 +172,8 @@
                         }
                     },
                     error:function(xhr){
-                        console.log(xhr.responseText());
-                        notify('error', xhr.responseText().slice(0,150));
+                        console.log(xhr.responseText);
+                        notify('error', xhr.responseText.slice(0,150));
                     }
                 });
             });
@@ -184,15 +189,15 @@
                         const data = res.data;
                         $('#batch_number').val(data.batch_number);
                         $('#exp_date').val(data.exp_date);
-                        $('#unit_cost').val(data.unit_cost);
+                        $('#unit_cost').val(rupiahFormatter(data.unit_cost));
                     }else{
-                        console.loh(res.message);
-                        notify('error', res.message)
+                        console.log(res.message);
+                        notify('error', res.message.slice(0,150))
                     }
                 },
                 error:function(xhr){
-                    console.log(xhr.responseText());
-                    notify('error', xhr.responseText());
+                    console.log(xhr.responseText);
+                    notify('error', xhr.responseText.slice(0,150));
                 }
             });
         }

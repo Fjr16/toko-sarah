@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\InventoryFlag;
+use App\Helpers\CustomHelpers;
 use App\Models\Item;
 use App\Models\ProductBatch;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
@@ -27,12 +30,13 @@ class ProductStockController extends Controller
             $q->whereDate('exp_date', $filterExpDate);
         });
         $data = $query->paginate(10);
-        $products = Item::all();
+
+        $selectedProduct = $filterProductId ? Item::where('id', $filterProductId)->first() : null;
         return view('pages.item-stok.index', [
             'title' => 'Data Stok Produk',
             'menu' => 'stok',
             'data' => $data,
-            'products' => $products,
+            'selectedProduct' => $selectedProduct,
         ]);
     }
 
@@ -60,22 +64,45 @@ class ProductStockController extends Controller
         }
         try {
             DB::beginTransaction();
-            $item = ProductBatch::updateOrCreate(
-                [
-                    'batch_number' => $req->batch_number,
-                    'item_id' => $req->item_id
-                ],
-                [
-                    'exp_date' => $req->exp_date,
-                    'stock' => $req->stock,
-                    'unit_cost' => $req->unit_cost,
-                ]
-            );
+            $helpers = new CustomHelpers;
 
-            $stokCurrent = $item->product->all_stok;
+            $item = ProductBatch::where('batch_number', $req->batch_number)->where('item_id', $req->item_id)->first()
+                    ? ProductBatch::where('batch_number', $req->batch_number)->where('item_id', $req->item_id)->first()
+                    : new ProductBatch;
+
+
+            $item->batch_number = $req->batch_number;
+            $item->item_id = $req->item_id;
+            $item->exp_date = $req->exp_date;
+            $item->stock = $item->stock
+                            ? $item->stock + $req->stock
+                            : $req->stock;
+            $item->unit_cost = $helpers->cleanCurrency($req->unit_cost);
+            $item->save();
+
+            $totalStokCurrent = $item->product->all_stok;
             $item->product->update([
-                'all_stok' => $stokCurrent + $item->stock
+                'all_stok' => $totalStokCurrent + $item->stock
             ]);
+
+            // pencatatan inventory movements
+            $dataToStore = [
+                'user_id' => Auth::user()->id,
+                'item_id' => $item->product->id,
+                'product_batch_id' => $item->id,
+                'flag' => InventoryFlag::in->value,
+                'qty' => $item->stock,
+                'unit' => $item->product->small_unit,
+                'note' => '-'
+            ];
+            $res = $helpers->logInventoryMovements($item, $dataToStore);
+            if ($res['status'] == false) {
+                DB::rollBack();
+                return response()->json([
+                    'status' => false,
+                    'message' => substr($res['message'], 0, 150),
+                ]);
+            }
 
             DB::commit();
             return response()->json([

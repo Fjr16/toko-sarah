@@ -53,7 +53,7 @@
         /* Wrapper */
         .fab-wrapper {
             position: fixed;
-            bottom: 30px;
+            bottom: 65px;
             right: 30px;
             z-index: 1050;
         }
@@ -83,12 +83,14 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            text-decoration: none;
         }
 
         /* Hover animasi */
         .fab-btn:hover {
         transform: translateY(-3px) scale(1.08);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+        /* box-shadow: 0 8px 20px rgba(0,0,0,0.25); */
+        box-shadow: 0 8px 20px rgba(0, 85, 255, 0.372);
         }
 
         /* Ripple effect */
@@ -115,6 +117,10 @@
         background: linear-gradient(135deg, #667eea, #764ba2);
         }
 
+        .fab-light {
+        background: linear-gradient(135deg, #7b7b7b, #777777);
+        }
+
         .fab-dark {
         background: linear-gradient(135deg, #232526, #414345);
         }
@@ -128,7 +134,7 @@
         }
 
         .fab-primary {
-        background: linear-gradient(135deg, #3c7ef9, #3675e9);
+        background: linear-gradient(135deg, #031d4b, #337dfb);
         }
 
         /* Default: sembunyi semua tombol selain .fab-main */
