@@ -40,7 +40,7 @@
         {{-- end produk --}}
         {{-- pencatatan stok --}}
         <a class="nav-link d-flex align-items-center rounded" data-bs-toggle="collapse" href="#submenuCatatanStok" role="button" aria-expanded="false" aria-controls="submenuCatatanStok">
-            <i class="bi bi-box-seam me-2"></i>
+            <i class="bi bi-card-checklist me-2"></i>
             <span class="nav-text">Pencatatan Stok</span>
             <i class="bi bi-caret-down ms-auto small"></i>
         </a>

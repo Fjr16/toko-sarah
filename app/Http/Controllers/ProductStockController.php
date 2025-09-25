@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 class ProductStockController extends Controller
 {
@@ -53,7 +54,9 @@ class ProductStockController extends Controller
             'batch_number' => 'required',
             'exp_date' => 'required',
             'stock' => 'required',
-            'unit_cost' => 'required'
+            'unit_cost' => 'required',
+            'flag' => ['required', Rule::enum(InventoryFlag::class)],
+            'note' => 'nullable'
         ]);
 
         if ($validators->fails()) {
@@ -66,23 +69,46 @@ class ProductStockController extends Controller
             DB::beginTransaction();
             $helpers = new CustomHelpers;
 
-            $item = ProductBatch::where('batch_number', $req->batch_number)->where('item_id', $req->item_id)->first()
-                    ? ProductBatch::where('batch_number', $req->batch_number)->where('item_id', $req->item_id)->first()
-                    : new ProductBatch;
+            $item = ProductBatch::where('batch_number', $req->batch_number)->where('item_id', $req->item_id)->first();
 
+            if ($req->flag == InventoryFlag::out->value) {
+                if (!$item) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Tidak dapat melakukan pengurangan stok pada batch yang belum ditambahkan',
+                    ]);
+                }
+                if (!$item->stock || $item->stock < $req->stock) {
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Stok tidak mencukupi untuk dikurangi dengan jumlah ' . $req->stock,
+                    ]);
+                }
+            }else{
+                $item = $item ? $item : new ProductBatch;
+            }
 
             $item->batch_number = $req->batch_number;
             $item->item_id = $req->item_id;
             $item->exp_date = $req->exp_date;
-            $item->stock = $item->stock
-                            ? $item->stock + $req->stock
-                            : $req->stock;
+            if ($req->flag == InventoryFlag::out->value) {
+                $item->stock = $item->stock - $req->stock;
+            }else{
+                $item->stock = $item->stock
+                                ? $item->stock + $req->stock
+                                : $req->stock;
+            }
             $item->unit_cost = $helpers->cleanCurrency($req->unit_cost);
             $item->save();
 
-            $totalStokCurrent = $item->product->all_stok;
+            $countTotal = $item->product->all_stok;
+            if ($req->flag == InventoryFlag::out->value) {
+                $countTotal = $countTotal - $req->stock;
+            }else{
+                $countTotal = $countTotal + $req->stock;
+            }
             $item->product->update([
-                'all_stok' => $totalStokCurrent + $item->stock
+                'all_stok' => $countTotal,
             ]);
 
             // pencatatan inventory movements
@@ -90,10 +116,10 @@ class ProductStockController extends Controller
                 'user_id' => Auth::user()->id,
                 'item_id' => $item->product->id,
                 'product_batch_id' => $item->id,
-                'flag' => InventoryFlag::in->value,
-                'qty' => $item->stock,
+                'flag' => $req->flag,
+                'qty' => $req->stock,
                 'unit' => $item->product->small_unit,
-                'note' => '-'
+                'note' => $req->note
             ];
             $res = $helpers->logInventoryMovements($item, $dataToStore);
             if ($res['status'] == false) {

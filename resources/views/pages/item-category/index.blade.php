@@ -109,10 +109,10 @@
     </div>
     <div class="fab-wrapper">
         <div class="fab-container" id="fabMenu">
-          <a href="{{ route('kategori/barang.create') }}" class="fab-btn fab-dark">
-            <i class="bx bx-plus"></i>
+          <a href="{{ route('kategori/barang.create') }}" class="fab-btn fab-main">
+            <i class="bx bx-book-add" style="font-size:22px;"></i>
           </a>
-          <button class="fab-btn fab-main" onclick="toggleFab()">
+          <button class="fab-btn fab-primary" onclick="toggleFab()">
             <i id="fabIcon" class="bx bx-expand"></i>
           </button>
         </div>

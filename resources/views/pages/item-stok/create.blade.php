@@ -57,9 +57,25 @@
                         </div>
                     </div> --}}
                     <div class="col-md">
-                        <label for="stock" class="form-label">Stok ditambahkan<span class="text-danger">*</span></label>
+                        <label for="stock" class="form-label">Jumlah Adjustment<span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <input name="stock" class="form-control form-control-md" id="stock" placeholder="Jumlah stok yang ditambahkan" required></input>
+                            <input type="hidden" value="{{ \App\Enums\InventoryFlag::in->value }}" name="flag" id="flag-input">
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="flag-btn">
+                                <i class="bi bi-graph-up-arrow text-primary"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li>
+                                    <a class="dropdown-item" href="#" data-value="{{ \App\Enums\InventoryFlag::in->value }}" data-icon="bi bi-graph-up-arrow text-primary">
+                                        <i class="bi bi-graph-up-arrow text-primary"></i> {{ \App\Enums\InventoryFlag::in->label() }}
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="#" data-value="{{ \App\Enums\InventoryFlag::out->value }}" data-icon="bi bi-graph-down-arrow text-danger">
+                                        <i class="bi bi-graph-down-arrow text-danger"></i> {{ App\Enums\InventoryFlag::out->label() }}
+                                    </a>
+                                </li>
+                            </ul>
+                            <input type="number" name="stock" class="form-control form-control-md" id="stock" placeholder="Jumlah stok yang ditambahkan" required></input>
                             <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
                         </div>
                     </div>
@@ -78,6 +94,12 @@
                             @endif
                             <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
                         </div>
+                    </div>
+                </div>
+                <div class="row mb-3">
+                     <div class="col-md">
+                        <label for="note" class="form-label">Keterangan <span class="text-primary">(opsional)</span></label>
+                        <input name="note" class="form-control form-control-md" id="note" placeholder="Ex:Barang kadaluarsa"></input>
                     </div>
                 </div>
                 <div class="col-md-12 mt-4 border-top">
@@ -178,6 +200,18 @@
                 });
             });
 
+            document.querySelectorAll('.dropdown-menu .dropdown-item').forEach(item => {
+                item.addEventListener('click', function(e){
+                    e.preventDefault();
+
+                    const value = this.getAttribute('data-value');
+                    const iconClass = this.getAttribute('data-icon');
+
+                    const btn = document.getElementById('flag-btn');
+                    btn.innerHTML = `<i class="${iconClass}"></i>`;
+                    document.getElementById('flag-input').value = value;
+                });
+            });
         });
 
         function useBatch(batchId){
@@ -189,7 +223,7 @@
                         const data = res.data;
                         $('#batch_number').val(data.batch_number);
                         $('#exp_date').val(data.exp_date);
-                        $('#unit_cost').val(rupiahFormatter(data.unit_cost));
+                        $('#unit_cost').val(numberFormatter(data.unit_cost));
                     }else{
                         console.log(res.message);
                         notify('error', res.message.slice(0,150))

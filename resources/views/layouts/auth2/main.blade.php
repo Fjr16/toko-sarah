@@ -472,6 +472,12 @@
                 maximumFractionDigits: 0,
             }).format(value);
         }
+        function numberFormatter(value) {
+            return new Intl.NumberFormat('id-ID', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            }).format(value);
+        }
 
         function toggleFab() {
              let fabMenu = document.getElementById('fabMenu');
