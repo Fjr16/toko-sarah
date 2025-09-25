@@ -62,7 +62,7 @@
                 processing:true,
                 serverSide:true,
                 ajax:{
-                    url:"{{ route('inventory/movement.getTable') }}",
+                    url:"{{ url()->current() }}",
                     data:{
 
                     }
