@@ -62,17 +62,17 @@
 
         {{-- Laporan --}}
         <a class="nav-link d-flex align-items-center rounded" data-bs-toggle="collapse" href="#submenuLaporan" role="button" aria-expanded="false" aria-controls="submenuLaporan">
-            <i class="bi bi-graph-up me-2"></i>
-            <span class="nav-text">Laporan</span>
+            <i class="bi bi-grid-3x3-gap me-2"></i>
+            <span class="nav-text">Extras</span>
             <i class="bi bi-caret-down ms-auto small"></i>
         </a>
-        <div class="{{ $menu == 'reports' ? 'expand' : 'collapse' }} ps-4" id="submenuLaporan" data-bs-parent="#sidebarMenu">
+        <div class="{{ $menu == 'extras' ? 'expand' : 'collapse' }} ps-4" id="submenuLaporan" data-bs-parent="#sidebarMenu">
             <a class="nav-link" href="">Pembelian</a>
             <a class="nav-link" href="">Return Pembelian</a>
             <a class="nav-link {{ Route::is('sales/riwayat.*') ? 'active' : '' }}" href="{{ route('sales/riwayat.index') }}">Penjualan</a>
             <a class="nav-link" href="">Return Penjualan</a>
             <a class="nav-link" href="">Keuntungan / Kerugian</a>
-            <a class="nav-link" href="">Aliran Stok</a>
+            <a class="nav-link {{ Route::is('inventory/movement*') ? 'active' : '' }}" href="{{ route('inventory/movement.index') }}">Inventory Movements</a>
         </div>
         {{-- end Laporan --}}
 

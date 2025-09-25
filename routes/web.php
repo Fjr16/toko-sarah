@@ -3,6 +3,7 @@
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CurrencyController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\InventoryMovementController;
 use App\Http\Controllers\ItemCategoryController;
 use App\Http\Controllers\ItemController;
 use App\Http\Controllers\OtherController;
@@ -136,9 +137,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('stok/barang', [ProductStockController::class, 'index'])->name('stok/barang.index');
     Route::get('stok/barang/create', [ProductStockController::class, 'create'])->name('stok/barang.create');
     Route::post('stok/barang/store', [ProductStockController::class, 'store'])->name('stok/barang.store');
-    Route::get('stok/barang/edit/{id}', [ProductStockController::class, 'edit'])->name('stok/barang.edit');
-    Route::get('stok/barang/show/{id}', [ProductStockController::class, 'show'])->name('stok/barang.show');
-    Route::delete('stok/barang/destroy/{id}', [ProductStockController::class, 'destroy'])->name('stok/barang.destroy');
+
+    // Extras
+    // inventory Movements
+    Route::get('inventory/movement/get/table', [InventoryMovementController::class, 'getTable'])->name('inventory/movement.getTable');
+    Route::get('inventory/movement', [InventoryMovementController::class, 'index'])->name('inventory/movement.index');
+    Route::get('inventory/movement/create', [InventoryMovementController::class, 'create'])->name('inventory/movement.create');
+    Route::post('inventory/movement/store', [InventoryMovementController::class, 'store'])->name('inventory/movement.store');
 });
 
 require __DIR__.'/auth.php';
