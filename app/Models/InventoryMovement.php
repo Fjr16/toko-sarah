@@ -25,4 +25,13 @@ class InventoryMovement extends Model
     public function reference(){
         return $this->morphTo();
     }
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+    public function item(){
+        return $this->belongsTo(Item::class);
+    }
+    public function productBatch(){
+        return $this->belongsTo(ProductBatch::class);
+    }
 }

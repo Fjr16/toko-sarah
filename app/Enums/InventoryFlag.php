@@ -8,8 +8,14 @@ enum InventoryFlag:string {
 
     public function label(): string{
         return match ($this) {
-            self::in => 'Penambahan',
-            self::out => 'Pengurangan',
+            self::in => 'Peningkatan',
+            self::out => 'Penurunan',
+        };
+    }
+    Public function icon(){
+        return match ($this) {
+            self::in => 'bi bi-graph-up-arrow text-primary',
+            self::out => 'bi bi-graph-down-arrow text-danger'
         };
     }
 }

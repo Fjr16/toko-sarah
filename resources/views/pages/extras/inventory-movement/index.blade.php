@@ -4,43 +4,22 @@
     <div class="card">
         <div class="card-header border-bottom mb-4">
             <h4 class="m-0 p-0 mb-4">{{ $title ?? '' }}</h4>
-            <form action="{{ route('stok/barang.index') }}" method="GET" class="d-flex flex-wrap align-items-center gap-2 mb-0">
-                <select name="product_id" id="product-select" class="form-control form-control-md" style="flex:1 1 200px;"></select>
-                <input type="text" name="batch_number" value="{{ request('batch_number') }}" class="form-control form-control-md" placeholder="No Batch" style="flex:1 1 150px;">
+            <form method="GET" class="d-flex flex-wrap align-items-center gap-2 mb-0" id="form-filter">
                 <div class="input-group" style="flex:1 1 150px;">
-                    <input type="date" name="start_at" value="{{ request('start_at') }}" class="form-control form-control-md" >
-                    <input type="date" name="end_at" value="{{ request('end_at') }}" class="form-control form-control-md">
+                    <input type="date" name="start_at" id="start_at" value="{{ request('start_at') }}" class="form-control form-control-md" >
+                    <input type="date" name="end_at" id="end_at" value="{{ request('end_at') }}" class="form-control form-control-md">
                 </div>
 
                 <button type="submit" class="btn btn-sm btn-primary">
                     <i class="bx bx-search"></i>
                 </button>
-                <a href="{{ route('stok/barang.index') }}" class="btn btn-sm btn-secondary">
+                <a id="btnReset" class="btn btn-sm btn-secondary">
                     <i class="bx bx-reset"></i>
                 </a>
             </form>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table" id="data-table">
-                    <thead>
-                        <tr>
-                            <th>Produk</th>
-                            <th>No. Batch</th>
-                            <th>Tgl Exp</th>
-                            <th>Jumlah</th>
-                            <th>Flag Movement</th>
-                            <th>Modul</th>
-                            <th>Catatan</th>
-                            <th>Dibuat Oleh</th>
-                            <th>Dibuat Pada</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-            <div class="mt-3">
-                {{-- {{ $data->appends(request()->all()->links()) }} --}}
-            </div>
+            {{ $dataTable->table() }}
         </div>
     </div>
     <div class="fab-wrapper">
@@ -55,21 +34,24 @@
     </div>
 @endsection
 @push('scripts')
-    <script>
-        var table;
-        $(document).ready(function(){
-            table = $('#data-table').DataTable({
-                processing:true,
-                serverSide:true,
-                ajax:{
-                    url:"{{ url()->current() }}",
-                    data:{
+    {{ $dataTable->scripts() }}
 
-                    }
-                },
-                columns:[
-                    {data:'', name:'', 'defaultContent':'-'},
-                ]
+    <script>
+        $(function () {
+            var table = $('#inventorymovement-table').DataTable();
+            $('#form-filter').on('submit', function(e){
+                e.preventDefault();
+                if($('#start_at').val() && $('#end_at').val()){
+                    table.ajax.reload();
+                }else{
+                    notify('error', 'Mohon isi rentang tanggal');
+                    return;
+                }
+            });
+            $('#btnReset').on('click', function(){
+                $('#start_at').val('');
+                $('#end_at').val('');
+                table.ajax.reload();
             })
         })
     </script>

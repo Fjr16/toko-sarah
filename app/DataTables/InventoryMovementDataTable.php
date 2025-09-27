@@ -2,7 +2,9 @@
 
 namespace App\DataTables;
 
+use App\Enums\InventoryFlag;
 use App\Models\InventoryMovement;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Yajra\DataTables\EloquentDataTable;
 use Yajra\DataTables\Html\Builder as HtmlBuilder;
@@ -22,7 +24,37 @@ class InventoryMovementDataTable extends DataTable
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
         return (new EloquentDataTable($query))
-            ->addColumn('action', 'inventorymovement.action')
+            ->addColumn('Produk', function($row){
+                return $row->item->name;
+            })
+            ->addColumn('No. Batch', function($row){
+                return $row->productBatch->batch_number;
+            })
+            ->addColumn('Tgl Exp', function($row){
+                return $row->productBatch->exp_date;
+            })
+            ->editColumn('qty', function($row){
+                return $row->qty . ' ' . $row->unit;
+            })
+            ->editColumn('flag', function($row){
+                $flag = $row->flag == InventoryFlag::in->value
+                        ? InventoryFlag::in
+                        : ($row->flag == InventoryFlag::out->value
+                            ? InventoryFlag::out
+                            : null);
+
+                return '<span><i class="'. ($flag ? $flag->icon() : 'bi bi-exclamation-square').' me-1" style="font-size:18px;"></i> '. ($flag ? $flag->label() : 'Undefined') .'</span>';
+            })
+            ->editColumn('reference_type', function($row){
+                return str_replace("App\\Models\\",'',$row->reference_type ?? '');
+            })
+            ->addColumn('Dibuat Oleh', function($row){
+                return $row->user->name;
+            })
+            ->editColumn('created_at', function($row){
+                return $row->created_at->format('Y-m-d H:i');
+            })
+            ->rawColumns(['flag'])
             ->setRowId('id');
     }
 
@@ -31,7 +63,15 @@ class InventoryMovementDataTable extends DataTable
      */
     public function query(InventoryMovement $model): QueryBuilder
     {
-        return $model->newQuery();
+        $query = $model->newQuery()->with(['user', 'item', 'productBatch']);
+        $query->when(request('start_at') && request('end_at'), function($q){
+            $q->whereBetween('created_at', [
+                Carbon::parse(request('start_at'))->startOfDay(),
+                Carbon::parse(request('end_at'))->endOfDay()
+            ]);
+        });
+
+        return $query;
     }
 
     /**
@@ -42,17 +82,24 @@ class InventoryMovementDataTable extends DataTable
         return $this->builder()
                     ->setTableId('inventorymovement-table')
                     ->columns($this->getColumns())
-                    ->minifiedAjax()
-                    //->dom('Bfrtip')
-                    ->orderBy(1)
+                    ->ajax([
+                        'data' => 'function(d) {
+                            d.start_at = $("#start_at").val();
+                            d.end_at = $("#end_at").val();
+                        }'
+                    ])
+                    ->parameters([
+                        'responsive' => true,
+                        'autoWidth' => false
+                    ])
+                    ->orderBy(0,'desc')
+                    ->dom('Bfrtip')
                     ->selectStyleSingle()
                     ->buttons([
-                        Button::make('excel'),
-                        Button::make('csv'),
-                        Button::make('pdf'),
+                        Button::make('excel')->filename($this->filename()),
+                        Button::make('csv')->filename($this->filename()),
+                        Button::make('pdf')->filename($this->filename()),
                         Button::make('print'),
-                        Button::make('reset'),
-                        Button::make('reload')
                     ]);
     }
 
@@ -62,15 +109,23 @@ class InventoryMovementDataTable extends DataTable
     public function getColumns(): array
     {
         return [
-            Column::computed('action')
-                  ->exportable(false)
-                  ->printable(false)
-                  ->width(60)
-                  ->addClass('text-center'),
-            Column::make('id'),
-            Column::make('add your columns'),
-            Column::make('created_at'),
-            Column::make('updated_at'),
+            Column::make('created_at')
+                    ->title('Dibuat Pada'),
+            Column::make('Produk'),
+            Column::make('No. Batch'),
+            Column::make('qty')
+                    ->title('Jumlah')
+                    ->orderable(true)
+                    ->searchable(true),
+            Column::make('Tgl Exp'),
+            Column::make('flag')
+                    ->title('Flag Movement'),
+            Column::make('reference_type')
+                    ->title('Modul'),
+            Column::make('note')
+                    ->title('Catatan')
+                    ->defaultContent('-'),
+            Column::make('Dibuat Oleh'),
         ];
     }
 
