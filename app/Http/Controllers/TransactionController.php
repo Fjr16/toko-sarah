@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CustomHelpers;
 use Exception;
 use App\Models\Item;
 use App\Models\Supplier;
@@ -17,12 +18,6 @@ use Illuminate\Validation\ValidationException;
 
 class TransactionController extends Controller
 {
-
-    // clean currency format before submit to controller
-    private function cleanFormat($val) {
-        $value = preg_replace('/[^\d]/', '', $val); //mengambil angka saja
-        return $value;
-    }
     /**
      * Display a listing of the resource.
      */
@@ -268,8 +263,8 @@ class TransactionController extends Controller
         DB::beginTransaction();
         try {
             $item = Item::findOrFail(decrypt($id));
-            $request['cost'] = $this->cleanFormat($request->cost);
-            $request['price'] = $this->cleanFormat($request->price);
+            $request['cost'] = CustomHelpers::cleanCurrency($request->cost);
+            $request['price'] = CustomHelpers::cleanCurrency($request->price);
             $data = $request->validate([
                 'cost' => 'required',
                 'margin' => 'required',
