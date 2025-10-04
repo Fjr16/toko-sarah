@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transaction_details', function (Blueprint $table) {
+        Schema::create('purchase_temp_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('transaction_id')->nullable(false);
+            $table->foreignId('purchase_temp_id')->nullable(false);
             $table->foreignId('item_id')->nullable(false);
-            $table->foreignId('product_batch_id')->nullable(false);
-            $table->integer('jumlah')->default(0);
-            $table->string('satuan')->default(0);
+            $table->string('temp_batch_number')->nullable(false)->unique(['item_id','batch_number']);
+            $table->date('exp_date')->nullable(false);
+            $table->unsignedInteger('qty')->default(0);
             $table->decimal('unit_price',12,2)->default(0);
             $table->decimal('discount',12,2)->default(0);
             $table->decimal('tax',12,2)->default(0);
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transaction_details');
+        Schema::dropIfExists('purchase_temp_details');
     }
 };

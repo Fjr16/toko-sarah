@@ -10,16 +10,17 @@ class Transaction extends Model
     use HasFactory;
 
     protected $fillable = [
-        'transaction_code',
+        'user_id',
         'supplier_id',
+        'invoice_number',
         'purchase_date',
         'subtotal',
         'diskon',
         'tax',
         'other_cost',
         'grand_total',
-        'status',
-        'payment_method',
+        'purchase_status',
+        'notes',
     ];
 
     public function transactionDetails()

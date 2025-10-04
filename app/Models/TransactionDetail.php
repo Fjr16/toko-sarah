@@ -12,10 +12,13 @@ class TransactionDetail extends Model
     protected $fillable = [
         'transaction_id',
         'item_id',
+        'product_batch_id',
         'jumlah',
         'satuan',
         'unit_price',
-        'total',
+        'discount',
+        'tax',
+        'sub_total',
     ];
 
     public function transaction()

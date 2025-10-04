@@ -11,19 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transactions', function (Blueprint $table) {
+        Schema::create('purchase_temps', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable(false);
-            $table->foreignId('supplier_id')->nullable(false);
-            $table->string('invoice_nunmber')->nullable(false);
-            $table->date('purchase_date')->nullable(false);
+            $table->foreignId('supplier_id')->nullable();
             $table->decimal('subtotal',12,2)->default(0);
             $table->decimal('diskon',12,2)->default(0);
             $table->decimal('tax',12,2)->default(0);
             $table->decimal('other_cost',12,2)->default(0);
             $table->decimal('grand_total',12,2)->default(0);
-            $table->string('purchase_status')->nullable(false);
-            $table->string('notes')->nullable();
+            $table->string('temp_status')->default('Draft');
             $table->timestamps();
         });
     }
@@ -33,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('transactions');
+        Schema::dropIfExists('purchase_temps');
     }
 };

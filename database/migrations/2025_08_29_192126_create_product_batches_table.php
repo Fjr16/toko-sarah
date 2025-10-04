@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('product_batches', function (Blueprint $table) {
             $table->id();
             $table->foreignId('item_id')->constrained()->nullable(false);
-            $table->string('batch_number')->nullable(false)->unique();
+            $table->string('batch_number')->nullable(false)->unique(['item_id','batch_number']);
             $table->date('exp_date')->nullable(false);
-            $table->integer('stock')->nullable(false)->default(0);
+            $table->unsignedInteger('stock')->nullable(false)->default(0);
             $table->decimal('unit_cost', 10,2)->nullable(false)->default(0);
             $table->timestamps();
 
