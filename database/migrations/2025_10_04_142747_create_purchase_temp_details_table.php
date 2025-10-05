@@ -15,13 +15,15 @@ return new class extends Migration
             $table->id();
             $table->foreignId('purchase_temp_id')->nullable(false);
             $table->foreignId('item_id')->nullable(false);
-            $table->string('temp_batch_number')->nullable(false)->unique(['item_id','batch_number']);
+            $table->foreignId('product_batch_id')->nullable();
+            $table->string('temp_batch_number')->nullable(false);
             $table->date('exp_date')->nullable(false);
             $table->unsignedInteger('qty')->default(0);
             $table->decimal('unit_price',12,2)->default(0);
             $table->decimal('discount',12,2)->default(0);
             $table->decimal('tax',12,2)->default(0);
             $table->decimal('sub_total', 12,2)->default(0);
+            $table->unique(['item_id','temp_batch_number']);
             $table->timestamps();
         });
     }

@@ -206,7 +206,8 @@
   </main>
 
   {{-- Checkout bar (sticky bottom) --}}
-  <footer class="pos-checkout bg-body p-2">
+  @yield('footer')
+  {{-- <footer class="pos-checkout bg-body p-2">
     <div class="container-fluid">
       <div class="row g-2 align-items-center">
         <div class="col-md">
@@ -226,7 +227,7 @@
         </div>
       </div>
     </div>
-  </footer>
+  </footer> --}}
 </div>
 
 {{-- Offcanvas Cart --}}

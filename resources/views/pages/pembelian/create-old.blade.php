@@ -22,43 +22,153 @@
       color: #aaa;
       font-size: 14px;
     }
-    .card.border-bottom-0 {
-        border-bottom-left-radius: 0 !important;
-        border-bottom-right-radius: 0 !important;
-    }
-
-    .card.border-top-0 {
-        border-top-left-radius: 0 !important;
-        border-top-right-radius: 0 !important;
-        margin-top: -1px; /* hilangkan garis ganda */
-    }
 </style>
 @endpush
 @section('content')
-    <div class="card shadow-sm mb-2 border-bottom-0 rounded-bottom-0">
-        {{-- <div class="card-header mb-4 border-bottom d-flex justify-content-between">
-            <h4 class="m-0 p-0"></h4>
-        </div> --}}
-        <div class="card-header d-flex justify-content-between align-items-center bg-light">
-        <h5 class="fw-bold mb-0 text-uppercase text-dark">{{ $title ?? 'Pembelian' }}</h5>
-        <h5 class="fw-bold mb-0 text-success totalAkhir"></h5>
+    <div class="card mb-4">
+        <div class="card-header mb-4 border-bottom d-flex justify-content-between">
+            <h4 class="m-0 p-0">{{ $title ?? 'Pembelian' }}</h4>
+            <h4 class="m-0 p-0 fw-bold fst-italic totalAkhir"></h4>
         </div>
-        <div class="card-body pb-1">
+        <div class="card-body border-bottom pb-2">
             <div class="row mb-3 px-3">
                 <button class="btn btn-sm btn-dark text-uppercase" type="button" data-bs-toggle="collapse" data-bs-target="#newProduct" aria-expanded="false" aria-controls="collapseExample">
                     <i class="bx bx-plus"></i> New Product
                 </button>
             </div>
-            <div class="collapse" id="newProduct">
-                @include('pages.pembelian.partials.newProduct')
+            <div class="collapse mb-3" id="newProduct">
+                <div class="card bg-label-primary">
+                    <form id="product-form">
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-10">
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <select class="form-select form-control" id="kategori-barang" aria-label="Default select example" name="item_category_id" required>
+                                        <option selected disabled>-- Pilih Kategori --</option>
+                                        @foreach ($itemCategories as $cat)
+                                            <option value="{{ $cat->id }}" {{ old('item_category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name ?? '-' }}</option>
+                                        @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-7">
+                                        <label for="nama-barang" class="form-label">Nama Barang <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-md" id="nama-barang" name="name" placeholder="Input Nama Barang" value="{{ old('name') }}" required />
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label for="kode-barang" class="form-label">Kode Barang <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control form-control-md" id="kode-barang" name="code" placeholder="Input / scan kode barang disini" value="{{ old('code') }}" required />
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label for="satuan-terkecil" class="form-label">Satuan Terkecil <span class="text-danger">*</span></label>
+                                        <input name="small_unit" class="form-control form-control-md" id="satuan-terkecil" placeholder="Input Satuan Terkecil" required></input>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="satuan-menengah" class="form-label">Satuan Menengah</label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" placeholder="Input Satuan Menengah" id="satuan-menengah" name="medium_unit"/>
+                                            <span class="input-group-text" id="get-satuan-sedang-awal">-</span>
+                                            <input type="number" class="form-control" placeholder="nilai konversi ke satuan terkecil" name="medium_to_small"/>
+                                            <span class="input-group-text" id="get-satuan-kecil">-</span>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="satuan-terbesar" class="form-label">Satuan Terbesar</label>
+                                        <div class="input-group input-group-merge">
+                                            <input type="text" class="form-control" placeholder="Input Satuan Terbesar" id="satuan-terbesar" name="big_unit" />
+                                            <span class="input-group-text" id="get-satuan-besar">-</span>
+                                            <input type="mumber" class="form-control" placeholder="nilai konversi ke satuan menengah" name="big_to_medium"/>
+                                            <span class="input-group-text" id="get-satuan-sedang-akhir">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2 d-flex justify-content-center align-items-center pt-0">
+                                <label for="fotoProduk" class="upload-box" id="uploadBox">
+                                    <span id="uploadText" style="display:block;">+ Upload Foto</span>
+                                    <img id="previewImg" alt="Preview" style="display:none;"/>
+                                </label>
+                                <input type="file" id="fotoProduk" name="image" accept="image/*" style="display: none;">
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-5">
+                                <label for="cost" class="form-label">Harga Beli <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    @if (setting('currency_position_default', 'prefix') == 'prefix')
+                                        <span class="input-group-text bg-dark text-white">Rp. </span>
+                                    @endif
+                                    <input type="text" class="form-control form-control-md price" id="cost" name="cost" placeholder="0,00" value="{{ old('cost', 0) }}" required />
+
+                                    @if (setting('currency_position_default', 'prefix') == 'suffix')
+                                        <span class="input-group-text bg-dark text-white">Rp. </span>
+                                    @endif
+                                    <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="margin" class="form-label">Margin (%) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control form-control-md" id="margin" name="margin" placeholder="0" min="0" value="{{ old('margin') ?? 0 }}" required />
+                            </div>
+                            <div class="col-md-5">
+                                <label for="price" class="form-label">Harga Jual <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    @if (setting('currency_position_default', 'prefix') == 'prefix')
+                                        <span class="input-group-text bg-dark text-white">Rp. </span>
+                                    @endif
+
+                                    <input type="text" name="price" id="price" class="form-control form-control-md" placeholder="0,00" value="{{ old('price', 0)}}" readonly required />
+
+                                    @if (setting('currency_position_default', 'prefix') == 'suffix')
+                                        <span class="input-group-text bg-dark text-white">Rp. </span>
+                                    @endif
+                                    <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md">
+                                <label for="stok-awal" class="form-label">Total stok / Stok Awal <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" name="stok" id="stok-awal" placeholder="0" min="0" class="form-control form-control-md" value="{{ old('stok') ?? 0 }}" required />
+                                    <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
+                                </div>
+                            </div>
+                            <div class="col-md">
+                                <label for="stok_alert" class="form-label">Peringatan Stok <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="number" name="stok_alert" id="stok_alert" placeholder="0" min="0" class="form-control form-control-md" value="{{ old('stok_alert') ?? 0 }}" required />
+                                    <span class="input-group-text get-satuan-kecil bg-primary text-white">/</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <label for="description" class="form-label">Deskripsi</label>
+                            <textarea class="form-control" id="description" rows="4" name="description">{{ old('description') }}</textarea>
+                        </div>
+                        <div class="col-md-12 mt-4 border-top">
+                            <div class="d-flex justify-content-center mt-4">
+                                <button type="button" class="btn btn-sm btn-success" id="product_submit"><i class="bx bx-file"></i> Save & add To Cart</button>
+                            </div>
+                        </div>
+                    </div>
+                    </form>
+                </div>
             </div>
+
+
+            <div id="product-select" style="width: 100%"></div>
         </div>
     </div>
-    <div class="card shadow-sm border-top-0 rounded-top-0">
+    <div class="card">
         <div class="card-body">
-            <div id="product-select" style="width: 100%"></div>
 
-            <div class="row my-2">
+            <div class="row mb-4">
                 <div class="col-md-8">
                     <label for="defaultInput" class="form-label">Supplier</label>
                     <select id="supplier_id" class="form-select" onchange="updateSupplier(this)">
@@ -77,7 +187,168 @@
                 </div>
             </div>
             <div class="row mb-4">
-                {{ $dataTable->table() }}
+                <div class="table-responsive">
+                    <table class="table text-nowrap">
+                        <thead class="table-secondary">
+                            <tr>
+                                <th></th>
+                                <th>Produk</th>
+                                <th>Batch</th>
+                                <th>Exp Date</th>
+                                <th>Harga Beli + margin (%)</th>
+                                <th>Harga Jual</th>
+                                <th>Qty</th>
+                                <th>Diskon</th>
+                                <th>Pajak</th>
+                                <th class="text-end">Total Harga</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (empty(session('data_pembelian')))
+                                <tr>
+                                    <td colspan="11" class="text-center fst-italic small fw-bold">-- Belum Ada Produk Dalam Keranjang --</td>
+                                </tr>
+                            @else
+                                @foreach (session()->get('data_pembelian') as $item)
+                                <tr>
+                                    <td>
+                                        <form action="{{ route('pembelian.destroy', $item['id']) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button class="text-danger border-0 bg-transparent p-0"><i class="bx bx-x fs-4"></i></button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <span class="d-block">{{ $item['name'] }}</span>
+                                        <span class="badge bg-primary">
+                                            <small class="text-start">
+                                                kode : {{ $item['barcode'] }} |
+                                                Stok : {{ $item['stok'] ?? '0' }} {{ $item['satuan'] }}
+                                            </small>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <input list="batchList1" 
+                                                name="temp_batch_number[]" 
+                                                class="form-control form-control-sm"
+                                                placeholder="Ketik / pilih batch">
+
+                                        <datalist id="batchList1">
+                                            <option value="s">
+                                                Exp: 
+                                            </option>
+                                            {{-- @foreach($batches as $batch) --}}
+                                            {{-- <option value="{{ $batch->batch_number }}"> --}}
+                                                {{-- Exp: {{ $batch->expired_date }} --}}
+                                            {{-- </option> --}}
+                                            {{-- @endforeach --}}
+                                        </datalist>
+                                    </td>
+                                    <td>
+                                        <input type="date" name="exp_date[]" class="form-control form-control-sm">
+                                    </td>
+                                    <td>
+                                        Rp {{ number_format($item['harga_satuan'], 0) }}
+                                        +
+                                        {{ $item['margin'] ?? 0 }} %
+                                        <button type="button" class="btn btn-icon text-warning" onclick="openModalUpdatePrice('{{ encrypt($item['id']) }}', '{{ $item['name'] }}', {{ $item['harga_satuan'] }}, {{ $item['margin'] ?? 0 }}, {{ $item['harga_jual'] ?? 0 }})">
+                                            <i class="bx bx-edit"></i>
+                                          </button>
+                                    </td>
+                                    <td class="text-nowrap">
+                                        Rp {{ number_format($item['harga_jual'], 0) }}
+                                    </td>
+                                    <td>
+                                        <div class="input-group">
+                                            <input type="number" class="form-control" name="jumlah" id="jumlah" value="{{ $item['jumlah'] }}" data-encrypt-id="{{ encrypt($item['id']) }}" readonly ondblclick="enableForm(this)">
+                                            <span class="input-group-text bg-primary text-white">{{ $item['satuan'] }}</span>
+                                        </div>
+                                    </td>
+                                    <td><input type="number" value="0" class="form-control form-control-sm"></td>
+                                    <td><input type="number" value="0" class="form-control form-control-sm"></td>
+                                    <td class="text-end text-nowrap">Rp {{ number_format($item['total_harga'], 0) }}</td>
+                                </tr>
+                                @endforeach
+                            @endif
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="row justify-content-md-end mb-4">
+                <div class="col-md-6">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <tr>
+                                <th>+ Subtotal</th>
+                                <td class="text-end subtotal">Rp. 0</td>
+                            </tr>
+                            <tr>
+                                <th>+ Pajak</th>
+                                <td class="pajak p-2">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input id="pajak" class="form-control price text-end" name="invoice_tax" type="text" value="{{ old('invoice_tax', 0) }}" onchange="totalBayar()"/>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>- Diskon</th>
+                                <td class="p-2">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input id="discount_invoice" class="form-control price text-end" name="discount_invoice" type="text" value="{{ old('discount_invoice', 0) }}" onchange="totalBayar()"/>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>+ Biaya Lainnya</th>
+                                <td class="biaya-lainnya p-2">
+                                    <div class="input-group">
+                                        <span class="input-group-text">Rp</span>
+                                        <input id="biaya_lainnya" class="form-control price text-end" name="biaya_lainnya" type="text" value="{{ old('biaya_lainnya', 0) }}" onchange="totalBayar()"/>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="table-dark">
+                                <th>= Total Akhir</th>
+                                <td class="text-end totalAkhir">Rp. 0</td>
+                            </tr>
+                            <tr>
+                                <th></th>
+                                <td></td>
+                            </tr>
+                            <tr>
+                                <th>Status <span class="text-danger">*</span></th>
+                                <td class="text-end">
+                                    <select id="status" class="form-select" onchange="updateStatus(this.value)">
+                                        <option value="pending">Pending</option>
+                                        <option value="ordered">Ordered</option>
+                                        <option value="completed">Completed</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Metode Pembayaran <span class="text-danger">*</span></th>
+                                <td class="text-end">
+                                    <select id="payment_method" onchange="updatePaymentMethod(this.value)" class="form-select">
+                                        <option value="Tunai">Tunai</option>
+                                        <option value="Kartu Kredit">Kartu Kredit</option>
+                                        <option value="Transfer Bank">Transfer Bank</option>
+                                        <option value="E-wallet">E-wallet</option>
+                                        <option value="Lainnya">Lainnya</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-top mt-4 ">
+                <div class="d-flex justify-content-center mt-4">
+                    <button class="btn btn-md btn-danger me-2" type="button" data-warning="Kosongkan keranjang belanja ?" data-url="{{ route('pembelian.reset') }}" onclick="showModalDelete(this)"><i class="bx bx-reset"></i> Reset</button>
+                    <button type="button" class="btn btn-md btn-success" data-bs-toggle="modal" data-bs-target="#modalLong"><i class="bx bx-check"></i> Checkout</button>
+                </div>
             </div>
         </div>
     </div>
@@ -236,73 +507,17 @@
     {{-- end modal update harga beli dan margin --}}
 
 @endsection
-@section('footer')
-    <div class="card mt-3 shadow-sm">
-        <div class="card-body py-2">
-            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
-            <small>
-                Total Item: <span class="fw-bold totalItem">0</span> |
-                Subtotal: <span class="fw-bold subtotal text-primary">Rp0</span> |
-                Diskon: <span class="fw-bold totalDiskon text-danger">Rp0</span>
-            </small>
-            <small class="fw-bold text-success">
-                Grand Total: <span class="totalAkhir fs-6">Rp0</span>
-            </small>
-            </div>
-
-            <div class="row g-2 align-items-center">
-            <div class="col-6 col-md-3">
-                <div class="input-group input-group-sm">
-                <span class="input-group-text">Pajak</span>
-                <input type="text" id="invoice_tax" class="form-control text-end price" value="0" onchange="updateInvoiceSummary()">
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="input-group input-group-sm">
-                <span class="input-group-text">Diskon</span>
-                <input type="text" id="invoice_discount" class="form-control text-end price" value="0" onchange="updateInvoiceSummary()">
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="input-group input-group-sm">
-                <span class="input-group-text">Biaya Lain</span>
-                <input type="text" id="invoice_other" class="form-control text-end price" value="0" onchange="updateInvoiceSummary()">
-                </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <select id="purchase_status" class="form-select form-select-sm" onchange="updateInvoiceSummary()">
-                <option value="draft">Draft</option>
-                <option value="ordered">Ordered</option>
-                <option value="completed">Completed</option>
-                </select>
-            </div>
-            </div>
-
-            <hr class="my-2">
-
-            <div class="d-flex justify-content-between align-items-center">
-                <button type="button" class="btn btn-outline-danger btn-sm"
-                        data-warning="Kosongkan keranjang?"
-                        data-url="{{ route('pembelian.reset') }}"
-                        onclick="showModalDelete(this)">
-                    <i class="bx bx-reset"></i> Reset
-                </button>
-    
-                <button type="button" class="btn btn-success btn-sm"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalLong">
-                    <i class="bx bx-check"></i> Checkout
-                </button>
-            </div>
-        </div>
-    </div>
-@endsection
 <x-modal-confirm-delete></x-modal-confirm-delete>
 
 
 @push('scripts')
-    {{ $dataTable->scripts() }}
+    <script>
+        // add item to cart
+        const name = document.getElementById('nama-produk');
+        const stok = document.getElementById('stok-produk');
+        const harga = document.getElementById('harga-satuan');
 
+    </script>
     <script>
         // enable form
         function enableForm(element){
@@ -339,6 +554,7 @@
         $(document).ready(function(){
             const selectSupplier = document.getElementById('supplier_id');
             updateSupplier(selectSupplier);
+            console.log($('#tanggal_pembelian').val());
             updatePurchaseDate($('#tanggal_pembelian').val());
             updatePaymentMethod($('#payment_method').val());
             updateStatus($('#status').val());
