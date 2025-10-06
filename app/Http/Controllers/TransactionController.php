@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DataTables\PurchaseTempDataTable;
 use App\Helpers\CustomHelpers;
 use Exception;
 use App\Models\Item;
@@ -29,18 +30,26 @@ class TransactionController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(PurchaseTempDataTable $dataTable)
     {
-        if (session('data_pembelian')) {
-            session()->put('data_pembelian', session('data_pembelian'));
-        }else{
-            session()->put('data_pembelian', []);
-        }
+        // if (session('data_pembelian')) {
+        //     session()->put('data_pembelian', session('data_pembelian'));
+        // }else{
+        //     session()->put('data_pembelian', []);
+        // }
 
         $produks = Item::all();
         $suppliers = Supplier::get();
         $itemCategories = ItemCategory::get();
-        return view('pages.pembelian.create', [
+        // return view('pages.pembelian.create', [
+        //     'title' => 'Pembelian',
+        //     'menu' => 'Pembelian',
+        //     'produks' => $produks,
+        //     'suppliers' => $suppliers,
+        //     'itemCategories' => $itemCategories,
+        // ]);
+
+        return $dataTable->render('pages.pembelian.create', [
             'title' => 'Pembelian',
             'menu' => 'Pembelian',
             'produks' => $produks,
