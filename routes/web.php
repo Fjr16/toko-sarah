@@ -104,7 +104,8 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('pembelian/riwayat', [SalesController::class, 'index'])->name('pembelian/riwayat.index');
     // Route::get('pembelian/riwayat/detail/{id}', [SalesController::class, 'detail'])->name('pembelian/riwayat.detail');
     Route::get('pembelian/create', [TransactionController::class, 'create'])->name('pembelian.create');
-    Route::get('pembelian/store/{id}', [TransactionController::class, 'store'])->name('pembelian.store');
+    Route::get('pembelian/store/item/{id}', [TransactionController::class, 'storeItem'])->name('pembelian/store.item');
+    // Route::get('pembelian/store/{id}', [TransactionController::class, 'store'])->name('pembelian.store');
     Route::delete('pembelian/destroy/{id}', [TransactionController::class, 'destroy'])->name('pembelian.destroy');
     Route::delete('pembelian/reset', [TransactionController::class, 'reset'])->name('pembelian.reset');
     Route::put('pembelian/update/{id}', [TransactionController::class, 'update'])->name('pembelian.update');

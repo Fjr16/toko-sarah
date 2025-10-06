@@ -36,9 +36,6 @@
 @endpush
 @section('content')
     <div class="card shadow-sm mb-2 border-bottom-0 rounded-bottom-0">
-        {{-- <div class="card-header mb-4 border-bottom d-flex justify-content-between">
-            <h4 class="m-0 p-0"></h4>
-        </div> --}}
         <div class="card-header d-flex justify-content-between align-items-center bg-light">
         <h5 class="fw-bold mb-0 text-uppercase text-dark">{{ $title ?? 'Pembelian' }}</h5>
         <h5 class="fw-bold mb-0 text-success totalAkhir"></h5>
@@ -83,7 +80,7 @@
     </div>
     <!-- Modal with long content -->
       <!-- Modal -->
-      <div class="modal fade" id="modalLong" tabindex="-1" aria-labelledby="modalLongTitle" aria-hidden="true">
+      {{-- <div class="modal fade" id="modalLong" tabindex="-1" aria-labelledby="modalLongTitle" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header border-bottom d-block">
@@ -197,11 +194,11 @@
             </form>
           </div>
         </div>
-      </div>
+      </div> --}}
     <!-- End Modal with long content -->
 
     {{-- modal update harga beli dan margin --}}
-    <div class="modal fade" id="smallModal" tabindex="-1" aria-hidden="true">
+    {{-- <div class="modal fade" id="smallModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
           <div class="modal-content">
             <div class="modal-header">
@@ -232,7 +229,7 @@
             </form>
           </div>
         </div>
-    </div>
+    </div> --}}
     {{-- end modal update harga beli dan margin --}}
 
 @endsection
@@ -287,7 +284,7 @@
                         onclick="showModalDelete(this)">
                     <i class="bx bx-reset"></i> Reset
                 </button>
-    
+
                 <button type="button" class="btn btn-success btn-sm"
                         data-bs-toggle="modal"
                         data-bs-target="#modalLong">
@@ -304,6 +301,30 @@
     {{ $dataTable->scripts() }}
 
     <script>
+        var table = $('#purchasetemp-table').DataTable();
+        async function removeItem(pruchaseTempId){
+            try {
+                const url = 'pembelian/destroy/'+pruchaseTempId;
+                const res = await fetch(url, {method : 'DELETE'});
+                if (!res.ok) {
+                    throw new Error(`${res.text}`);
+                }
+                const result = await res.json();
+
+                const data = result.data ?? [];
+                console.log(result.message);
+                console.log(result.data);
+
+                notify('success', result.message ?? 'Success');
+
+            } catch (msg) {
+                console.log(msg);
+                notify('error', msg.slice(0,150) ?? 'Terjadi Kesalahan');
+            }
+        }
+    </script>
+
+    {{-- <script>
         // enable form
         function enableForm(element){
             $(element).attr('readonly', false);
@@ -506,7 +527,7 @@
 
         }
 
-    </script>
+    </script> --}}
 
     <script>
         // preview image
@@ -584,20 +605,27 @@
         });
 
         // event ketika value select2 produk diganti, maka simpan data pada keranjang
-        $('#product-select').on('change', function(){
-            fetch(`/pembelian/store/${this.value}`)
-            .then(response => response.json())
-            .then(res => {
-                if (res.status_code === 200) {
-                    window.location.reload();
-                } else {
+        $('#product-select').on('change', async function(){
+            try {
+                const res = await fetch(`/pembelian/store/item/${this.value}`);
+                if (!res.ok) {
+                    throw new Error(`${res.text}`);
+                }
+                const result = await res.json();
+
+                if (res.status) {
+                    table.ajax.reload(null, false);
+                }else{
                     name.value = null;
                     stok.value = null;
                     harga.value = null;
                     console.log(res.message);
+                    notify('error', res.message ?? 'Terjadi Kesalahan');
                 }
-            })
-            .catch(error => console.error('Error: ', error, window.location.reload()));
+            } catch (error) {
+                console.error('Error: ', error);
+                notify('error', error.slice(0,150));
+            }
         });
     </script>
 

@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Validation\ValidationException;
+use Throwable;
 
 class TransactionController extends Controller
 {
@@ -69,7 +70,7 @@ class TransactionController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store($id)
+    public function store_old($id)
     {
         try {
             $dataSession = session()->get('data_pembelian');
@@ -130,6 +131,59 @@ class TransactionController extends Controller
             session()->flash('error', 'Terjadi Kesalahan Sistem');
             return response()->json([
                 'status_code' => 500,
+                'message' => 'Kesalahan Sistem',
+            ], 500);
+        }
+    }
+
+    public function storeItem($id){
+        try {
+            $dataSession = session()->get('data_pembelian');
+            $item = Item::findOrFail($id);
+            $findItem = $this->findItem($item->id);
+            if ($findItem) {
+                // untuk mendapatkan key asli, case misal terdapat array dengan key 0,1,2 ketika array key 1
+                // dihapus maka array 0,2. disini ketika index dicari maka index yang dikembalikan sesuai dengan index 0,2 bukan 0,1
+                $index = key(array_filter($dataSession, function($itemSession) use ($item) {
+                    return $itemSession['id'] === $item->id;
+                }));
+                $jumlahItem = $dataSession[$index]['jumlah']+1;
+                $dataSession[$index] = [
+                    'id' => $item->id,
+                    'barcode' => $item->code,
+                    'name' => $item->name,
+                    'jumlah' => $jumlahItem,
+                    'satuan' => $item->small_unit,
+                    'harga_satuan' => $item->default_cost,
+                    'margin' => $item->margin,
+                    'harga_jual' => $item->default_price,
+                    'stok' => $item->all_stok,
+                    'total_harga' => $item->default_cost * $jumlahItem,
+                ];
+                session()->put('data_pembelian', $dataSession);
+            }else{
+                session()->push('data_pembelian', [
+                    'id' => $item->id,
+                    'barcode' => $item->code,
+                    'name' => $item->name,
+                    'jumlah' => 1,
+                    'satuan' => $item->small_unit,
+                    'harga_satuan' => $item->default_cost,
+                    'margin' => $item->margin,
+                    'harga_jual' => $item->default_price,
+                    'stok' => $item->all_stok,
+                    'total_harga' => $item->default_cost * 1,
+                ]);
+            }
+            session()->flash('success', 'Berhasil Ditambahkan Keranjang');
+            return response()->json([
+                'status' => true,
+                'message' => 'Data Berhasil Ditemukan',
+            ]);
+        } catch (Throwable $th) {
+            // session()->flash('error', 'Terjadi Kesalahan Sistem');
+            return response()->json([
+                'status' => false,
                 'message' => 'Kesalahan Sistem',
             ], 500);
         }
