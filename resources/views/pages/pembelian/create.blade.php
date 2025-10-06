@@ -32,29 +32,152 @@
         border-top-right-radius: 0 !important;
         margin-top: -1px; /* hilangkan garis ganda */
     }
+
+    /* Presisi tinggi antar kolom */
+    #batchWrapper .form-label {
+    font-size: 0.75rem;
+    margin-bottom: 2px;
+    }
+
+    #batchWrapper .form-control {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.875rem;
+    }
+
+    #batchWrapper .btn {
+    padding: 0.35rem 0.55rem;
+    }
+
+    #batchWrapper .batch-row {
+    border-bottom: 1px solid #eaeaea;
+    padding-bottom: 4px;
+    }
+
+    /* Hover efek baris */
+    #batchWrapper .batch-row:hover {
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    transition: background 0.2s ease-in-out;
+    }
 </style>
 @endpush
 @section('content')
-    <div class="card shadow-sm mb-2 border-bottom-0 rounded-bottom-0">
-        <div class="card-header d-flex justify-content-between align-items-center bg-light">
-        <h5 class="fw-bold mb-0 text-uppercase text-dark">{{ $title ?? 'Pembelian' }}</h5>
-        <h5 class="fw-bold mb-0 text-success totalAkhir"></h5>
+    <div class="card shadow-sm mb-3 border-0">
+        <div class="card-header bg-light">
+            <h5 class="fw-bold mb-0 text-uppercase text-dark">
+            {{ $title ?? 'Pembelian' }}
+            <i class="bi bi-cart-plus"></i>
+            </h5>
         </div>
-        <div class="card-body pb-1">
-            <div class="row mb-3 px-3">
-                <button class="btn btn-sm btn-dark text-uppercase" type="button" data-bs-toggle="collapse" data-bs-target="#newProduct" aria-expanded="false" aria-controls="collapseExample">
-                    <i class="bx bx-plus"></i> New Product
-                </button>
+
+        <div class="card-body">
+            {{-- Tombol tambah produk baru --}}
+            <div class="d-flex justify-content-between align-items-center mb-3">
+            <button class="btn btn-sm btn-dark text-uppercase" type="button" data-bs-toggle="collapse"
+                data-bs-target="#newProduct" aria-expanded="false" aria-controls="collapseExample">
+                <i class="bx bx-plus"></i> New Product
+            </button>
             </div>
-            <div class="collapse" id="newProduct">
-                @include('pages.pembelian.partials.newProduct')
+
+            {{-- Form Produk Baru --}}
+            <div class="collapse mb-4" id="newProduct">
+            @include('pages.pembelian.partials.newProduct')
+            </div>
+
+            {{-- Pilih Produk --}}
+            <div class="mb-3">
+            <label class="form-label fw-semibold">Pilih Produk</label>
+                <div id="product-select" style="width: 100%"></div>
+            </div>
+
+            {{-- === BAGIAN MULTIPLE BATCH === --}}
+            <div class="border rounded p-3 bg-light mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold text-uppercase mb-0">Batch Produk</h6>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="addBatchRow">
+                    <i class="bi bi-plus-circle"></i> Tambah Batch
+                    </button>
+                </div>
+
+                {{-- Header visual agar sejajar seperti tabel --}}
+                <div class="d-none d-lg-flex fw-semibold text-secondary small border-bottom pb-2 mb-2">
+                    <div class="col-2">Batch Number</div>
+                    <div class="col-2">Exp. Date</div>
+                    <div class="col-1 text-end">Qty</div>
+                    <div class="col-2 text-end">Harga Beli</div>
+                    <div class="col-1 text-end">Diskon</div>
+                    <div class="col-1 text-end">Pajak</div>
+                    <div class="col-2 text-end">Harga Jual</div>
+                    <div class="col-1 text-center">Aksi</div>
+                </div>
+
+                <div id="batchWrapper">
+                    {{-- Contoh Row --}}
+                    <div class="row g-2 batch-row align-items-end mb-2">
+                        <div class="col-12 col-md-3 col-lg-2">
+                            <label class="form-label d-lg-none fw-semibold">Batch Number</label>
+                            <select class="form-select form-select-sm batch-select" name="batch_number[]" style="width: 100%;"></select>
+                        </div>
+
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <label class="form-label d-lg-none fw-semibold">Exp. Date</label>
+                            <input type="date" class="form-control form-control-sm" name="exp_date[]">
+                        </div>
+
+                        <div class="col-6 col-md-2 col-lg-1">
+                            <label class="form-label d-lg-none fw-semibold">Qty</label>
+                            <input type="number" class="form-control form-control-sm text-end" name="qty[]" placeholder="0" min="1">
+                        </div>
+
+                        <div class="col-6 col-md-3 col-lg-2">
+                            <label class="form-label d-lg-none fw-semibold">Harga Beli</label>
+                            <input type="text" class="form-control form-control-sm text-end" name="unit_price[]"
+                            oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="0">
+                        </div>
+
+                        <div class="col-6 col-md-2 col-lg-1">
+                            <label class="form-label d-lg-none fw-semibold">Diskon</label>
+                            <input type="text" class="form-control form-control-sm text-end" name="discount[]"
+                            oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="0">
+                        </div>
+
+                        <div class="col-6 col-md-2 col-lg-1">
+                            <label class="form-label d-lg-none fw-semibold">Pajak</label>
+                            <input type="text" class="form-control form-control-sm text-end" name="tax[]"
+                            oninput="this.value=this.value.replace(/[^0-9]/g,'')" placeholder="0">
+                        </div>
+
+                        <div class="col-6 col-md-2 col-lg-2">
+                            <label class="form-label d-lg-none fw-semibold">Harga Jual</label>
+                            <input type="text" class="form-control form-control-sm text-end" name="default_price[]" placeholder="0"
+                            disabled>
+                        </div>
+
+                        <div class="col-12 col-md-1 d-flex align-items-end justify-content-center">
+                            <button type="button" class="btn btn-sm btn-outline-danger removeBatchRow">
+                            <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Tombol Tambah ke Keranjang --}}
+            <div class="text-end">
+            <button class="btn btn-success px-4">
+                <i class="bi bi-cart-plus"></i> Tambahkan ke Keranjang
+            </button>
             </div>
         </div>
     </div>
-    <div class="card shadow-sm border-top-0 rounded-top-0">
-        <div class="card-body">
-            <div id="product-select" style="width: 100%"></div>
 
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0 text-uppercase text-dark">Keranjang <i class="bi bi-cart4"></i></h5>
+            <h5 class="fw-bold mb-0 text-success totalAkhir"></h5>
+        </div>
+        <div class="card-body">
             <div class="row my-2">
                 <div class="col-md-8">
                     <label for="defaultInput" class="form-label">Supplier</label>
@@ -301,25 +424,28 @@
     {{ $dataTable->scripts() }}
 
     <script>
-        var table = $('#purchasetemp-table').DataTable();
-        async function removeItem(pruchaseTempId){
+        async function removeItem(purchaseTempId){
             try {
-                const url = 'pembelian/destroy/'+pruchaseTempId;
-                const res = await fetch(url, {method : 'DELETE'});
+                const url = '/pembelian/destroy/'+purchaseTempId;
+                const res = await fetch(url, {
+                    method : 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN':"{{ csrf_token() }}"
+                    }
+                });
                 if (!res.ok) {
-                    throw new Error(`${res.text}`);
+                    const errorText = await res.statusText;
+                    throw new Error(errorText || 'Gagal Hapus Data');
                 }
                 const result = await res.json();
 
                 const data = result.data ?? [];
-                console.log(result.message);
-                console.log(result.data);
+                window.LaravelDataTables['purchasetemp-table'].ajax.reload();
 
                 notify('success', result.message ?? 'Success');
-
-            } catch (msg) {
-                console.log(msg);
-                notify('error', msg.slice(0,150) ?? 'Terjadi Kesalahan');
+            } catch (error) {
+                console.log('Error: ', error.message);
+                notify('error', error.message.slice(0,150) ?? 'Terjadi Kesalahan');
             }
         }
     </script>
@@ -603,28 +729,98 @@
                 notify('error', result.message.slice(0,150));
             }
         });
+    </script>
 
-        // event ketika value select2 produk diganti, maka simpan data pada keranjang
-        $('#product-select').on('change', async function(){
-            try {
-                const res = await fetch(`/pembelian/store/item/${this.value}`);
-                if (!res.ok) {
-                    throw new Error(`${res.text}`);
-                }
-                const result = await res.json();
+    <script>
+        $(document).ready(function() {
+            // saat produk dipilih
+            $('#product-select').on('select2:select', function(e) {
+                const data = e.params.data;
+                $(this).find('option').remove();
+                const newOption = new Option(data.text, data.id, true, true);
+                $(this).append(newOption).trigger('change.select2');
 
-                if (res.status) {
-                    table.ajax.reload(null, false);
-                }else{
-                    name.value = null;
-                    stok.value = null;
-                    harga.value = null;
-                    console.log(res.message);
-                    notify('error', res.message ?? 'Terjadi Kesalahan');
+                // reset semua batch row agar relevan dengan produk baru
+                resetBatchSelect();
+            });
+            // === Fungsi inisialisasi Select2 Hybrid (manual + existing) ===
+            function initSelect2(element) {
+                element.select2({
+                    theme: 'bootstrap-5',
+                    placeholder: 'Tambah atau pilih batch...',
+                    tags: true, // bisa input manual
+                    ajax: {
+                        url: '/product/get/batch/select',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            const productId = $('#product-select').val(); // optional: batasi batch per produk
+                            return {
+                                keyword: params.term,
+                                product_id: productId
+                            };
+                        },
+                        processResults: function (data) {
+                            return {
+                                results: data.map(item => ({
+                                    id: item.batch_number,
+                                    text: item.batch_number,
+                                    exp_date: item.exp_date,
+                                    price: item.unit_price,
+                                    default_price: item.default_price
+                                }))
+                            };
+                        },
+                        cache: false
+                    },
+                    minimumInputLength : 1,
+                });
+
+                // Isi otomatis exp_date, harga, dll bila pilih batch existing
+                element.on('select2:select', function (e) {
+                    const data = e.params.data;
+                    const row = $(this).closest('.batch-row');
+
+                    if (data.exp_date) row.find('[name="exp_date[]"]').val(data.exp_date);
+                    if (data.price) row.find('[name="unit_price[]"]').val(data.price);
+                    if (data.default_price) row.find('[name="default_price[]"]').val(data.default_price);
+                });
+            }
+
+            // === Inisialisasi row pertama ===
+            initSelect2($('.batch-select'));
+
+            // === Tambah row baru ===
+            $('#addBatchRow').on('click', function() {
+                const newRow = $('.batch-row:first').clone();
+                newRow.find('input').val('');
+                newRow.find('select').remove(); // hapus select lama
+                const newInput = $('<select class="form-select form-select-sm batch-select" name="batch_number[]" style="width: 100%;"></select>');
+                newRow.find('.col-12.col-md-3.col-lg-2').first().html(newInput);
+                $('#batchWrapper').append(newRow.hide().fadeIn(150));                
+                initSelect2(newRow.find('.batch-select'));
+            });
+
+            // === Hapus row ===
+            $(document).on('click', '.removeBatchRow', function() {
+                if ($('.batch-row').length > 1) {
+                    $(this).closest('.batch-row').fadeOut(150, function() {
+                        $(this).remove();
+                    });
+                } else {
+                    notify('warning', 'Minimal 1 batch harus ada!');
                 }
-            } catch (error) {
-                console.error('Error: ', error);
-                notify('error', error.slice(0,150));
+            });
+
+            function resetBatchSelect() {
+                $('#batchWrapper .batch-select').each(function() {
+                    if ($(this).data('select2')) {
+                        $(this).select2('destroy');
+                    }
+                    $(this).find('option').remove();
+                    $(this).val('');
+                    initSelect2($(this));
+                });
             }
         });
     </script>

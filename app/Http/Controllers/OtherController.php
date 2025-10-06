@@ -94,4 +94,19 @@ class OtherController extends Controller
             ]);
         }
     }
+
+    public function getBatchSelect() {
+        $keyword = request()->get('keyword');
+        $productId = request()->get('product_id');
+
+        $dataBatch = ProductBatch::query()
+        ->where('item_id', $productId)
+        ->when($keyword,function ($q, $key) {
+            $q->where('batch_number', 'LIKE', "%{$key}%");
+        })
+        ->limit(10)
+        ->get(['batch_number', 'exp_date', 'unit_cost']);
+
+        return response()->json($dataBatch);
+    }
 }

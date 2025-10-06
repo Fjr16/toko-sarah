@@ -46,6 +46,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('product/show/by-id/{item_id}', [OtherController::class, 'showDetailProductById'])->name('product/show.by-id');
     Route::get('product/get/data/batch', [OtherController::class, 'getDataBatch'])->name('product/get/data.batch');
     Route::get('product/get/item/batch/{batchId}', [OtherController::class, 'getItemBatch'])->name('product/get/item.batch');
+    Route::get('product/get/batch/select', [OtherController::class, 'getBatchSelect'])->name('product/get/batch.select');
     // Route::get('product/to/cart/{id}', [OtherController::class, 'addProductToCart'])->name('product/to.cart');
 
 

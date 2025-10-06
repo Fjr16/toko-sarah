@@ -11,10 +11,13 @@ use App\Models\Transaction;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use App\Models\ItemCategory;
+use App\Models\PurchaseTemp;
+use App\Models\PurchaseTempDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -138,50 +141,35 @@ class TransactionController extends Controller
 
     public function storeItem($id){
         try {
-            $dataSession = session()->get('data_pembelian');
             $item = Item::findOrFail($id);
-            $findItem = $this->findItem($item->id);
-            if ($findItem) {
-                // untuk mendapatkan key asli, case misal terdapat array dengan key 0,1,2 ketika array key 1
-                // dihapus maka array 0,2. disini ketika index dicari maka index yang dikembalikan sesuai dengan index 0,2 bukan 0,1
-                $index = key(array_filter($dataSession, function($itemSession) use ($item) {
-                    return $itemSession['id'] === $item->id;
-                }));
-                $jumlahItem = $dataSession[$index]['jumlah']+1;
-                $dataSession[$index] = [
-                    'id' => $item->id,
-                    'barcode' => $item->code,
-                    'name' => $item->name,
-                    'jumlah' => $jumlahItem,
-                    'satuan' => $item->small_unit,
-                    'harga_satuan' => $item->default_cost,
-                    'margin' => $item->margin,
-                    'harga_jual' => $item->default_price,
-                    'stok' => $item->all_stok,
-                    'total_harga' => $item->default_cost * $jumlahItem,
-                ];
-                session()->put('data_pembelian', $dataSession);
-            }else{
-                session()->push('data_pembelian', [
-                    'id' => $item->id,
-                    'barcode' => $item->code,
-                    'name' => $item->name,
-                    'jumlah' => 1,
-                    'satuan' => $item->small_unit,
-                    'harga_satuan' => $item->default_cost,
-                    'margin' => $item->margin,
-                    'harga_jual' => $item->default_price,
-                    'stok' => $item->all_stok,
-                    'total_harga' => $item->default_cost * 1,
-                ]);
+            $findItem = PurchaseTempDetail::where('item_id', $id)->first();
+            if ($findItem) return response()->json([
+                'status' => false,
+                'message' => 'Produk Telah ditambahkan ke keranjang',
+            ]);
+            
+            $purchaseTemp = PurchaseTemp::first();
+            if (!$purchaseTemp) {
+                $purchaseTemp = new PurchaseTemp;
+                $purchaseTemp->user_id = Auth::user()->id;
+                $purchaseTemp->save();
             }
-            session()->flash('success', 'Berhasil Ditambahkan Keranjang');
+            $model = new PurchaseTempDetail;
+            $model->purchase_temp_id = $purchaseTemp->id;
+            $model->item_id = $item->id;
+            // $model->product_batch_id = null
+            // $model->temp_batch_number = null;
+            // $model->exp_date = null;
+            $model->qty = 1;
+            $model->unit_price = $item->default_cost;
+            // $model->discount = 0;
+            // $model->tax = 0;
+            // $model->sub_total = 0;
             return response()->json([
                 'status' => true,
-                'message' => 'Data Berhasil Ditemukan',
+                'message' => 'Sukses ditambahkan',
             ]);
         } catch (Throwable $th) {
-            // session()->flash('error', 'Terjadi Kesalahan Sistem');
             return response()->json([
                 'status' => false,
                 'message' => 'Kesalahan Sistem',
@@ -308,13 +296,19 @@ class TransactionController extends Controller
      */
     public function destroy(string $id)
     {
-        $data = session()->get('data_pembelian');
-        $newData = array_filter($data, function ($item) use ($id){
-            return $item['id'] != $id;
-        });
-
-        session()->put('data_pembelian', $newData);
-        return back()->with('success', 'Berhasil Dihapus');
+        try {
+            $item = PurchaseTempDetail::findOrFail($id);
+            $item->delete();
+            return response()->json([
+                'status' => true,
+                'message' => 'Berhasil Hapus Produk'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => substr($th->getMessage(),0,150)
+            ]);
+        }
     }
 
     public function reset(){
