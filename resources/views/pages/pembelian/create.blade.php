@@ -87,11 +87,12 @@
             {{-- Pilih Produk --}}
             <div class="mb-3">
             <label class="form-label fw-semibold">Pilih Produk</label>
-                <div id="product-select" style="width: 100%"></div>
+                {{-- <div id="product-select" style="width: 100%"></div> --}}
+                <select name="product_id" id="product-select" style="width: 100%"></select>
             </div>
 
             {{-- === BAGIAN MULTIPLE BATCH === --}}
-            <div class="border rounded p-3 bg-light mb-3">
+            <div class="border rounded p-3 mb-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold text-uppercase mb-0">Batch Produk</h6>
                     <button type="button" class="btn btn-sm btn-outline-primary" id="addBatchRow">
@@ -164,7 +165,7 @@
 
             {{-- Tombol Tambah ke Keranjang --}}
             <div class="text-end">
-            <button class="btn btn-success px-4">
+            <button class="btn btn-success px-4" onclick="addToCart()">
                 <i class="bi bi-cart-plus"></i> Tambahkan ke Keranjang
             </button>
             </div>
@@ -424,6 +425,51 @@
     {{ $dataTable->scripts() }}
 
     <script>
+        async function addToCart() {
+            const productId = $('#product-select').val();
+            const batch = $('select[name="batch_number[]"]').map(function (){return this.value.trim()}).get();
+            const exp_date = $('input[name="exp_date[]"]').map(function (){return this.value.trim()}).get();
+            const qty = $('input[name="qty[]"]').map(function (){return this.value.trim()}).get();
+            const unit_price = $('input[name="unit_price[]"]').map(function (){return this.value.trim()}).get();
+            const discount = $('input[name="discount[]"]').map(function (){return this.value.trim()}).get();
+            const tax = $('input[name="tax[]"]').map(function (){return this.value.trim()}).get();
+
+            try {
+                const res = await fetch('pembelian/store/item'+productId, {
+                    method : 'POST',
+                    headers:{
+                        'X-CSRF-TOKEN' : "{{ csrf_token() }}",
+                        'accept' : 'application/json',
+                        'ContentType' : 'application/json',
+                    },
+                    data:{
+                        item_id : productId,
+                        batch_number : batch,
+                        exp_date : exp_date,
+                        qty:qty,
+                        unit_price:unit_price,
+                        discount:discount,
+                        tax:tax,
+                    }
+                });
+
+                if (!res.ok) {
+                    const errorText = await res.statusText;
+                    throw new Error(errorText || 'Gagal Hapus Data');
+                }
+
+                const result = await res.json();
+
+                if (!result || result.status == false) {
+                    notify('error', result.message || 'Gagal, terjadi kesalahan sistem');
+                    return;
+                }
+                notify('success', result.message || 'Sukses, ditambahkan ke keranjang');
+            } catch (error) {
+                console.log('Error: ', error.message);
+                notify('error', error.message.slice(0,150) ?? 'terjadi Kesalahan sistem');
+            }
+        }
         async function removeItem(purchaseTempId){
             try {
                 const url = '/pembelian/destroy/'+purchaseTempId;
@@ -655,6 +701,7 @@
 
     </script> --}}
 
+    {{-- scripts untuk form input new product master --}}
     <script>
         // preview image
         const inputImage = document.getElementById('fotoProduk');
@@ -731,6 +778,7 @@
         });
     </script>
 
+    {{-- scripts modified batch --}}
     <script>
         $(document).ready(function() {
             // saat produk dipilih
@@ -743,11 +791,35 @@
                 // reset semua batch row agar relevan dengan produk baru
                 resetBatchSelect();
             });
+            // end saat produk dipilih
+
+            //event saat batch select on change
+            $('#batchWrapper').on('select2:select change', '.batch-select', function(e){
+                const row = $(this).closest('.batch-row');
+                const batchId = $(this).val();
+                // Objek Select2 (punya id, text, exp_date, price, dst.)
+                const d = ($(this).select2('data')[0] || {});
+                // Deteksi apakah ini "tag baru"
+                const isNew = d.newTag || (d.element && $(d.element).attr('data-select2-tag') === 'true');
+
+                console.log({ batchId, d, isNew });
+
+                // contoh: isi field lain kalau existing
+                if (!isNew) {
+                    if (d.exp_date)      $row.find('[name="exp_date[]"]').val(d.exp_date);
+                    if (d.price)         $row.find('[name="unit_price[]"]').val(d.price);
+                    if (d.default_price) $row.find('[name="default_price[]"]').val(d.default_price);
+                }
+            });
+
+            //end event saat batch select on change
+
             // === Fungsi inisialisasi Select2 Hybrid (manual + existing) ===
             function initSelect2(element) {
                 element.select2({
                     theme: 'bootstrap-5',
                     placeholder: 'Tambah atau pilih batch...',
+                    minimumInputLength: 1,
                     tags: true, // bisa input manual
                     ajax: {
                         url: '/product/get/batch/select',
@@ -773,31 +845,55 @@
                         },
                         cache: false
                     },
-                    minimumInputLength : 1,
+                    createTag: (params) => {
+                        const term = (params.term || '').trim();
+                        if(!term) return null;
+                        const exists = element.find('option').toArray()
+                                        .some(opt => $(opt).text().trim().toLowerCase() === term.toLowerCase());
+                        return exists ? null : {id:term, text:term, newTag:true};
+                    },
+                    insertTag: (data,tag) => {data.unshift(tag);},
+                    templateResult:item => {
+                        if (item.loading) return item.text;
+                        return item.newTag
+                        ? $(`<span>Tambah batch baru: <strong>${item.text}</strong></span>`)
+                        : $(`<span>${item.text}</span>`);
+                    }
                 });
 
                 // Isi otomatis exp_date, harga, dll bila pilih batch existing
                 element.on('select2:select', function (e) {
+                    const picked = (e.params.data.text || '').trim().toLowerCase();
+                    $(this).find('option[data-select2-tag="true"]').each(function(){
+                        const t = (this.text || '').trim().toLowerCase();
+                        if (t !== picked) $(this).remove(); // sisakan hanya yang terpilih
+                    });
+
                     const data = e.params.data;
                     const row = $(this).closest('.batch-row');
 
-                    if (data.exp_date) row.find('[name="exp_date[]"]').val(data.exp_date);
-                    if (data.price) row.find('[name="unit_price[]"]').val(data.price);
-                    if (data.default_price) row.find('[name="default_price[]"]').val(data.default_price);
+                    if (data.newTag) {
+                        row.find('[name="exp_date[]"], [name="unit_price[]"], [name="default_price[]"]').val('');
+                    }else{
+                        if (data.exp_date) row.find('[name="exp_date[]"]').val(data.exp_date);
+                        if (data.price) row.find('[name="unit_price[]"]').val(data.price);
+                        if (data.default_price) row.find('[name="default_price[]"]').val(data.default_price);
+                    }
                 });
             }
-
             // === Inisialisasi row pertama ===
             initSelect2($('.batch-select'));
 
             // === Tambah row baru ===
             $('#addBatchRow').on('click', function() {
-                const newRow = $('.batch-row:first').clone();
-                newRow.find('input').val('');
-                newRow.find('select').remove(); // hapus select lama
+                const newRow = $('.batch-row:first').clone(false,false);
+                newRow.find('input[type="text"], input[type="number"], input[type="date"], input[type="hidden"]').val('');
+                newRow.find('.select2, .select2-container').remove(); // hapus select lama
+                newRow.find('select .batch-select').remove(); // hapus select lama
+
                 const newInput = $('<select class="form-select form-select-sm batch-select" name="batch_number[]" style="width: 100%;"></select>');
                 newRow.find('.col-12.col-md-3.col-lg-2').first().html(newInput);
-                $('#batchWrapper').append(newRow.hide().fadeIn(150));                
+                $('#batchWrapper').append(newRow.hide().fadeIn(150));
                 initSelect2(newRow.find('.batch-select'));
             });
 
@@ -820,6 +916,10 @@
                     $(this).find('option').remove();
                     $(this).val('');
                     initSelect2($(this));
+
+                });
+                $('.batch-row').each(function(){
+                    $(this).find('[name="exp_date[]"], [name="qty[]"], [name="unit_price[]"], [name="discount[]"], [name="default_price[]"], [name="tax[]"]').val('');
                 });
             }
         });
