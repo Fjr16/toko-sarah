@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Throwable;
 
@@ -139,42 +140,58 @@ class TransactionController extends Controller
         }
     }
 
-    public function storeItem($id){
-        try {
-            $item = Item::findOrFail($id);
-            $findItem = PurchaseTempDetail::where('item_id', $id)->first();
-            if ($findItem) return response()->json([
-                'status' => false,
-                'message' => 'Produk Telah ditambahkan ke keranjang',
-            ]);
-            
-            $purchaseTemp = PurchaseTemp::first();
-            if (!$purchaseTemp) {
-                $purchaseTemp = new PurchaseTemp;
-                $purchaseTemp->user_id = Auth::user()->id;
-                $purchaseTemp->save();
-            }
-            $model = new PurchaseTempDetail;
-            $model->purchase_temp_id = $purchaseTemp->id;
-            $model->item_id = $item->id;
-            // $model->product_batch_id = null
-            // $model->temp_batch_number = null;
-            // $model->exp_date = null;
-            $model->qty = 1;
-            $model->unit_price = $item->default_cost;
-            // $model->discount = 0;
-            // $model->tax = 0;
-            // $model->sub_total = 0;
-            return response()->json([
-                'status' => true,
-                'message' => 'Sukses ditambahkan',
-            ]);
-        } catch (Throwable $th) {
+    public function storeItem(Request $req){
+        $validators = Validator::make($req->all(), [
+            'item_id' => 'required|exists:items,id',
+            'product_batch_id' => 'nullable|exists:product_batches,id|required_without:batch_number',
+            'batch_number' => 'nullable|required_without:product_batch_id',
+            'exp_date' => 'required|date',
+            'qty' => 'required|integer|min:1',
+            'unit_price'=>'required',
+            'discount'=>'nullable',
+            'tax'=>'nullable',
+        ]);
+        if ($validators->fails()) {
             return response()->json([
                 'status' => false,
-                'message' => 'Kesalahan Sistem',
-            ], 500);
+                'message' => $validators->errors()->first(),
+            ]);
         }
+        // try {
+        //     $item = Item::findOrFail($id);
+        //     $findItem = PurchaseTempDetail::where('item_id', $id)->first();
+        //     if ($findItem) return response()->json([
+        //         'status' => false,
+        //         'message' => 'Produk Telah ditambahkan ke keranjang',
+        //     ]);
+            
+        //     $purchaseTemp = PurchaseTemp::first();
+        //     if (!$purchaseTemp) {
+        //         $purchaseTemp = new PurchaseTemp;
+        //         $purchaseTemp->user_id = Auth::user()->id;
+        //         $purchaseTemp->save();
+        //     }
+        //     $model = new PurchaseTempDetail;
+        //     $model->purchase_temp_id = $purchaseTemp->id;
+        //     $model->item_id = $item->id;
+        //     // $model->product_batch_id = null
+        //     // $model->temp_batch_number = null;
+        //     // $model->exp_date = null;
+        //     $model->qty = 1;
+        //     $model->unit_price = $item->default_cost;
+        //     // $model->discount = 0;
+        //     // $model->tax = 0;
+        //     // $model->sub_total = 0;
+        //     return response()->json([
+        //         'status' => true,
+        //         'message' => 'Sukses ditambahkan',
+        //     ]);
+        // } catch (Throwable $th) {
+        //     return response()->json([
+        //         'status' => false,
+        //         'message' => 'Kesalahan Sistem',
+        //     ], 500);
+        // }
     }
 
     private function generateRandomId() {

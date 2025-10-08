@@ -100,13 +100,23 @@ class OtherController extends Controller
         $productId = request()->get('product_id');
 
         $dataBatch = ProductBatch::query()
+        ->with(['product:id,default_price,margin'])
         ->where('item_id', $productId)
         ->when($keyword,function ($q, $key) {
             $q->where('batch_number', 'LIKE', "%{$key}%");
         })
         ->limit(10)
-        ->get(['batch_number', 'exp_date', 'unit_cost']);
+        ->get(['item_id','batch_number', 'exp_date', 'unit_cost', 'id']);
 
-        return response()->json($dataBatch);
+        $results = $dataBatch->map(function($item){
+            return [
+                'id' => $item->id,
+                'text' => $item->batch_number,
+                'exp_date' => $item->exp_date,
+                'cost' => number_format($item->unit_cost,0,null,''),
+            ];
+        });
+
+        return response()->json($results);
     }
 }

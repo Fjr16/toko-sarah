@@ -59,6 +59,14 @@
     border-radius: 6px;
     transition: background 0.2s ease-in-out;
     }
+    .is-disabled {
+        background: rgba(0,0,0,.20);
+        opacity: .8;                 /* terlihat redup */
+        filter: brightness(.75) contrast(.95) saturate(.8);
+        pointer-events: none;         /* cegah interaksi mouse */
+        user-select: none;            /* cegah seleksi teks */
+        cursor: not-allowed;          /* hint visual */
+    }
 </style>
 @endpush
 @section('content')
@@ -92,7 +100,7 @@
             </div>
 
             {{-- === BAGIAN MULTIPLE BATCH === --}}
-            <div class="border rounded p-3 mb-3">
+            <div id="wrapperMultipleBatch" class="border rounded p-3 mb-3 is-disabled" aria-disabled="true">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h6 class="fw-bold text-uppercase mb-0">Batch Produk</h6>
                     <button type="button" class="btn btn-sm btn-outline-primary" id="addBatchRow">
@@ -105,16 +113,17 @@
                     <div class="col-2">Batch Number</div>
                     <div class="col-2">Exp. Date</div>
                     <div class="col-1 text-end">Qty</div>
-                    <div class="col-2 text-end">Harga Beli</div>
-                    <div class="col-1 text-end">Diskon</div>
-                    <div class="col-1 text-end">Pajak</div>
-                    <div class="col-2 text-end">Harga Jual</div>
+                    <div class="col-2 text-end">* Harga Satuan</div>
+                    <div class="col-1 text-end">- Diskon</div>
+                    <div class="col-1 text-end">+ Pajak</div>
+                    <div class="col-2 text-end">= SubTotal</div>
                     <div class="col-1 text-center">Aksi</div>
                 </div>
 
                 <div id="batchWrapper">
                     {{-- Contoh Row --}}
                     <div class="row g-2 batch-row align-items-end mb-2">
+                        <input type="hidden" name="product_batch_id[]">
                         <div class="col-12 col-md-3 col-lg-2">
                             <label class="form-label d-lg-none fw-semibold">Batch Number</label>
                             <select class="form-select form-select-sm batch-select" name="batch_number[]" style="width: 100%;"></select>
@@ -149,8 +158,8 @@
                         </div>
 
                         <div class="col-6 col-md-2 col-lg-2">
-                            <label class="form-label d-lg-none fw-semibold">Harga Jual</label>
-                            <input type="text" class="form-control form-control-sm text-end" name="default_price[]" placeholder="0"
+                            <label class="form-label d-lg-none fw-semibold">Sub Total</label>
+                            <input type="text" class="form-control form-control-sm text-end" name="sub_total[]" placeholder="0"
                             disabled>
                         </div>
 
@@ -427,6 +436,7 @@
     <script>
         async function addToCart() {
             const productId = $('#product-select').val();
+            const batchId = $('input[name="product_batch_id[]"]').map(function (){return this.value.trim()}).get();
             const batch = $('select[name="batch_number[]"]').map(function (){return this.value.trim()}).get();
             const exp_date = $('input[name="exp_date[]"]').map(function (){return this.value.trim()}).get();
             const qty = $('input[name="qty[]"]').map(function (){return this.value.trim()}).get();
@@ -434,23 +444,29 @@
             const discount = $('input[name="discount[]"]').map(function (){return this.value.trim()}).get();
             const tax = $('input[name="tax[]"]').map(function (){return this.value.trim()}).get();
 
+            if (!productId) {
+                notify('error', 'Pilih produk terlebih dahulu');
+                return;
+            }
+
             try {
-                const res = await fetch('pembelian/store/item'+productId, {
+                const res = await fetch('/pembelian/store/item', {
                     method : 'POST',
                     headers:{
                         'X-CSRF-TOKEN' : "{{ csrf_token() }}",
-                        'accept' : 'application/json',
-                        'ContentType' : 'application/json',
+                        'Accept' : 'application/json',
+                        'Content-Type' : 'application/json',
                     },
-                    data:{
+                    body:JSON.stringify({
                         item_id : productId,
+                        product_batch_id : batchId,
                         batch_number : batch,
                         exp_date : exp_date,
                         qty:qty,
                         unit_price:unit_price,
                         discount:discount,
                         tax:tax,
-                    }
+                    })
                 });
 
                 if (!res.ok) {
@@ -784,6 +800,13 @@
             // saat produk dipilih
             $('#product-select').on('select2:select', function(e) {
                 const data = e.params.data;
+                if (data.text) {
+                    $('#wrapperMultipleBatch').removeClass('is-disabled');
+                    $('#wrapperMultipleBatch').attr('aria-disabled', false);
+                }else{
+                    $('#wrapperMultipleBatch').addClass('is-disabled');
+                    $('#wrapperMultipleBatch').attr('aria-disabled', true);
+                }
                 $(this).find('option').remove();
                 const newOption = new Option(data.text, data.id, true, true);
                 $(this).append(newOption).trigger('change.select2');
@@ -792,27 +815,6 @@
                 resetBatchSelect();
             });
             // end saat produk dipilih
-
-            //event saat batch select on change
-            $('#batchWrapper').on('select2:select change', '.batch-select', function(e){
-                const row = $(this).closest('.batch-row');
-                const batchId = $(this).val();
-                // Objek Select2 (punya id, text, exp_date, price, dst.)
-                const d = ($(this).select2('data')[0] || {});
-                // Deteksi apakah ini "tag baru"
-                const isNew = d.newTag || (d.element && $(d.element).attr('data-select2-tag') === 'true');
-
-                console.log({ batchId, d, isNew });
-
-                // contoh: isi field lain kalau existing
-                if (!isNew) {
-                    if (d.exp_date)      $row.find('[name="exp_date[]"]').val(d.exp_date);
-                    if (d.price)         $row.find('[name="unit_price[]"]').val(d.price);
-                    if (d.default_price) $row.find('[name="default_price[]"]').val(d.default_price);
-                }
-            });
-
-            //end event saat batch select on change
 
             // === Fungsi inisialisasi Select2 Hybrid (manual + existing) ===
             function initSelect2(element) {
@@ -834,12 +836,11 @@
                         },
                         processResults: function (data) {
                             return {
-                                results: data.map(item => ({
-                                    id: item.batch_number,
-                                    text: item.batch_number,
-                                    exp_date: item.exp_date,
-                                    price: item.unit_price,
-                                    default_price: item.default_price
+                                results: data.map(row => ({
+                                    id: row.id,
+                                    text: row.text,
+                                    exp_date: row.exp_date,
+                                    cost: row.cost,
                                 }))
                             };
                         },
@@ -873,11 +874,15 @@
                     const row = $(this).closest('.batch-row');
 
                     if (data.newTag) {
-                        row.find('[name="exp_date[]"], [name="unit_price[]"], [name="default_price[]"]').val('');
+                        row.find('[name="qty[]"],[name="product_batch_id[]"],[name="exp_date[]"], [name="unit_price[]"], [name="sub_total[]"]').val('');
                     }else{
+                        if (data.id) row.find('[name="product_batch_id[]"]').val(data.id);
                         if (data.exp_date) row.find('[name="exp_date[]"]').val(data.exp_date);
-                        if (data.price) row.find('[name="unit_price[]"]').val(data.price);
-                        if (data.default_price) row.find('[name="default_price[]"]').val(data.default_price);
+                        if (data.cost){
+                            row.find('[name="qty[]"]').val(1);
+                            row.find('[name="unit_price[]"]').val(data.cost);
+                            row.find('[name="sub_total[]"]').val(data.cost);
+                        } 
                     }
                 });
             }
@@ -919,9 +924,24 @@
 
                 });
                 $('.batch-row').each(function(){
-                    $(this).find('[name="exp_date[]"], [name="qty[]"], [name="unit_price[]"], [name="discount[]"], [name="default_price[]"], [name="tax[]"]').val('');
+                    $(this).find('[name="product_batch_id[]"], [name="exp_date[]"], [name="qty[]"], [name="unit_price[]"], [name="discount[]"], [name="sub_total[]"], [name="tax[]"]').val('');
                 });
             }
+
+            // hitung sub total per batch
+            $('#batchWrapper').on('input change',
+                '[name="qty[]"], [name="unit_price[]"], [name="discount[]"], [name="tax[]"]',
+                function(){
+                    const row = $(this).closest('.batch-row');
+                    const qty = toNum(row.find('[name="qty[]"]').val());
+                    const unit_price = toNum(row.find('[name="unit_price[]"]').val());
+                    const discount = toNum(row.find('[name="discount[]"]').val());
+                    const tax = toNum(row.find('[name="tax[]"]').val());
+                    
+                    let subTotal = toNum((qty * unit_price) + tax - discount); 
+                    row.find('[name="sub_total[]"]').val(subTotal);
+                }
+            );
         });
     </script>
 

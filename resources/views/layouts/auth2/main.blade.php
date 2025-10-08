@@ -493,6 +493,13 @@
                 maximumFractionDigits: 0,
             }).format(value);
         }
+        function toNum(value){
+          if (value == null) return 0;
+          const str = String(value).trim();
+          if(!str) return 0;
+          const n = Number(str);
+          return Number.isFinite(n) ? n : 0;
+        }
 
         function toggleFab() {
              let fabMenu = document.getElementById('fabMenu');
