@@ -480,15 +480,17 @@
                     notify('error', result.message || 'Gagal, terjadi kesalahan sistem');
                     return;
                 }
+                window.LaravelDataTables['purchasetemp-table'].ajax.reload();
+                resetBatchSelect();
                 notify('success', result.message || 'Sukses, ditambahkan ke keranjang');
             } catch (error) {
                 console.log('Error: ', error.message);
                 notify('error', error.message.slice(0,150) ?? 'terjadi Kesalahan sistem');
             }
         }
-        async function removeItem(purchaseTempId){
+        async function removeItem(purchaseTempDetailId){
             try {
-                const url = '/pembelian/destroy/'+purchaseTempId;
+                const url = '/pembelian/destroy/'+purchaseTempDetailId;
                 const res = await fetch(url, {
                     method : 'DELETE',
                     headers: {
@@ -510,6 +512,58 @@
                 notify('error', error.message.slice(0,150) ?? 'Terjadi Kesalahan');
             }
         }
+        async function editItem(purchaseTempDetailId) {
+            const table = window.LaravelDataTables['purchasetemp-table'];
+            const row = '#' + purchaseTempDetailId;
+
+            const actionIndex  = table.column('.action_table').index();
+            const unitPriceIndex  = table.column('.unit_price_table').index();
+            const qtyIndex  = table.column('.qty_table').index();
+            const discIndex  = table.column('.discount_table').index();
+            const taxIndex  = table.column('.tax_table').index();
+            const subTotalIndex  = table.column('.subtotal_table').index();
+
+            const colAct = table.cell(row, actionIndex).node();
+            const colUnitPrice = table.cell(row, unitPriceIndex).node();
+            const colQty = table.cell(row, qtyIndex).node();
+            const colDisc = table.cell(row, discIndex).node();
+            const colTax = table.cell(row, taxIndex).node();
+            const colSubtotal = table.cell(row, subTotalIndex).node();
+
+            const btnSimpan = `<button onclick="updateItem(${purchaseTempDetailId})" class="text-success border-0 bg-transparent p-0"><i class="bx bx-save fs-4"></i></button>`;
+            const btnBtl =`<button onclick="window.LaravelDataTables['purchasetemp-table'].ajax.reload()" class="text-danger border-0 bg-transparent p-0"><i class="bx bx-exit fs-4"></i></button>`;
+
+            const inputUnitPrice = `<input type="text" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="0" name="unit_price_edit" id="unit_price_edit" class="form-control form-control-sm">`;
+            const inputQty = `
+                <div class="input-group">
+                    <input type="number" class="form-control" name="qty_edit" id="qty_edit" value="">
+                    <span class="input-group-text bg-primary text-white">'.$row->product_satuan.'</span>
+                </div>`;
+            const inputDisc = `<input type="text" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="0" name="discount_edit" id="discount_edit" class="form-control form-control-sm">`;
+            const inputTax = `<input type="text" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="0" name="tax_edit" id="tax_edit" class="form-control form-control-sm">`;
+            // const elementSubTotal = selectedRow.;
+
+            $(colAct).html(btnBtl + btnSimpan);
+            $(colUnitPrice).html(inputUnitPrice);
+            $(colDisc).html(inputDisc);
+            $(colTax).html(inputTax);
+        }
+
+        $('#purchasetemp-table').on('input',
+            'input[name="unit_price_edit"], input[name="qty_edit"], input[name="discount_edit"], input[name="tax_edit"]',
+            function (e) {
+                const table = window.LaravelDataTables['purchasetemp-table'];
+
+                const tr   = $(this).closest('tr');
+                const rowId = tr.attr('id');
+
+                // akses node/data datatables (opsional)
+                const row   = table.row('#' + rowId);
+                const data  = row.data();
+                console.log(rowId);
+                // ... lanjut hitung subtotal, dsb.
+            }
+        );
     </script>
 
     {{-- <script>
@@ -796,6 +850,90 @@
 
     {{-- scripts modified batch --}}
     <script>
+        // === Fungsi inisialisasi Select2 Hybrid (manual + existing) ===
+        function initSelect2(element) {
+            element.select2({
+                theme: 'bootstrap-5',
+                placeholder: 'Tambah atau pilih batch...',
+                minimumInputLength: 1,
+                tags: true, // bisa input manual
+                ajax: {
+                    url: '/product/get/batch/select',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        const productId = $('#product-select').val(); // optional: batasi batch per produk
+                        return {
+                            keyword: params.term,
+                            product_id: productId
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.map(row => ({
+                                id: row.id,
+                                text: row.text,
+                                exp_date: row.exp_date,
+                                cost: row.cost,
+                            }))
+                        };
+                    },
+                    cache: false
+                },
+                createTag: (params) => {
+                    const term = (params.term || '').trim();
+                    if(!term) return null;
+                    const exists = element.find('option').toArray()
+                                    .some(opt => $(opt).text().trim().toLowerCase() === term.toLowerCase());
+                    return exists ? null : {id:term, text:term, newTag:true};
+                },
+                insertTag: (data,tag) => {data.unshift(tag);},
+                templateResult:item => {
+                    if (item.loading) return item.text;
+                    return item.newTag
+                    ? $(`<span>Tambah batch baru: <strong>${item.text}</strong></span>`)
+                    : $(`<span>${item.text}</span>`);
+                }
+            });
+
+            // Isi otomatis exp_date, harga, dll bila pilih batch existing
+            element.on('select2:select', function (e) {
+                const picked = (e.params.data.text || '').trim().toLowerCase();
+                $(this).find('option[data-select2-tag="true"]').each(function(){
+                    const t = (this.text || '').trim().toLowerCase();
+                    if (t !== picked) $(this).remove(); // sisakan hanya yang terpilih
+                });
+
+                const data = e.params.data;
+                const row = $(this).closest('.batch-row');
+
+                if (data.newTag) {
+                    row.find('[name="qty[]"],[name="product_batch_id[]"],[name="exp_date[]"], [name="unit_price[]"], [name="sub_total[]"]').val('');
+                }else{
+                    if (data.id) row.find('[name="product_batch_id[]"]').val(data.id);
+                    if (data.exp_date) row.find('[name="exp_date[]"]').val(data.exp_date);
+                    if (data.cost){
+                        row.find('[name="qty[]"]').val(1);
+                        row.find('[name="unit_price[]"]').val(data.cost);
+                        row.find('[name="sub_total[]"]').val(rupiahFormatter(data.cost));
+                    }
+                }
+            });
+        }
+        function resetBatchSelect() {
+            $('#batchWrapper .batch-select').each(function() {
+                if ($(this).data('select2')) {
+                    $(this).select2('destroy');
+                }
+                $(this).find('option').remove();
+                $(this).val('');
+                initSelect2($(this));
+
+            });
+            $('.batch-row').each(function(){
+                $(this).find('[name="product_batch_id[]"], [name="exp_date[]"], [name="qty[]"], [name="unit_price[]"], [name="discount[]"], [name="sub_total[]"], [name="tax[]"]').val('');
+            });
+        }
         $(document).ready(function() {
             // saat produk dipilih
             $('#product-select').on('select2:select', function(e) {
@@ -816,76 +954,6 @@
             });
             // end saat produk dipilih
 
-            // === Fungsi inisialisasi Select2 Hybrid (manual + existing) ===
-            function initSelect2(element) {
-                element.select2({
-                    theme: 'bootstrap-5',
-                    placeholder: 'Tambah atau pilih batch...',
-                    minimumInputLength: 1,
-                    tags: true, // bisa input manual
-                    ajax: {
-                        url: '/product/get/batch/select',
-                        dataType: 'json',
-                        delay: 250,
-                        data: function (params) {
-                            const productId = $('#product-select').val(); // optional: batasi batch per produk
-                            return {
-                                keyword: params.term,
-                                product_id: productId
-                            };
-                        },
-                        processResults: function (data) {
-                            return {
-                                results: data.map(row => ({
-                                    id: row.id,
-                                    text: row.text,
-                                    exp_date: row.exp_date,
-                                    cost: row.cost,
-                                }))
-                            };
-                        },
-                        cache: false
-                    },
-                    createTag: (params) => {
-                        const term = (params.term || '').trim();
-                        if(!term) return null;
-                        const exists = element.find('option').toArray()
-                                        .some(opt => $(opt).text().trim().toLowerCase() === term.toLowerCase());
-                        return exists ? null : {id:term, text:term, newTag:true};
-                    },
-                    insertTag: (data,tag) => {data.unshift(tag);},
-                    templateResult:item => {
-                        if (item.loading) return item.text;
-                        return item.newTag
-                        ? $(`<span>Tambah batch baru: <strong>${item.text}</strong></span>`)
-                        : $(`<span>${item.text}</span>`);
-                    }
-                });
-
-                // Isi otomatis exp_date, harga, dll bila pilih batch existing
-                element.on('select2:select', function (e) {
-                    const picked = (e.params.data.text || '').trim().toLowerCase();
-                    $(this).find('option[data-select2-tag="true"]').each(function(){
-                        const t = (this.text || '').trim().toLowerCase();
-                        if (t !== picked) $(this).remove(); // sisakan hanya yang terpilih
-                    });
-
-                    const data = e.params.data;
-                    const row = $(this).closest('.batch-row');
-
-                    if (data.newTag) {
-                        row.find('[name="qty[]"],[name="product_batch_id[]"],[name="exp_date[]"], [name="unit_price[]"], [name="sub_total[]"]').val('');
-                    }else{
-                        if (data.id) row.find('[name="product_batch_id[]"]').val(data.id);
-                        if (data.exp_date) row.find('[name="exp_date[]"]').val(data.exp_date);
-                        if (data.cost){
-                            row.find('[name="qty[]"]').val(1);
-                            row.find('[name="unit_price[]"]').val(data.cost);
-                            row.find('[name="sub_total[]"]').val(data.cost);
-                        } 
-                    }
-                });
-            }
             // === Inisialisasi row pertama ===
             initSelect2($('.batch-select'));
 
@@ -913,21 +981,6 @@
                 }
             });
 
-            function resetBatchSelect() {
-                $('#batchWrapper .batch-select').each(function() {
-                    if ($(this).data('select2')) {
-                        $(this).select2('destroy');
-                    }
-                    $(this).find('option').remove();
-                    $(this).val('');
-                    initSelect2($(this));
-
-                });
-                $('.batch-row').each(function(){
-                    $(this).find('[name="product_batch_id[]"], [name="exp_date[]"], [name="qty[]"], [name="unit_price[]"], [name="discount[]"], [name="sub_total[]"], [name="tax[]"]').val('');
-                });
-            }
-
             // hitung sub total per batch
             $('#batchWrapper').on('input change',
                 '[name="qty[]"], [name="unit_price[]"], [name="discount[]"], [name="tax[]"]',
@@ -937,9 +990,9 @@
                     const unit_price = toNum(row.find('[name="unit_price[]"]').val());
                     const discount = toNum(row.find('[name="discount[]"]').val());
                     const tax = toNum(row.find('[name="tax[]"]').val());
-                    
-                    let subTotal = toNum((qty * unit_price) + tax - discount); 
-                    row.find('[name="sub_total[]"]').val(subTotal);
+
+                    let subTotal = toNum((qty * unit_price) + tax - discount);
+                    row.find('[name="sub_total[]"]').val(rupiahFormatter(subTotal));
                 }
             );
         });

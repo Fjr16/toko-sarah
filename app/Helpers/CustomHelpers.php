@@ -45,4 +45,13 @@ class CustomHelpers {
             ];
         }
     }
+
+    public static function formatterRupiah($val){
+        if (empty($val)) {
+            return 'Rp. -';
+        }
+
+        $formatter = number_format($val, 0, ',', '.');
+        return 'Rp ' . $formatter;
+    }
 }

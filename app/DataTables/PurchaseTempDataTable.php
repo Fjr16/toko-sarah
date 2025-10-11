@@ -2,6 +2,7 @@
 
 namespace App\DataTables;
 
+use App\Helpers\CustomHelpers;
 use App\Models\PurchaseTempDetail;
 use Illuminate\Database\Eloquent\Builder as QueryBuilder;
 use Yajra\DataTables\EloquentDataTable;
@@ -23,14 +24,16 @@ class PurchaseTempDataTable extends DataTable
     {
         return (new EloquentDataTable($query))
             ->addColumn('action', function($row){
-                return '<button onclick="removeItem('.$row->id.')" class="text-danger border-0 bg-transparent p-0"><i class="bx bx-x fs-4"></i></button>';
+                $delete = '<button onclick="removeItem('.$row->id.')" class="text-danger border-0 bg-transparent p-0"><i class="bx bxs-x-square fs-4"></i></button>';
+                $edit = '<button onclick="editItem('.$row->id.')" class="text-warning border-0 bg-transparent p-0"><i class="bx bx-edit fs-4"></i></button>';
+                return $edit . $delete;
             })
             ->addColumn('Produk', function($row){
-                return '<span class="d-block">'.($row->item->name ?? '').'</span>
+                return '<span class="d-block">'.($row->product_name ?? '').'</span>
                 <span class="badge bg-primary">
                     <small class="text-start">
-                        kode : '.($row->item->code ?? '').' |
-                        Stok : '. ($row->item->all_stok ?? '0') .' '.($row->item->small_unit).'
+                        kode : '.($row->product_code ?? '').' |
+                        Stok : '. ($row->product_total_stock ?? '0') .' '.($row->product_satuan).'
                     </small>
                 </span>';
             })
@@ -40,35 +43,20 @@ class PurchaseTempDataTable extends DataTable
             ->addColumn('Exp Date', function($row){
                 return $row->productBatch->exp_date ?? $row->exp_date ?? '00-00-0000';
             })
-            ->addColumn('Harga Beli + margin (%)', function($row){
-                $unitPrice = 'Rp. ' . number_format(($row->unit_price ?? $row->item->default_cost) ,0);
-                $margin = ($row->item->margin ?? 0) . ' %';
-                $btnEdit = '<button type="button" class="btn btn-icon text-warning" onclick="openModalUpdatePrice(\'' . encrypt($row->item->id) . '\', 
-                                    \'' . addslashes($row->item->name) . '\', 
-                                    \'' . $row->item->default_cost . '\',
-                                    \'' . ($row->item->margin ?? 0) . '\', 
-                                    \'' . ($row->item->default_price ?? 0) . '\')">
-                                <i class="bx bx-edit"></i>
-                            </button>';
-                return $unitPrice . '+' . $margin . $btnEdit;
-            })
-            ->addColumn('Harga Jual', function($row){
-                return 'Rp. ' . number_format($row->item->default_price, 0);
+            ->addColumn('Harga Satuan', function($row){
+                return CustomHelpers::formatterRupiah(($row->unit_price ?? $row->product_default_cost));
             })
             ->addColumn('Qty', function($row){
-                return '<div class="input-group">
-                    <input type="number" class="form-control" name="jumlah" id="jumlah" value="'.$row->qty.'" data-encrypt-id="'.encrypt($row->id).'" readonly ondblclick="enableForm(this)">
-                    <span class="input-group-text bg-primary text-white">'.$row->item->small_unit.'</span>
-                </div>';
+                return (int) $row->qty . ' pcs';
             })
             ->addColumn('Diskon', function($row){
-                return '<input type="number" value="0" name="discount" id="discount" class="form-control form-control-sm">';
+                return CustomHelpers::formatterRupiah($row->discount);
             })
             ->addColumn('Pajak', function($row){
-                return '<input type="number" value="0" name="tax" id="tax" class="form-control form-control-sm">';
+                return CustomHelpers::formatterRupiah($row->tax);
             })
             ->addColumn('Total Harga', function($row){
-                return 'Rp. ' . number_format($row->sub_total,0);
+                return CustomHelpers::formatterRupiah($row->sub_total);
             })
             ->rawColumns(['action', 'Produk','Harga Beli + margin (%)', 'Qty','Diskon', 'Pajak'])
             ->setRowId('id');
@@ -80,7 +68,17 @@ class PurchaseTempDataTable extends DataTable
     public function query(PurchaseTempDetail $model): QueryBuilder
     {
         return $model->newQuery()
-                ->with(['purchaseTemp','item', 'productBatch'])
+                ->leftJoin('items', 'purchase_temp_details.item_id', '=', 'items.id')
+                ->with(['purchaseTemp', 'productBatch'])
+                ->select([
+                    'purchase_temp_details.*',
+                    'items.id as product_id',
+                    'items.code as product_code',
+                    'items.name as product_name',
+                    'items.all_stok as product_total_stock',
+                    'items.small_unit as product_satuan',
+                    'items.default_cost as product_default_cost',
+                ])
                 ->whereHas('purchaseTemp', function($q){
                     $q->where('user_id', auth()->id());
                 });
@@ -95,9 +93,17 @@ class PurchaseTempDataTable extends DataTable
                     ->setTableId('purchasetemp-table')
                     ->columns($this->getColumns())
                     ->minifiedAjax()
+                    ->processing(true)
+                    ->serverSide(true)
                     ->parameters([
                         'responsive' => true,
-                        'autoWidth' => false
+                        'autoWidth' => false,
+                        'language' => [
+                            'processing' => '<div class="d-flex align-items-center gap-2">
+                                   <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+                                   <span>Loading data…</span>
+                                 </div>',
+                        ],
                     ])
                     ->orderBy(1)
                     ->dom('frtip')
@@ -117,20 +123,43 @@ class PurchaseTempDataTable extends DataTable
     {
         return [
             Column::computed('action')
-                  ->title('')
-                  ->orderable(false)
-                  ->searchable(false),
-            Column::make('Produk'),
+                    ->title('Aksi')
+                    ->addClass('action_table')
+                    ->orderable(false)
+                    ->searchable(false),
+            Column::make('Produk')
+                    ->name('items.name'),
             Column::make('Batch')
+                    ->name('temp_batch_number')
                     ->defaultContent('-'),
-            Column::make('Exp Date'),
-            Column::make('Harga Beli + margin (%)'),
-            Column::make('Harga Jual'),
-            Column::make('Qty'),
-            Column::make('Diskon'),
-            Column::make('Pajak'),
+            Column::make('Exp Date')
+                    ->name('exp_date'),
+            Column::make('Harga Satuan')
+                    ->orderable(false)
+                    ->searchable(false)
+                    ->addClass('unit_price_table'),
+            Column::make('Qty')
+                    ->title('* Qty')
+                    ->orderable(false)
+                    ->searchable(false)
+                    ->addClass('qty_table'),
+            Column::make('Diskon')
+                    ->title('- Diskon')
+                    ->orderable(false)
+                    ->searchable(false)
+                    ->addClass('discount_table'),
+            Column::make('Pajak')
+                    ->title('+ Pajak')
+                    ->orderable(false)
+                    ->searchable(false)
+                    ->addClass('tax_table'),
             Column::make('Total Harga')
-                    ->addClass('text-end'),
+                    ->addClass('subtotal_table text-end')
+                    ->title('Subtotal'),
+            Column::make('product_code')
+                    ->name('items.code')
+                    ->visible(false)
+                    ->searchable(true),
         ];
     }
 

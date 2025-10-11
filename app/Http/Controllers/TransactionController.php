@@ -11,8 +11,10 @@ use App\Models\Transaction;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
 use App\Models\ItemCategory;
+use App\Models\ProductBatch;
 use App\Models\PurchaseTemp;
 use App\Models\PurchaseTempDetail;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\QueryException;
@@ -37,23 +39,9 @@ class TransactionController extends Controller
      */
     public function create(PurchaseTempDataTable $dataTable)
     {
-        // if (session('data_pembelian')) {
-        //     session()->put('data_pembelian', session('data_pembelian'));
-        // }else{
-        //     session()->put('data_pembelian', []);
-        // }
-
         $produks = Item::all();
         $suppliers = Supplier::get();
         $itemCategories = ItemCategory::get();
-        // return view('pages.pembelian.create', [
-        //     'title' => 'Pembelian',
-        //     'menu' => 'Pembelian',
-        //     'produks' => $produks,
-        //     'suppliers' => $suppliers,
-        //     'itemCategories' => $itemCategories,
-        // ]);
-
         return $dataTable->render('pages.pembelian.create', [
             'title' => 'Pembelian',
             'menu' => 'Pembelian',
@@ -71,85 +59,27 @@ class TransactionController extends Controller
         });
         return $find;
     }
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store_old($id)
-    {
-        try {
-            $dataSession = session()->get('data_pembelian');
-            $item = Item::findOrFail($id);
-            $findItem = $this->findItem($item->id);
-            if ($findItem) {
-                // untuk mendapatkan key asli, case misal terdapat array dengan key 0,1,2 ketika array key 1
-                // dihapus maka array 0,2. disini ketika index dicari maka index yang dikembalikan sesuai dengan index 0,2 bukan 0,1
-                $index = key(array_filter($dataSession, function($itemSession) use ($item) {
-                    return $itemSession['id'] === $item->id;
-                }));
-                $jumlahItem = $dataSession[$index]['jumlah']+1;
-                $dataSession[$index] = [
-                    'id' => $item->id,
-                    'barcode' => $item->code,
-                    'name' => $item->name,
-                    'jumlah' => $jumlahItem,
-                    'satuan' => $item->small_unit,
-                    'harga_satuan' => $item->default_cost,
-                    'margin' => $item->margin,
-                    'harga_jual' => $item->default_price,
-                    'stok' => $item->all_stok,
-                    'total_harga' => $item->default_cost * $jumlahItem,
-                ];
-                session()->put('data_pembelian', $dataSession);
-            }else{
-                session()->push('data_pembelian', [
-                    'id' => $item->id,
-                    'barcode' => $item->code,
-                    'name' => $item->name,
-                    'jumlah' => 1,
-                    'satuan' => $item->small_unit,
-                    'harga_satuan' => $item->default_cost,
-                    'margin' => $item->margin,
-                    'harga_jual' => $item->default_price,
-                    'stok' => $item->all_stok,
-                    'total_harga' => $item->default_cost * 1,
-                ]);
-            }
-            session()->flash('success', 'Berhasil Ditambahkan Keranjang');
-            return response()->json([
-                'status_code' => 200,
-                'message' => 'Data Berhasil Ditemukan',
-            ]);
-        } catch (ModelNotFoundException $mn){
-            session()->flash('error', 'Produk Tidak Ditemukan');
-            return response()->json([
-                'status_code' => 404,
-                'message' => 'Produk Tidak Ditemukan',
-            ]);
-        } catch (QueryException $qe){
-            session()->flash('error', 'Terjadi Kesalahan Database');
-            return response()->json([
-                'status_code' => 500,
-                'message' => 'Kesalahan Database',
-            ], 500);
-        } catch (Exception $e) {
-            session()->flash('error', 'Terjadi Kesalahan Sistem');
-            return response()->json([
-                'status_code' => 500,
-                'message' => 'Kesalahan Sistem',
-            ], 500);
-        }
-    }
 
     public function storeItem(Request $req){
         $validators = Validator::make($req->all(), [
             'item_id' => 'required|exists:items,id',
-            'product_batch_id' => 'nullable|exists:product_batches,id|required_without:batch_number',
-            'batch_number' => 'nullable|required_without:product_batch_id',
-            'exp_date' => 'required|date',
-            'qty' => 'required|integer|min:1',
-            'unit_price'=>'required',
-            'discount'=>'nullable',
-            'tax'=>'nullable',
+            'product_batch_id' => 'required|array',
+            'product_batch_id.*' => 'nullable|exists:product_batches,id|required_without:batch_number.*',
+            'batch_number' => 'required|array',
+            'batch_number.*' => 'nullable|required_without:product_batch_id.*',
+            'exp_date' => 'required|array',
+            'exp_date.*' => 'required|date|after:today',
+            'qty' => 'required|array',
+            'qty.*' => 'required|integer|min:1',
+            'unit_price'=>'required|array',
+            'unit_price.*'=>'required',
+            'discount'=>'required|array',
+            'discount.*'=>'nullable',
+            'tax'=>'required|array',
+            'tax.*'=>'nullable',
+        ],[
+            'product_batch_id.*.required_without' => 'Pilih No batch produk yang ada atau buat batch baru',
+            'batch_number.*.required_without' => 'Isi nomor batch jika tidak memilih batch yang ada',
         ]);
         if ($validators->fails()) {
             return response()->json([
@@ -157,41 +87,65 @@ class TransactionController extends Controller
                 'message' => $validators->errors()->first(),
             ]);
         }
-        // try {
-        //     $item = Item::findOrFail($id);
-        //     $findItem = PurchaseTempDetail::where('item_id', $id)->first();
-        //     if ($findItem) return response()->json([
-        //         'status' => false,
-        //         'message' => 'Produk Telah ditambahkan ke keranjang',
-        //     ]);
-            
-        //     $purchaseTemp = PurchaseTemp::first();
-        //     if (!$purchaseTemp) {
-        //         $purchaseTemp = new PurchaseTemp;
-        //         $purchaseTemp->user_id = Auth::user()->id;
-        //         $purchaseTemp->save();
-        //     }
-        //     $model = new PurchaseTempDetail;
-        //     $model->purchase_temp_id = $purchaseTemp->id;
-        //     $model->item_id = $item->id;
-        //     // $model->product_batch_id = null
-        //     // $model->temp_batch_number = null;
-        //     // $model->exp_date = null;
-        //     $model->qty = 1;
-        //     $model->unit_price = $item->default_cost;
-        //     // $model->discount = 0;
-        //     // $model->tax = 0;
-        //     // $model->sub_total = 0;
-        //     return response()->json([
-        //         'status' => true,
-        //         'message' => 'Sukses ditambahkan',
-        //     ]);
-        // } catch (Throwable $th) {
-        //     return response()->json([
-        //         'status' => false,
-        //         'message' => 'Kesalahan Sistem',
-        //     ], 500);
-        // }
+
+
+        DB::beginTransaction();
+        try {
+            $purchaseTemp = PurchaseTemp::firstOrCreate([
+                'user_id' => Auth::user()->id,
+            ]);
+
+            $data = $req->all();
+            $itemId = $data['item_id'];
+            foreach ($data['product_batch_id'] as $key => $batchId) {
+                $qty = (int) $data['qty'][$key] ?? 0;
+                $unitPrice = CustomHelpers::cleanCurrency($data['unit_price'][$key]) ?? 0;
+                $disc = CustomHelpers::cleanCurrency($data['discount'][$key]) ?? 0;
+                $tax = CustomHelpers::cleanCurrency($data['tax'][$key]) ?? 0;
+                $subTotal = ($qty * $unitPrice) + $tax - $disc;
+                $productBatchNumber = !empty($batchId) ? ProductBatch::whereKey($batchId)->value('batch_number') : null;
+                if (!empty($batchId) && !$productBatchNumber) {
+                    DB::rollBack();
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Mohon pilih atau tambahkan nomor batch baru'
+                    ]);
+                }
+
+                if($this->checkExistBatch($itemId, $batchId, $data['batch_number'][$key])){
+                    DB::rollBack();
+                    return response()->json([
+                        'status' => false,
+                        'message' => 'Nomor batch ' . (empty($batchId) ? $data['batch_number'][$key] : $productBatchNumber) . ' telah ditambahkan ke keranjang',
+                    ]);
+                }
+
+                $purchaseDetail = new PurchaseTempDetail;
+                $purchaseDetail->purchase_temp_id = $purchaseTemp->id;
+                $purchaseDetail->item_id = $itemId;
+                $purchaseDetail->product_batch_id = $batchId ?? null;
+                $purchaseDetail->temp_batch_number = empty($batchId) ? $data['batch_number'][$key] : $productBatchNumber;
+                $purchaseDetail->exp_date = Carbon::parse($data['exp_date'][$key])->format('Y-m-d');
+                $purchaseDetail->qty = $qty;
+                $purchaseDetail->unit_price = $unitPrice;
+                $purchaseDetail->discount = $disc;
+                $purchaseDetail->tax = $tax;
+                $purchaseDetail->sub_total = $subTotal;
+                $purchaseDetail->save();
+            }
+
+            DB::commit();
+            return response()->json([
+                'status' => true,
+                'message' => 'Berhasil tambah ke keranjang'
+            ]);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage()
+            ]);
+        }
     }
 
     private function generateRandomId() {
@@ -381,5 +335,15 @@ class TransactionController extends Controller
             DB::rollBack();
             return back()->with('error', 'Gagal memperbarui data, coba lagi : '.$e->getMessage());
         }
+    }
+
+
+    private function checkExistBatch($itemId, $batchId = null, $batchNumber = null){
+        if ($batchId) {
+            return PurchaseTempDetail::where('item_id', $itemId)->where('product_batch_id', $batchId)->exists();
+        }else if($batchNumber){
+            return PurchaseTempDetail::where('item_id', $itemId)->where('temp_batch_number', $batchNumber)->exists();
+        }
+        return false;
     }
 }
