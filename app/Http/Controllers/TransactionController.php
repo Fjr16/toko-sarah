@@ -39,13 +39,11 @@ class TransactionController extends Controller
      */
     public function create(PurchaseTempDataTable $dataTable)
     {
-        $produks = Item::all();
         $suppliers = Supplier::get();
         $itemCategories = ItemCategory::get();
         return $dataTable->render('pages.pembelian.create', [
             'title' => 'Pembelian',
             'menu' => 'Pembelian',
-            'produks' => $produks,
             'suppliers' => $suppliers,
             'itemCategories' => $itemCategories,
         ]);
@@ -148,14 +146,56 @@ class TransactionController extends Controller
         }
     }
 
+    public function updateItem(Request $request, string $id)
+    {
+        $validators = Validator::make($request->all(), [
+            'unit_price' => 'required',
+            'qty' => 'required|integer|min:1',
+            'discount' => 'required',
+            'tax' => 'required'
+        ]);
+
+        if ($validators->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => substr($validators->errors()->first(),0,150)
+            ]);
+        }
+        try {
+            $item = PurchaseTempDetail::findOrFail($id);
+            $cleanPrice = CustomHelpers::cleanCurrency($request->unit_price) ?? 0;
+            $cleanDisc = CustomHelpers::cleanCurrency($request->discount) ?? 0;
+            $cleanTax = CustomHelpers::cleanCurrency($request->tax) ?? 0;
+            $subTotal = ($cleanPrice * $request->qty) - $cleanDisc + $cleanTax;
+            if ($subTotal < 0) {
+                throw new Exception("Subtotal tidak valid, tidak boleh kecil dari 0");
+            }
+            $item->update([
+                'unit_price' => $cleanPrice,
+                'qty' => $request->qty,
+                'discount' => $cleanDisc,
+                'tax' => $cleanTax,
+                'sub_total' => $subTotal,
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Data Berhasil diperbarui',
+            ]);
+        } catch (Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => substr($th->getMessage(), 0, 150),
+            ]);
+        }
+    }
+
     private function generateRandomId() {
         $date = now()->format('YmdHis');
         $randomUniqueString = strtoupper(Str::random(6));
         return 'PRC-' . $date . '-' . $randomUniqueString;
     }
-    /**
-     * Display the specified resource.
-     */
+
     public function saveOnTable(Request $request)
     {
         DB::beginTransaction();
@@ -208,63 +248,6 @@ class TransactionController extends Controller
         }
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        try {
-            $qty = $request->jumlah;
-            $dataSession = session()->get('data_pembelian');
-            $findItem = $this->findItem(decrypt($id));
-            if ($findItem) {
-                $index = key(array_filter($dataSession, function ($itemSession) use ($findItem){
-                    return $itemSession['id'] == $findItem['id'];
-                }));
-                $dataSession[$index] = [
-                    'id' => $findItem['id'],
-                    'barcode' => $findItem['barcode'],
-                    'name' => $findItem['name'],
-                    'jumlah' => $qty,
-                    'satuan' => $findItem['satuan'],
-                    'harga_satuan' => $findItem['harga_satuan'],
-                    'margin' => $findItem['margin'],
-                    'harga_jual' => $findItem['harga_jual'],
-                    'total_harga' => $findItem['harga_satuan'] * $qty,
-                ];
-                session()->put('data_pembelian', $dataSession);
-                session()->flash('success', 'Berhasil memperbarui data');
-                return response()->json([
-                    'status_code' => 200,
-                    'message' => 'Data Berhasil diperbarui',
-                ]);
-            }else{
-                session()->flash('error', 'Data tidak ditemukan');
-                return response()->json([
-                    'status_code' => 404,
-                    'message' => 'Data tidak ditemukan pada keranjang',
-                ]);
-            }
-        } catch (Exception $e) {
-            session()->flash('error', 'Kesalahan Sistem');
-            return response()->json([
-                'status_code' => 500,
-                'message' => 'Kesalahan Sistem',
-            ], 500);
-        }
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         try {

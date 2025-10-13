@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Exception;
 use App\Models\Item;
 use App\Models\ProductBatch;
+use App\Models\PurchaseTempDetail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -118,5 +119,36 @@ class OtherController extends Controller
         });
 
         return response()->json($results);
+    }
+
+    public function getTempDetailById($tempId){
+        $tempDetail = PurchaseTempDetail::query()
+        ->leftJoin('items as product', 'purchase_temp_details.item_id', '=', 'product.id')
+        ->where('purchase_temp_details.id', $tempId)
+        ->select(
+            'purchase_temp_details.item_id',
+            'purchase_temp_details.unit_price',
+            'purchase_temp_details.qty',
+            'purchase_temp_details.discount',
+            'purchase_temp_details.tax',
+            'product.small_unit'
+        )
+        ->first();
+
+        $tempDetail['unit_price'] = number_format($tempDetail['unit_price'],0,null,'');
+        $tempDetail['discount'] = number_format($tempDetail['discount'],0,null,'');
+        $tempDetail['tax'] = number_format($tempDetail['tax'],0,null,'');
+
+        if (!$tempDetail) {
+            return response()->json([
+                'status' => false,
+                'data' => []
+            ]);
+        }
+
+        return response()->json([
+            'status' => true,
+            'data' => $tempDetail
+        ]);
     }
 }

@@ -48,6 +48,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('product/get/item/batch/{batchId}', [OtherController::class, 'getItemBatch'])->name('product/get/item.batch');
     Route::get('product/get/batch/select', [OtherController::class, 'getBatchSelect'])->name('product/get/batch.select');
     // Route::get('product/to/cart/{id}', [OtherController::class, 'addProductToCart'])->name('product/to.cart');
+    Route::get('purchase/temp/detail/byId/{id}', [OtherController::class, 'getTempDetailById'])->name('purchase/temp/detail.byId');
 
 
     // kategori barang (DONE)
@@ -106,10 +107,9 @@ Route::middleware(['auth'])->group(function () {
     // Route::get('pembelian/riwayat/detail/{id}', [SalesController::class, 'detail'])->name('pembelian/riwayat.detail');
     Route::get('pembelian/create', [TransactionController::class, 'create'])->name('pembelian.create');
     Route::post('pembelian/store/item', [TransactionController::class, 'storeItem'])->name('pembelian/store.item');
-    // Route::get('pembelian/store/{id}', [TransactionController::class, 'store'])->name('pembelian.store');
+    Route::put('pembelian/update/item/{id}', [TransactionController::class, 'updateItem'])->name('pembelian/update.item');
     Route::delete('pembelian/destroy/{id}', [TransactionController::class, 'destroy'])->name('pembelian.destroy');
     Route::delete('pembelian/reset', [TransactionController::class, 'reset'])->name('pembelian.reset');
-    Route::put('pembelian/update/{id}', [TransactionController::class, 'update'])->name('pembelian.update');
     Route::get('pembelian/invoice', [TransactionController::class, 'show'])->name('pembelian.invoice');
     Route::put('update/price/item/{id}', [TransactionController::class, 'updatePriceItem'])->name('update/price.item');
     Route::post('pembelian/save/all', [TransactionController::class, 'saveOnTable'])->name('pembelian/save.all');

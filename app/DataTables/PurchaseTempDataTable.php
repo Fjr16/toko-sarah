@@ -22,7 +22,26 @@ class PurchaseTempDataTable extends DataTable
      */
     public function dataTable(QueryBuilder $query): EloquentDataTable
     {
+        $summary = PurchaseTempDetail::query()
+        ->leftJoin('items', 'purchase_temp_details.item_id', '=', 'items.id')
+        ->whereHas('purchaseTemp', fn($q) => $q->where('user_id', auth()->id()))
+        ->selectRaw('
+            COUNT(*) AS total_items,
+            COALESCE(SUM(purchase_temp_details.sub_total), 0) AS total_kotor,
+            COALESCE(SUM(purchase_temp_details.discount), 0) AS total_diskon,
+            COALESCE(SUM(purchase_temp_details.tax), 0) AS total_pajak
+        ')
+        ->first();
         return (new EloquentDataTable($query))
+            ->with([
+                'summary' => [
+                    'total_rows'  => (int) $summary->total_items,
+                    'subtotal'    => CustomHelpers::formatterRupiah($summary->total_kotor),
+                    'discount'    => CustomHelpers::formatterRupiah($summary->total_diskon),
+                    'tax'         => CustomHelpers::formatterRupiah($summary->total_pajak),
+                    'grand_total' => CustomHelpers::formatterRupiah($summary->total_kotor + $summary->total_pajak - $summary->total_diskon),
+                ]
+            ])
             ->addColumn('action', function($row){
                 $delete = '<button onclick="removeItem('.$row->id.')" class="text-danger border-0 bg-transparent p-0"><i class="bx bxs-x-square fs-4"></i></button>';
                 $edit = '<button onclick="editItem('.$row->id.')" class="text-warning border-0 bg-transparent p-0"><i class="bx bx-edit fs-4"></i></button>';
@@ -154,7 +173,7 @@ class PurchaseTempDataTable extends DataTable
                     ->searchable(false)
                     ->addClass('tax_table'),
             Column::make('Total Harga')
-                    ->addClass('subtotal_table text-end')
+                    ->addClass('text-end')
                     ->title('Subtotal'),
             Column::make('product_code')
                     ->name('items.code')

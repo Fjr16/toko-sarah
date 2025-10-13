@@ -371,12 +371,13 @@
         <div class="card-body py-2">
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
             <small>
-                Total Item: <span class="fw-bold totalItem">0</span> |
-                Subtotal: <span class="fw-bold subtotal text-primary">Rp0</span> |
-                Diskon: <span class="fw-bold totalDiskon text-danger">Rp0</span>
+                Total Item: <span class="fw-bold" id="summaryTotalItem">0</span> |
+                Subtotal: <span class="fw-bold text-primary" id="summarySubtotal">Rp0</span> |
+                Diskon: <span class="fw-bold text-info" id="summaryTotalDiskon">Rp0</span> |
+                Pajak: <span class="fw-bold text-danger" id="summaryTotalPajak">Rp0</span>
             </small>
             <small class="fw-bold text-success">
-                Grand Total: <span class="totalAkhir fs-6">Rp0</span>
+                Grand Total: <span class="fs-6" id="summaryTotalAkhir">Rp0</span>
             </small>
             </div>
 
@@ -432,6 +433,27 @@
 
 @push('scripts')
     {{ $dataTable->scripts() }}
+
+    <script>
+        $(document).ready(function(){
+            const table = window.LaravelDataTables['purchasetemp-table'];
+            table.on('xhr.dt', function(){
+                const json = table.ajax.json();
+                if(json?.summary){
+                    updateSummaryPurchase(json.summary);
+                }
+            })
+        });
+
+        function updateSummaryPurchase(data){
+            $('#summaryTotalItem').text(data.total_rows);
+            $('#summarySubtotal').text(data.subtotal);
+            $('#summaryTotalDiskon').text(data.discount);
+            $('#summaryTotalPajak').text(data.tax);
+            $('#summaryTotalAkhir').text(data.grand_total);
+        }
+
+    </script>
 
     <script>
         async function addToCart() {
@@ -513,6 +535,29 @@
             }
         }
         async function editItem(purchaseTempDetailId) {
+            var currentPrice = 0,currentQty = 0,currentDisc = 0,currentTax = 0, productSatuan = '';
+            try {
+                const res = await fetch('/purchase/temp/detail/byId/' + purchaseTempDetailId);
+                if (!res.ok) {
+                    const errorText = await res.statusText;
+                    throw new Error(errorText || "Terjadi kesalahan sistem, mohon coba lagi beberapa saat");
+                }
+
+                const result = await res.json();
+                if (result.status) {
+                    const data = result.data ?? [];
+
+                    currentPrice = data.unit_price ?? 0;
+                    currentQty = data.qty ?? 0;
+                    currentDisc = data.discount ?? 0;
+                    currentTax = data.tax ?? 0;
+                    productSatuan = data.small_unit ?? '';
+                }
+            } catch (error) {
+                console.log(error.message)
+                notify('error', error.message.slice(0,150) ?? 'Terjadi kesalahan sistem');
+            }
+
             const table = window.LaravelDataTables['purchasetemp-table'];
             const row = '#' + purchaseTempDetailId;
 
@@ -521,49 +566,67 @@
             const qtyIndex  = table.column('.qty_table').index();
             const discIndex  = table.column('.discount_table').index();
             const taxIndex  = table.column('.tax_table').index();
-            const subTotalIndex  = table.column('.subtotal_table').index();
 
             const colAct = table.cell(row, actionIndex).node();
             const colUnitPrice = table.cell(row, unitPriceIndex).node();
             const colQty = table.cell(row, qtyIndex).node();
             const colDisc = table.cell(row, discIndex).node();
             const colTax = table.cell(row, taxIndex).node();
-            const colSubtotal = table.cell(row, subTotalIndex).node();
 
             const btnSimpan = `<button onclick="updateItem(${purchaseTempDetailId})" class="text-success border-0 bg-transparent p-0"><i class="bx bx-save fs-4"></i></button>`;
             const btnBtl =`<button onclick="window.LaravelDataTables['purchasetemp-table'].ajax.reload()" class="text-danger border-0 bg-transparent p-0"><i class="bx bx-exit fs-4"></i></button>`;
 
-            const inputUnitPrice = `<input type="text" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="0" name="unit_price_edit" id="unit_price_edit" class="form-control form-control-sm">`;
+            const inputUnitPrice = `<input type="text" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="${currentPrice}" placeholder="0" name="unit_price_edit" id="unit_price_edit_${purchaseTempDetailId}" class="form-control form-control-sm">`;
             const inputQty = `
-                <div class="input-group">
-                    <input type="number" class="form-control" name="qty_edit" id="qty_edit" value="">
-                    <span class="input-group-text bg-primary text-white">'.$row->product_satuan.'</span>
+                <div class="input-group input-group-sm">
+                    <input type="number" class="form-control" oninput="this.value = this.value,replace(/[^0-9]/g, '')" name="qty_edit" id="qty_edit_${purchaseTempDetailId}" value="${currentQty}">
+                    <span class="input-group-text bg-primary text-white">${productSatuan}</span>
                 </div>`;
-            const inputDisc = `<input type="text" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="0" name="discount_edit" id="discount_edit" class="form-control form-control-sm">`;
-            const inputTax = `<input type="text" oninput="this.value = this.value.replace(/[^0-9]/g, '')" placeholder="0" name="tax_edit" id="tax_edit" class="form-control form-control-sm">`;
-            // const elementSubTotal = selectedRow.;
+            const inputDisc = `<input type="text" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="${currentDisc}" name="discount_edit" id="discount_edit_${purchaseTempDetailId}" class="form-control form-control-sm">`;
+            const inputTax = `<input type="text" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="${currentTax}" name="tax_edit" id="tax_edit_${purchaseTempDetailId}" class="form-control form-control-sm">`;
 
             $(colAct).html(btnBtl + btnSimpan);
             $(colUnitPrice).html(inputUnitPrice);
+            $(colQty).html(inputQty);
             $(colDisc).html(inputDisc);
             $(colTax).html(inputTax);
         }
+        async function updateItem(purchaseTempDetailId) {
+            const table = window.LaravelDataTables['purchasetemp-table'];
+            const row = table.row('#' + purchaseTempDetailId).node();
+            try {
+                const res = await fetch('/pembelian/update/item/'+purchaseTempDetailId, {
+                    method:'PUT',
+                    headers: {
+                        'X-CSRF-TOKEN':"{{ csrf_token() }}",
+                        'Accept' : 'application/json',
+                        'Content-Type' : 'application/json'
+                    },
+                    body:JSON.stringify({
+                        unit_price : $(row).find('#unit_price_edit_'+purchaseTempDetailId).val() ?? 0,
+                        qty : $(row).find('#qty_edit_'+purchaseTempDetailId).val() ?? 0,
+                        discount : $(row).find('#discount_edit_'+purchaseTempDetailId).val() ?? 0,
+                        tax : $(row).find('#tax_edit_'+purchaseTempDetailId).val() ?? 0,
+                    })
+                });
 
-        $('#purchasetemp-table').on('input',
-            'input[name="unit_price_edit"], input[name="qty_edit"], input[name="discount_edit"], input[name="tax_edit"]',
-            function (e) {
-                const table = window.LaravelDataTables['purchasetemp-table'];
+                if (!res.ok) {
+                    const errorText = await res.statusText;
+                    throw new Error(errorText || "Gagal update data");
+                }
 
-                const tr   = $(this).closest('tr');
-                const rowId = tr.attr('id');
-
-                // akses node/data datatables (opsional)
-                const row   = table.row('#' + rowId);
-                const data  = row.data();
-                console.log(rowId);
-                // ... lanjut hitung subtotal, dsb.
+                const result = await res.json();
+                if (result.status) {
+                    table.ajax.reload();
+                    notify('success', result.message);
+                }else{
+                    notify('error', result.message);
+                }
+            } catch (error) {
+                console.log(error.message);
+                notify('error', error.message.slice(0,150) ?? 'Terjadi kesalahan, gagal update data');
             }
-        );
+        }
     </script>
 
     {{-- <script>
