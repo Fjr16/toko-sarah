@@ -8,8 +8,6 @@ use Exception;
 use App\Models\Item;
 use App\Models\Supplier;
 use App\Models\Transaction;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use App\Models\ItemCategory;
 use App\Models\ProductBatch;
 use App\Models\PurchaseTemp;
@@ -17,26 +15,12 @@ use App\Models\PurchaseTempDetail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Database\QueryException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class TransactionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create(PurchaseTempDataTable $dataTable)
     {
         $suppliers = Supplier::get();
@@ -47,15 +31,6 @@ class TransactionController extends Controller
             'suppliers' => $suppliers,
             'itemCategories' => $itemCategories,
         ]);
-    }
-
-
-    private function findItem($id) {
-        $data = session()->get('data_pembelian');
-        $find = Arr::first($data, function($item) use ($id){
-            return $item['id'] === $id;
-        });
-        return $find;
     }
 
     public function storeItem(Request $req){
@@ -190,17 +165,48 @@ class TransactionController extends Controller
         }
     }
 
-    private function generateRandomId() {
-        $date = now()->format('YmdHis');
-        $randomUniqueString = strtoupper(Str::random(6));
-        return 'PRC-' . $date . '-' . $randomUniqueString;
+    public function destroyItem(string $id)
+    {
+        try {
+            $item = PurchaseTempDetail::findOrFail($id);
+            $item->delete();
+            return response()->json([
+                'status' => true,
+                'message' => 'Berhasil Hapus Produk'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => substr($th->getMessage(),0,150)
+            ]);
+        }
     }
 
-    public function saveOnTable(Request $request)
+    public function resetCart(){
+        try {
+            DB::transaction(function(){
+                $item = PurchaseTemp::first();
+                PurchaseTempDetail::query()->delete();
+                if ($item) {
+                    $item->delete();
+                }
+            });
+            return response()->json([
+                'status' => true,
+                'message' => 'Keranjang berhasil dikosongkan'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Gagal mengosongkan keranjang'
+            ]);
+        }
+    }
+
+    public function finishPurchase(Request $request)
     {
         DB::beginTransaction();
         try {
-            $tranId = $this->generateRandomId();
             $dataTran = $request->validate([
                 'supplier_id' => 'required|exists:suppliers,id',
                 'purchase_date' => 'required|date',
@@ -212,7 +218,6 @@ class TransactionController extends Controller
                 'status' => 'required|in:pending,ordered,completed',
                 'payment_method' => 'required',
             ]);
-            $dataTran['transaction_code'] = $tranId;
 
             $item = Transaction::create($dataTran);
             $dataSession = session()->get('data_pembelian');
@@ -231,95 +236,18 @@ class TransactionController extends Controller
             }
             DB::commit();
 
-            session()->put('data_pembelian', []);
-            return redirect()->route('pembelian.create')->with('success', 'Berhasil menyimpan data');
-        } catch (Exception $e) {
-            return back()->with('error', 'Gagal menyimpan data: '.$e->getMessage());
-            DB::rollBack();
-        } catch (ValidationException $e) {
-            return back()->with('error', 'Gagal menyimpan data: '.$e->getMessage());
-            DB::rollBack();
-        } catch (ModelNotFoundException $e) {
-            return back()->with('error', 'Gagal menyimpan data: '.$e->getMessage());
-            DB::rollBack();
-        } catch (QueryException $qe){
-            return back()->with('error', 'Terjadi Kesalahan Database:'. $qe->getMessage());
-            DB::rollBack();
-        }
-    }
-
-    public function destroy(string $id)
-    {
-        try {
-            $item = PurchaseTempDetail::findOrFail($id);
-            $item->delete();
             return response()->json([
                 'status' => true,
-                'message' => 'Berhasil Hapus Produk'
+                'message' => 'Pembelian berhasil disimpan'
             ]);
-        } catch (\Throwable $th) {
+        } catch (Throwable $th) {
+            DB::rollBack();
             return response()->json([
                 'status' => false,
                 'message' => substr($th->getMessage(),0,150)
             ]);
         }
     }
-
-    public function reset(){
-        session()->put('data_pembelian', []);
-        return back()->with('success', 'Berhasil Direset');
-    }
-
-    public function updatePriceItem(Request $request, $id){
-        DB::beginTransaction();
-        try {
-            $item = Item::findOrFail(decrypt($id));
-            $request['cost'] = CustomHelpers::cleanCurrency($request->cost);
-            $request['price'] = CustomHelpers::cleanCurrency($request->price);
-            $data = $request->validate([
-                'cost' => 'required',
-                'margin' => 'required',
-                'price' => 'required',
-            ]);
-            $item->default_cost = $request->cost;
-            $item->margin = $request->margin;
-            $item->default_price = $request->price;
-            $item->save();
-
-            $dataSession = session()->get('data_pembelian');
-            $findItem = $this->findItem(decrypt($id));
-            if ($findItem) {
-                $index = key(array_filter($dataSession, function ($itemSession) use ($findItem){
-                    return $itemSession['id'] == $findItem['id'];
-                }));
-                $dataSession[$index] = [
-                    'id' => $findItem['id'],
-                    'barcode' => $findItem['barcode'],
-                    'name' => $findItem['name'],
-                    'jumlah' => $findItem['jumlah'],
-                    'satuan' => $findItem['satuan'],
-                    'harga_satuan' => $item->default_cost,
-                    'margin' => $item->margin,
-                    'harga_jual' => $item->default_price,
-                    'total_harga' => $item->default_cost * $findItem['jumlah'],
-                ];
-                session()->put('data_pembelian', $dataSession);
-            }else{
-                DB::rollBack();
-                return back()->with('error', 'Data tidak ditemukan Pada Keranjang');
-            }
-
-            DB::commit();
-            return back()->with('success', 'Berhasil memperbarui data');
-        } catch (Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Gagal memperbarui data, coba lagi : '.$e->getMessage());
-        } catch (ModelNotFoundException $e) {
-            DB::rollBack();
-            return back()->with('error', 'Gagal memperbarui data, coba lagi : '.$e->getMessage());
-        }
-    }
-
 
     private function checkExistBatch($itemId, $batchId = null, $batchNumber = null){
         if ($batchId) {

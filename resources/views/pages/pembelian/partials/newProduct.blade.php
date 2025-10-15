@@ -120,3 +120,102 @@
         </div>
     </form>
 </div>
+
+@push('scripts')
+    <script>
+        document.getElementById('cost').addEventListener('keyup', function() {
+            let cost = this.value.replace(/[^0-9]/g, '');
+            let margin = document.getElementById('margin').value.replace(/[^0-9]/g, '');
+            let price = parseInt(cost) * (parseInt(margin) / 100) + parseInt(cost);
+
+            let harga = rupiahFormatter(price).replace(/[^0-9.]/g, '');
+            document.getElementById('price').value = harga;
+        });
+        document.getElementById('margin').addEventListener('keyup', function() {
+            let cost = document.getElementById('cost').value.replace(/[^0-9]/g, '');
+            let margin = this.value.replace(/[^0-9]/g, '');
+            let price = parseInt(cost) * (parseInt(margin) / 100) + parseInt(cost);
+
+            let harga = rupiahFormatter(price).replace(/[^0-9.]/g, '');
+            document.getElementById('price').value = harga;
+            return this.value = parseInt(margin);
+        });
+    </script>
+
+    <script>
+        // preview image
+        const inputImage = document.getElementById('fotoProduk');
+        const previewImg = document.getElementById('previewImg');
+        const uploadText = document.getElementById('uploadText');
+
+        inputImage.addEventListener('change', function(){
+            // validation image
+            const maxSize = 200 * 1024; //max 200 kb
+            const allowedExtensions = ['image/png', 'image/jpeg', 'image/webp']
+
+            const file = this.files[0];
+            if (!file) return;
+
+            const isImage = file.type.startsWith('image/');
+            const isTrueEks = allowedExtensions.includes(file.type);
+            const isTrueSize = file.size <= maxSize;
+
+            if (isImage && isTrueEks && isTrueSize) {
+                const reader = new FileReader();
+                reader.onload = function(e){
+                    previewImg.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+                uploadText.style.display='none';
+                previewImg.style.display = 'block';
+            }else{
+                this.value = '';
+                previewImg.src = '';
+                uploadText.style.display='block';
+                previewImg.style.display = 'none';
+
+                let message;
+                const messageImage = isImage == false ? 'File bukan image !' : '';
+                const messageEks = isTrueEks == false ? 'Ekstensi yang diterima hanya jpg, png, dan webp !' : '';
+                const messageSize = isTrueSize == false ? 'Ukuran file tidak lebih dari 200 KB !' : '';
+                if (isImage == false && isTrueEks == false && isTrueSize == false) {
+                    message = 'pastikan file berupa gambar dengan ekstensi jpeg, png atau webp berukuran maksimal : 200 KB !';
+                }else{
+                    message = (messageImage ?? '') + (messageEks ? '<br>' + messageEks : '') + (messageSize ?  '<br>' + messageSize : '');
+                }
+                notify('error', message);
+            }
+        });
+
+        // submit form
+        document.getElementById('product_submit').addEventListener('click', async function () {
+            const form = document.getElementById('product-form');
+            const formData = new FormData(form);
+            const url = "{{ route('item/store/add/to.cart') }}";
+
+            let res = await fetch(url, {
+                method : 'POST',
+                headers: {
+                    'X-CSRF-TOKEN' : "{{ csrf_token() }}"
+                },
+                body: formData,
+            });
+
+            if (!res.ok) {
+                notify('error', res.status);
+            }
+
+            let result = await res.json();
+
+            if (result.status) {
+                notify('success', result.message);
+                form.reset();
+                location.reload();
+            }else{
+                console.log(result.message);
+                notify('error', result.message.slice(0,150));
+            }
+        });
+    </script>
+
+@endpush

@@ -108,11 +108,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('pembelian/create', [TransactionController::class, 'create'])->name('pembelian.create');
     Route::post('pembelian/store/item', [TransactionController::class, 'storeItem'])->name('pembelian/store.item');
     Route::put('pembelian/update/item/{id}', [TransactionController::class, 'updateItem'])->name('pembelian/update.item');
-    Route::delete('pembelian/destroy/{id}', [TransactionController::class, 'destroy'])->name('pembelian.destroy');
-    Route::delete('pembelian/reset', [TransactionController::class, 'reset'])->name('pembelian.reset');
+    Route::delete('pembelian/destroy/{id}', [TransactionController::class, 'destroyItem'])->name('pembelian.destroy');
+    Route::delete('pembelian/reset', [TransactionController::class, 'resetCart'])->name('pembelian.reset');
     Route::get('pembelian/invoice', [TransactionController::class, 'show'])->name('pembelian.invoice');
-    Route::put('update/price/item/{id}', [TransactionController::class, 'updatePriceItem'])->name('update/price.item');
-    Route::post('pembelian/save/all', [TransactionController::class, 'saveOnTable'])->name('pembelian/save.all');
+    Route::post('pembelian/save/all', [TransactionController::class, 'finishPurchase'])->name('pembelian/save.all');
 
     // setting
     Route::get('pengaturan/sistem/index', [SettingController::class, 'index'])->name('pengaturan/sistem.index');

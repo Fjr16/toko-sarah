@@ -207,13 +207,13 @@
                 </div>
             </div>
             <div class="row mb-4">
-                {{ $dataTable->table() }}
+                {{ $dataTable->table([],true) }}
             </div>
         </div>
     </div>
     <!-- Modal with long content -->
       <!-- Modal -->
-      {{-- <div class="modal fade" id="modalLong" tabindex="-1" aria-labelledby="modalLongTitle" aria-hidden="true">
+      <div class="modal fade" id="modalLong" tabindex="-1" aria-labelledby="modalLongTitle" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header border-bottom d-block">
@@ -258,14 +258,6 @@
                             </thead>
 
                             <tbody>
-                                @foreach (session()->get('data_pembelian') as $item)
-                                    <tr>
-                                        <td>{{ $item['name'] ?? '' }}</td>
-                                        <td>{{ $item['jumlah'] }}</td>
-                                        <td>Rp. {{ number_format($item['harga_satuan'], 0) }}</td>
-                                        <td>Rp. {{ number_format($item['total_harga'], 0) }}</td>
-                                    </tr>
-                                @endforeach
                                 <tr>
                                     <th colspan="3">
                                         <input type="hidden" name="subtotal" required>
@@ -309,13 +301,6 @@
                                     </th>
                                     <th class="fw-bold totalAkhir">Rp. 0</th>
                                 </tr>
-                                <tr>
-                                    <th colspan="3">
-                                        <input type="hidden" name="payment_method" required>
-                                        Metode Pembayaran
-                                    </th>
-                                    <th id="metodePembayaran">-</th>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -327,43 +312,8 @@
             </form>
           </div>
         </div>
-      </div> --}}
+      </div>
     <!-- End Modal with long content -->
-
-    {{-- modal update harga beli dan margin --}}
-    {{-- <div class="modal fade" id="smallModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="modal-title"></h5>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form action="" method="post">
-                @csrf
-                @method('PUT')
-                <div class="modal-body">
-                    <div class="row mb-3">
-                            <label for="new_cost" class="form-label">Harga Beli <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control form-control-md price" id="new_cost" name="cost" placeholder="0,00" value="0" required />
-                    </div>
-                    <div class="row">
-                        <label for="new_margin" class="form-label">Margin (%) <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control form-control-md" id="new_margin" name="margin" placeholder="0" min="0" value="0" required />
-                    </div>
-                    <div class="row">
-                        <label for="new_price" class="form-label">Harga Jual <span class="text-danger">*</span></label>
-                        <input type="text" name="price" id="new_price" class="form-control form-control-md" placeholder="0,00" value="0" readonly required />
-                        <div id="info-harga"></div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Save changes</button>
-                </div>
-            </form>
-          </div>
-        </div>
-    </div> --}}
-    {{-- end modal update harga beli dan margin --}}
 
 @endsection
 @section('footer')
@@ -372,9 +322,7 @@
             <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
             <small>
                 Total Item: <span class="fw-bold" id="summaryTotalItem">0</span> |
-                Subtotal: <span class="fw-bold text-primary" id="summarySubtotal">Rp0</span> |
-                Diskon: <span class="fw-bold text-info" id="summaryTotalDiskon">Rp0</span> |
-                Pajak: <span class="fw-bold text-danger" id="summaryTotalPajak">Rp0</span>
+                Subtotal: <span class="fw-bold text-primary" id="summarySubtotal">Rp0</span>
             </small>
             <small class="fw-bold text-success">
                 Grand Total: <span class="fs-6" id="summaryTotalAkhir">Rp0</span>
@@ -382,31 +330,24 @@
             </div>
 
             <div class="row g-2 align-items-center">
-            <div class="col-6 col-md-3">
-                <div class="input-group input-group-sm">
-                <span class="input-group-text">Pajak</span>
-                <input type="text" id="invoice_tax" class="form-control text-end price" value="0" onchange="updateInvoiceSummary()">
+                <div class="col-6 col-md-4">
+                    <div class="input-group input-group-sm">
+                    <span class="input-group-text">Pajak</span>
+                    <input type="text" id="invoice_tax" class="form-control text-end price" placeholder="0" oninput="this.value = this.value.replace(/[^0-9]/g,''), updateGrandTotal()">
+                    </div>
                 </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="input-group input-group-sm">
-                <span class="input-group-text">Diskon</span>
-                <input type="text" id="invoice_discount" class="form-control text-end price" value="0" onchange="updateInvoiceSummary()">
+                <div class="col-6 col-md-4">
+                    <div class="input-group input-group-sm">
+                    <span class="input-group-text">Diskon</span>
+                    <input type="text" id="invoice_discount" class="form-control text-end price" placeholder="0" oninput="this.value = this.value.replace(/[^0-9]/g,''), updateGrandTotal()">
+                    </div>
                 </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <div class="input-group input-group-sm">
-                <span class="input-group-text">Biaya Lain</span>
-                <input type="text" id="invoice_other" class="form-control text-end price" value="0" onchange="updateInvoiceSummary()">
+                <div class="col-6 col-md-4">
+                    <div class="input-group input-group-sm">
+                    <span class="input-group-text">Biaya Lain</span>
+                    <input type="text" id="invoice_other" class="form-control text-end price" placeholder="0" oninput="this.value = this.value.replace(/[^0-9]/g,''), updateGrandTotal()">
+                    </div>
                 </div>
-            </div>
-            <div class="col-6 col-md-3">
-                <select id="purchase_status" class="form-select form-select-sm" onchange="updateInvoiceSummary()">
-                <option value="draft">Draft</option>
-                <option value="ordered">Ordered</option>
-                <option value="completed">Completed</option>
-                </select>
-            </div>
             </div>
 
             <hr class="my-2">
@@ -416,14 +357,20 @@
                         data-warning="Kosongkan keranjang?"
                         data-url="{{ route('pembelian.reset') }}"
                         onclick="showModalDelete(this)">
-                    <i class="bx bx-reset"></i> Reset
+                    <i class="bx bx-reset"></i> Kosongkan Keranjang
                 </button>
 
-                <button type="button" class="btn btn-success btn-sm"
-                        data-bs-toggle="modal"
-                        data-bs-target="#modalLong">
-                    <i class="bx bx-check"></i> Checkout
-                </button>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary btn-sm">
+                        <i class="bi bi-file-earmark-text"></i>
+                        Simpan Draft
+                    </button>
+                    <button type="button" class="btn btn-primary btn-sm"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalLong">
+                        <i class="bx bx-check"></i> Pembelian Selesai
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -440,17 +387,30 @@
             table.on('xhr.dt', function(){
                 const json = table.ajax.json();
                 if(json?.summary){
-                    updateSummaryPurchase(json.summary);
+                    updateSummaryPurchase(json.summary, table);
                 }
             })
         });
 
-        function updateSummaryPurchase(data){
+        function updateSummaryPurchase(data, table){
+            $(table.column(5).footer()).text(data.total_qty);
+            $(table.column(6).footer()).text(data.subtotal);
+            $(table.column(7).footer()).text(data.discount);
+            $(table.column(8).footer()).text(data.tax);
+            $(table.column(9).footer()).text(data.total);
             $('#summaryTotalItem').text(data.total_rows);
-            $('#summarySubtotal').text(data.subtotal);
-            $('#summaryTotalDiskon').text(data.discount);
-            $('#summaryTotalPajak').text(data.tax);
-            $('#summaryTotalAkhir').text(data.grand_total);
+            $('#summarySubtotal').text(data.total);
+            updateGrandTotal();
+        }
+
+        function updateGrandTotal(){
+            const totalClean = reverseFormatRupiah($('#summarySubtotal').text());
+            const pajakInvoice = toNum(($('#invoice_tax').val().replace(/[^0-9]/g,'')));
+            const discInvoice = toNum(($('#invoice_discount').val().replace(/[^0-9]/g,'')));
+            const otherCost = toNum(($('#invoice_other').val().replace(/[^0-9]/g,'')));
+
+            const grandTot = totalClean+pajakInvoice+otherCost-discInvoice;
+            $('#summaryTotalAkhir').text(rupiahFormatter(grandTot));
         }
 
     </script>
@@ -617,7 +577,7 @@
 
                 const result = await res.json();
                 if (result.status) {
-                    table.ajax.reload();
+                    table.ajax.reload(null,false);
                     notify('success', result.message);
                 }else{
                     notify('error', result.message);
@@ -627,288 +587,37 @@
                 notify('error', error.message.slice(0,150) ?? 'Terjadi kesalahan, gagal update data');
             }
         }
-    </script>
-
-    {{-- <script>
-        // enable form
-        function enableForm(element){
-            $(element).attr('readonly', false);
-            element.addEventListener('change', function(e){
-               const encryptedId = element.dataset.encryptId;
-               const bodyReq = {
-                jumlah : element.value,
-               };
-
-               fetch(`/pembelian/update/${encryptedId}`, {
-                    method: 'PUT',
+        async function storeAll(status) {
+            try {
+                const res = await fetch('pembelian/save/all', {
+                    method : 'POST',
                     headers: {
-                        'Content-Type' : 'application/json',
+                        'X-CSRF-TOKEN' : "{{ csrf_token() }}",
                         'Accept' : 'application/json',
-                        'X-CSRF-TOKEN' : $('meta[name="csrf-token"]').attr('content')
+                        'Content-Type' : 'application/json'
                     },
-                    body: JSON.stringify(bodyReq)
-               })
-               .then(response => response.json())
-               .then(res => {
-                if (res.status_code === 200) {
-                    window.location.reload();
-                } else {
-                    $(e).attr('readonly', true);
-                    console.log(res.message);
-                }
-               })
-               .catch(error => console.error('Error: ', error));
-            });
-        }
-        // setting global variabel
-        // let symbol, position, thouSeparator, decSeparator;
-        $(document).ready(function(){
-            const selectSupplier = document.getElementById('supplier_id');
-            updateSupplier(selectSupplier);
-            updatePurchaseDate($('#tanggal_pembelian').val());
-            updatePaymentMethod($('#payment_method').val());
-            updateStatus($('#status').val());
-            sumAll();
-        });
+                    body:JSON.stringify({
 
-        let totalAkhir = 0;
-        let totalDiskon = 0;
-        let biayaLainnya = 0;
-        let totalPajak = 0;
-        let total_bayar = 0;
-        function sumAll(){
-            // sum all data
-            const data = @json(session('data_pembelian'));
-            const dataArr = Object.values(data);
-            let totalQty = 0;
-            if (dataArr.length !== 0) {
-                dataArr.forEach(function (item){
-                    totalQty += parseInt(item.jumlah);
-                    totalAkhir += parseInt(item.total_harga);
+                    })
                 });
-            }
-            $('.totalItems').text(dataArr.length);
-            $('.totalQty').text(totalQty);
-            $('.subtotal').text(rupiahFormatter(totalAkhir));
-            $('input[name="subtotal"]').val(totalAkhir);
 
-            totalBayar();
-        }
+                if (!res.ok) {
+                    const errorText = await res.statusText;
+                    throw new Error(errorText || "Gagal simpan pembelian");
+                }
 
-        function totalBayar(){
-            totalDiskon = parseInt($('#discount_invoice').val().replace(/[^0-9]/g, ''));
-            totalPajak = parseInt($('#pajak').val().replace(/[^0-9]/g, ''));
-            biayaLainnya = parseInt($('#biaya_lainnya').val().replace(/[^0-9]/g, ''));
-            $('.totalDiskon').text(rupiahFormatter(totalDiskon));
-            $('.totalPajak').text(rupiahFormatter(totalPajak));
-            $('.biayaLainnya').text(rupiahFormatter(biayaLainnya));
-
-            total_bayar = totalAkhir + totalPajak + biayaLainnya - totalDiskon;
-            $('.totalAkhir').text(rupiahFormatter(total_bayar));
-            $('input[name="diskon"]').val(totalDiskon);
-            $('input[name="tax"]').val(totalPajak);
-            $('input[name="other_cost"]').val(biayaLainnya);
-            $('input[name="grand_total"]').val(total_bayar);
-        }
-    </script>
-    <script>
-        $('#modalLong').keypress(function (e){
-            if (e.key === 'Enter') {
-                $(this).find('form').submit();
-            }
-        })
-        function jumBayar(element){
-            let value = rupiahFormatter(element.value.replace(/[^0-9]/g, ''));   //"\d" sama dengan [0-9], "^" artinya bukan, dan decimal separator diambil dari variabel
-            element.value = value.replace(/[^0-9.]/g, '');
-
-            let formatAsli = value.replace(/[^0-9]/g, '');
-
-            $('input[name="jumlah_bayar"]').val(formatAsli);
-        }
-
-        function updateSupplier(selectSupplier){
-            $('#namaSupplier').text(selectSupplier.options[selectSupplier.selectedIndex].text);
-            $('input[name="supplier_id"]').val(selectSupplier.value);
-        }
-        function updatePurchaseDate(value){
-            $('#purchase_date').text(value);
-            $('input[name="purchase_date"]').val(value);
-        }
-        function updatePaymentMethod(value){
-            $('#metodePembayaran').text(value);
-            $('input[name="payment_method"]').val(value);
-        }
-
-        function updateStatus(value){
-            $('.status_bayar').text(value);
-            $('.status_bayar').removeClass('badge bg-warning');
-            $('.status_bayar').removeClass('badge bg-primary');
-            $('.status_bayar').removeClass('badge bg-success');
-            $('.status_bayar').removeClass('badge bg-danger');
-            if (value === 'pending') {
-                $('.status_bayar').addClass('badge bg-warning');
-            } else if(value === 'ordered'){
-                $('.status_bayar').addClass('badge bg-primary');
-            } else if(value === 'completed'){
-                $('.status_bayar').addClass('badge bg-success');
-            }else{
-                $('.status_bayar').addClass('badge bg-danger');
-            }
-            $('input[name="status"]').val(value);
-        }
-
-        document.getElementById('cost').addEventListener('keyup', function() {
-            let cost = this.value.replace(/[^0-9]/g, '');
-            let margin = document.getElementById('margin').value.replace(/[^0-9]/g, '');
-            let price = parseInt(cost) * (parseInt(margin) / 100) + parseInt(cost);
-
-            let harga = rupiahFormatter(price).replace(/[^0-9.]/g, '');
-            document.getElementById('price').value = harga;
-        });
-        document.getElementById('margin').addEventListener('keyup', function() {
-            let cost = document.getElementById('cost').value.replace(/[^0-9]/g, '');
-            let margin = this.value.replace(/[^0-9]/g, '');
-            let price = parseInt(cost) * (parseInt(margin) / 100) + parseInt(cost);
-
-            let harga = rupiahFormatter(price).replace(/[^0-9.]/g, '');
-            document.getElementById('price').value = harga;
-            return this.value = parseInt(margin);
-        });
-        // format rupiah
-        let inputPrice = document.querySelectorAll('.price');
-        inputPrice.forEach(function(input) {
-            input.addEventListener('keyup', function() {
-                let val = rupiahFormatter(input.value.replace(/[^0-9]/g, ''));
-                input.value = val.replace(/[^0-9.]/g, '');
-            });
-        });
-
-        function openModalUpdatePrice(id, name, cost, margin, price){
-            const currentPrice = parseInt(price);
-            $('#smallModal #modal-title').text(name);
-            $('#smallModal #new_cost').val(rupiahFormatter(cost).replace(/[^0-9.]/g, ''));
-            $('#smallModal #new_margin').val(margin);
-            $('#smallModal #new_price').val(rupiahFormatter(price).replace(/[^0-9.]/g, ''));
-            $('#smallModal form').attr('action', '{{ route("update/price.item", "") }}' + "/" + id);
-            $('#smallModal').modal('show');
-
-            $('#smallModal #new_cost').keyup(function(){
-                const newCost = this.value.replace(/[^0-9]/g, '');
-                const newMargin = $('#smallModal #new_margin').val().replace(/[^0-9]/g, '');
-                const newPrice = parseInt(newCost) * (parseInt(newMargin) / 100) + parseInt(newCost);
-
-                const newHarga = rupiahFormatter(newPrice).replace(/[^0-9.]/g, '');
-                $('#smallModal #new_price').val(newHarga);
-
-                if (newPrice > currentPrice) {
-                    $('#smallModal #info-harga').attr('class', 'text-warning').html(`<i class="bx bx-up-arrow-alt"></i> Harga naik sebesar: ${rupiahFormatter(newPrice-currentPrice)}`);
-                } else if (newPrice < currentPrice) {
-                    $('#smallModal #info-harga').attr('class', 'text-danger').html(`<i class="bx bx-up-arrow-alt"></i> Harga turun sebesar: ${rupiahFormatter(currentPrice-newPrice)}`);
-                } else if (newPrice === currentPrice) {
-                    $('#smallModal #info-harga').attr('class', 'text-success').html(`<i class="bx bx-check"></i> Harga tidak berubah`);
+                const result = await res.json();
+                if (result.status) {
+                    table.ajax.reload();
+                    notify('success', result.message);
                 }else{
-                    $('#smallModal #info-harga').html(`Harga Tidak Valid`);
+                    notify('success', result.message || 'Gagal simpan pembelian');
                 }
-            });
-            $('#smallModal #new_margin').keyup(function(){
-                const newCost = $('#smallModal #new_cost').val().replace(/[^0-9]/g, '');
-                const newMargin = this.value.replace(/[^0-9]/g, '');
-                const newPrice = parseInt(newCost) * (parseInt(newMargin) / 100) + parseInt(newCost);
 
-                const newHarga = rupiahFormatter(newPrice).replace(/[^0-9.]/g, '');
-                $('#smallModal #new_price').val(newHarga);
-
-                if (newPrice > currentPrice) {
-                    $('#smallModal #info-harga').attr('class', 'text-warning').html(`<i class="bx bx-up-arrow-alt"></i> Harga naik sebesar: ${rupiahFormatter(newPrice-currentPrice)}`);
-                } else if (newPrice < currentPrice) {
-                    $('#smallModal #info-harga').attr('class', 'text-danger').html(`<i class="bx bx-up-arrow-alt"></i> Harga turun sebesar: ${rupiahFormatter(currentPrice-newPrice)}`);
-                } else if (newPrice === currentPrice) {
-                    $('#smallModal #info-harga').attr('class', 'text-success').html(`<i class="bx bx-check"></i> Harga tidak berubah`);
-                }else{
-                    $('#smallModal #info-harga').html(`Harga Tidak Valid`);
-                }
-                return this.value = parseInt(newMargin);
-            });
-
+            } catch (error) {
+                notify('error', error.message || 'Terjadi Kesalahan');
+            }
         }
-
-    </script> --}}
-
-    {{-- scripts untuk form input new product master --}}
-    <script>
-        // preview image
-        const inputImage = document.getElementById('fotoProduk');
-        const previewImg = document.getElementById('previewImg');
-        const uploadText = document.getElementById('uploadText');
-
-        inputImage.addEventListener('change', function(){
-            // validation image
-            const maxSize = 200 * 1024; //max 200 kb
-            const allowedExtensions = ['image/png', 'image/jpeg', 'image/webp']
-
-            const file = this.files[0];
-            if (!file) return;
-
-            const isImage = file.type.startsWith('image/');
-            const isTrueEks = allowedExtensions.includes(file.type);
-            const isTrueSize = file.size <= maxSize;
-
-            if (isImage && isTrueEks && isTrueSize) {
-                const reader = new FileReader();
-                reader.onload = function(e){
-                    previewImg.src = e.target.result;
-                }
-                reader.readAsDataURL(file);
-                uploadText.style.display='none';
-                previewImg.style.display = 'block';
-            }else{
-                this.value = '';
-                previewImg.src = '';
-                uploadText.style.display='block';
-                previewImg.style.display = 'none';
-
-                let message;
-                const messageImage = isImage == false ? 'File bukan image !' : '';
-                const messageEks = isTrueEks == false ? 'Ekstensi yang diterima hanya jpg, png, dan webp !' : '';
-                const messageSize = isTrueSize == false ? 'Ukuran file tidak lebih dari 200 KB !' : '';
-                if (isImage == false && isTrueEks == false && isTrueSize == false) {
-                    message = 'pastikan file berupa gambar dengan ekstensi jpeg, png atau webp berukuran maksimal : 200 KB !';
-                }else{
-                    message = (messageImage ?? '') + (messageEks ? '<br>' + messageEks : '') + (messageSize ?  '<br>' + messageSize : '');
-                }
-                notify('error', message);
-            }
-        });
-
-        // submit form
-        document.getElementById('product_submit').addEventListener('click', async function () {
-            const form = document.getElementById('product-form');
-            const formData = new FormData(form);
-            const url = "{{ route('item/store/add/to.cart') }}";
-
-            let res = await fetch(url, {
-                method : 'POST',
-                headers: {
-                    'X-CSRF-TOKEN' : "{{ csrf_token() }}"
-                },
-                body: formData,
-            });
-
-            if (!res.ok) {
-                notify('error', res.status);
-            }
-
-            let result = await res.json();
-
-            if (result.status) {
-                notify('success', result.message);
-                form.reset();
-                location.reload();
-            }else{
-                console.log(result.message);
-                notify('error', result.message.slice(0,150));
-            }
-        });
     </script>
 
     {{-- scripts modified batch --}}
@@ -1059,6 +768,40 @@
                 }
             );
         });
+    </script>
+
+     <script>
+        // format rupiah pada event oninput
+        let inputPrice = document.querySelectorAll('.price');
+        inputPrice.forEach(function(input) {
+            input.addEventListener('keyup', function() {
+                let val = rupiahFormatter(input.value.replace(/[^0-9]/g, ''));
+                input.value = val.replace(/[^0-9.]/g, '');
+            });
+        });
+
+         // setting global variabel
+        // let symbol, position, thouSeparator, decSeparator;
+        $(document).ready(function(){
+            const selectSupplier = document.getElementById('supplier_id');
+            updateSupplier(selectSupplier);
+            updatePurchaseDate($('#tanggal_pembelian').val());
+        });
+
+        $('#modalLong').keypress(function (e){
+            if (e.key === 'Enter') {
+                $(this).find('form').submit();
+            }
+        })
+
+        function updateSupplier(selectSupplier){
+            $('#namaSupplier').text(selectSupplier.options[selectSupplier.selectedIndex].text);
+            $('input[name="supplier_id"]').val(selectSupplier.value);
+        }
+        function updatePurchaseDate(value){
+            $('#purchase_date').text(value);
+            $('input[name="purchase_date"]').val(value);
+        }
     </script>
 
 @endpush

@@ -27,6 +27,12 @@ class PurchaseTempDataTable extends DataTable
         ->whereHas('purchaseTemp', fn($q) => $q->where('user_id', auth()->id()))
         ->selectRaw('
             COUNT(*) AS total_items,
+            COALESCE(SUM(purchase_temp_details.qty), 0) AS total_qty,
+            COALESCE(
+                SUM(
+                    COALESCE(purchase_temp_details.unit_price,0) * COALESCE(purchase_temp_details.qty,0)
+                ),0
+            ) AS sub_total,
             COALESCE(SUM(purchase_temp_details.sub_total), 0) AS total_kotor,
             COALESCE(SUM(purchase_temp_details.discount), 0) AS total_diskon,
             COALESCE(SUM(purchase_temp_details.tax), 0) AS total_pajak
@@ -36,10 +42,11 @@ class PurchaseTempDataTable extends DataTable
             ->with([
                 'summary' => [
                     'total_rows'  => (int) $summary->total_items,
-                    'subtotal'    => CustomHelpers::formatterRupiah($summary->total_kotor),
+                    'total_qty'    => (int) $summary->total_qty,
+                    'subtotal'    => CustomHelpers::formatterRupiah($summary->sub_total),
+                    'total'    => CustomHelpers::formatterRupiah($summary->total_kotor),
                     'discount'    => CustomHelpers::formatterRupiah($summary->total_diskon),
                     'tax'         => CustomHelpers::formatterRupiah($summary->total_pajak),
-                    'grand_total' => CustomHelpers::formatterRupiah($summary->total_kotor + $summary->total_pajak - $summary->total_diskon),
                 ]
             ])
             ->addColumn('action', function($row){
@@ -67,6 +74,9 @@ class PurchaseTempDataTable extends DataTable
             })
             ->addColumn('Qty', function($row){
                 return (int) $row->qty . ' pcs';
+            })
+            ->addColumn('subtotal', function($row){
+                return CustomHelpers::formatterRupiah(($row->unit_price ?? 0) * ($row->qty ?? 0));
             })
             ->addColumn('Diskon', function($row){
                 return CustomHelpers::formatterRupiah($row->discount);
@@ -147,7 +157,8 @@ class PurchaseTempDataTable extends DataTable
                     ->orderable(false)
                     ->searchable(false),
             Column::make('Produk')
-                    ->name('items.name'),
+                    ->name('items.name')
+                    ->footer('Total Akhir'),
             Column::make('Batch')
                     ->name('temp_batch_number')
                     ->defaultContent('-'),
@@ -162,6 +173,11 @@ class PurchaseTempDataTable extends DataTable
                     ->orderable(false)
                     ->searchable(false)
                     ->addClass('qty_table'),
+            Column::make('subtotal')
+                    ->title('= Subtotal')
+                    ->orderable(false)
+                    ->searchable(false)
+                    ->addClass('subtotal_table'),
             Column::make('Diskon')
                     ->title('- Diskon')
                     ->orderable(false)
@@ -174,7 +190,7 @@ class PurchaseTempDataTable extends DataTable
                     ->addClass('tax_table'),
             Column::make('Total Harga')
                     ->addClass('text-end')
-                    ->title('Subtotal'),
+                    ->title('Σ Total'),
             Column::make('product_code')
                     ->name('items.code')
                     ->visible(false)
