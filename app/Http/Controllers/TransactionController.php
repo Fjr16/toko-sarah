@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\PurchaseTempDataTable;
+use App\Enums\InventoryFlag;
+use App\Enums\PurchaseStatus;
 use App\Helpers\CustomHelpers;
 use Exception;
 use App\Models\Item;
@@ -12,11 +14,13 @@ use App\Models\ItemCategory;
 use App\Models\ProductBatch;
 use App\Models\PurchaseTemp;
 use App\Models\PurchaseTempDetail;
+use App\Models\TransactionDetail;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Enum;
 use Throwable;
 
 class TransactionController extends Controller
@@ -25,11 +29,13 @@ class TransactionController extends Controller
     {
         $suppliers = Supplier::get();
         $itemCategories = ItemCategory::get();
+        $stts = PurchaseStatus::class;
         return $dataTable->render('pages.pembelian.create', [
             'title' => 'Pembelian',
             'menu' => 'Pembelian',
             'suppliers' => $suppliers,
             'itemCategories' => $itemCategories,
+            'stts' => $stts
         ]);
     }
 
@@ -205,40 +211,105 @@ class TransactionController extends Controller
 
     public function finishPurchase(Request $request)
     {
+        $validators = Validator::make($request->all(), [
+            'supplier_id' => 'required|exists:suppliers,id',
+            'purchase_date' => 'required|date',
+            'subtotal' => 'required|numeric|max_digits:10',
+            'diskon' => 'required|numeric|max_digits:10',
+            'tax' => 'required|numeric|max_digits:10',
+            'other_cost' => 'required|numeric|max_digits:10',
+            'grand_total' => 'required|numeric|max_digits:10',
+            'status' => ['required', new Enum(PurchaseStatus::class)],
+            "notes" => 'nullable'
+        ]);
+
+        if($validators->fails()){
+            return response()->json([
+                'status' => false,
+                'message' => substr($validators->errors()->first(), 0, 150),
+            ]);
+        }
+
         DB::beginTransaction();
         try {
-            $dataTran = $request->validate([
-                'supplier_id' => 'required|exists:suppliers,id',
-                'purchase_date' => 'required|date',
-                'subtotal' => 'required|numeric|max_digits:10',
-                'diskon' => 'required|numeric|max_digits:10',
-                'tax' => 'required|numeric|max_digits:10',
-                'other_cost' => 'required|numeric|max_digits:10',
-                'grand_total' => 'required|numeric|max_digits:10',
-                'status' => 'required|in:pending,ordered,completed',
-                'payment_method' => 'required',
-            ]);
+            $purcTemp = PurchaseTemp::first();
+            $purcTemp->user_id = Auth::user()->id;
+            $purcTemp->supplier_id = $request->supplier_id;
+            $purcTemp->subtotal = $request->subtotal;
+            $purcTemp->diskon = $request->diskon;
+            $purcTemp->tax = $request->tax;
+            $purcTemp->other_cost = $request->other_cost;
+            $purcTemp->grand_total = $request->grand_total;
+            $purcTemp->temp_status = $request->status;
+            $purcTemp->save();
 
-            $item = Transaction::create($dataTran);
-            $dataSession = session()->get('data_pembelian');
-            foreach ($dataSession as $itemSession) {
-                $item->transactionDetails()->create([
-                    // 'transaction_id' => $item->id,
-                    'item_id' => $itemSession['id'],
-                    'jumlah' => $itemSession['jumlah'],
-                    'satuan' => $itemSession['satuan'],
-                    'unit_price' => $itemSession['harga_satuan'],
-                    'total' => $itemSession['total_harga'],
-                ]);
-                $productItem = Item::findOrFail($itemSession['id']);
-                $productItem->all_stok = $productItem->all_stok + $itemSession['jumlah'];
-                $productItem->save();
+            if (PurchaseStatus::finish->value === $request->status) {
+                $item = new Transaction;
+                $item->user_id = Auth::user()->id;
+                $item->supplier_id = $request->supplier_id;
+                $item->purchase_date = $request->purchase_date;
+                $item->subtotal = $request->subtotal;
+                $item->diskon = $request->diskon;
+                $item->tax = $request->tax;
+                $item->other_cost = $request->other_cost;
+                $item->grand_total = $request->grand_total;
+                $item->purchase_status = $request->status;
+                $item->notes = $request->notes ?? null;
+                $item->save();
+
+                foreach ($purcTemp->purchaseTempDetails as $tempDetail) {
+                    $batch_id = $this->createOrUpdateBatch($tempDetail);
+                    $itemDetail = TransactionDetail::create([
+                        'transaction_id' => $item->id,
+                        'item_id' => $tempDetail->item_id,
+                        'product_batch_id' => $batch_id,
+                        'jumlah' => $tempDetail->qty,
+                        'satuan' => $tempDetail->item->small_unit,
+                        'unit_price' => $tempDetail->unit_price,
+                        'discount' => $tempDetail->discount,
+                        'tax' => $tempDetail->tax,
+                        'sub_total' => $tempDetail->sub_total,
+                    ]);
+
+                    $updateProduk = $this->checkAnyChangeOnProduk($itemDetail);
+                    if (!$updateProduk) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Produk id:' . $tempDetail->item_id . ' Tidak ditemukan, cek kembali maste barang',
+                        ]);
+                    }
+
+                    // pencatatan inventory movements
+                    $dataToStore = [
+                        'user_id' => Auth::user()->id,
+                        'item_id' => $tempDetail->item_id,
+                        'product_batch_id' => $batch_id,
+                        'flag' => InventoryFlag::in->value,
+                        'qty' => $tempDetail->qty,
+                        'unit' => $tempDetail->item->small_unit,
+                        'note' => 'Pembelian'
+                    ];
+                    $helpers = new CustomHelpers;
+                    $res = $helpers->logInventoryMovements($itemDetail, $dataToStore);
+                    if ($res['status'] == false) {
+                        DB::rollBack();
+                        return response()->json([
+                            'status' => false,
+                            'message' => substr($res['message'], 0, 150),
+                        ]);
+                    }
+                }
+
+                $purcTemp->purchaseTempDetails()->delete();
+                $purcTemp->delete();
             }
+
             DB::commit();
 
             return response()->json([
                 'status' => true,
-                'message' => 'Pembelian berhasil disimpan'
+                'message' => 'Transaksi berhasil'
             ]);
         } catch (Throwable $th) {
             DB::rollBack();
@@ -256,5 +327,41 @@ class TransactionController extends Controller
             return PurchaseTempDetail::where('item_id', $itemId)->where('temp_batch_number', $batchNumber)->exists();
         }
         return false;
+    }
+
+    private function createOrUpdateBatch($tempDetail){
+        if ($tempDetail->product_batch_id) {
+            $batch = ProductBatch::where('id', $tempDetail->product_batch_id)->first();
+            $batch->stock = $batch->stock + $tempDetail->qty;
+        }else{
+            $batch = new ProductBatch;
+            $batch->item_id = $tempDetail->item_id;
+            $batch->batch_number = $tempDetail->temp_batch_number;
+            $batch->stock = $tempDetail->qty;
+        }
+
+        $batch->exp_date = $tempDetail->exp_date;
+        $batch->unit_cost = $tempDetail->unit_price;
+        $batch->save();
+
+        return $batch->id;
+    }
+    private function checkAnyChangeOnProduk($transDetail){
+        $produk = Item::where('id', $transDetail->item_id)->first();
+        if (!$produk) return false;
+        $defaultCost = $produk->default_cost;
+        $defaultPrice = $produk->default_price;
+        if ($produk->default_cost < $transDetail->unit_price) {
+            $defaultCost = $transDetail->unit_price;
+            $margin = $transDetail->unit_price * ($produk->margin/100);
+            $defaultPrice = $transDetail->unit_price + $margin;
+        }
+        $produk->update([
+            'default_cost' => $defaultCost,
+            'default_price' => $defaultPrice,
+            'all_stok' => $produk->all_stok + $transDetail->jumlah
+        ]);
+
+        return true;
     }
 }

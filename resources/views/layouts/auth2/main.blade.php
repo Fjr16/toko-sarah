@@ -319,6 +319,8 @@
     <script src="{{ asset('/assets/vendor/libs/select2/select2.js') }}"></script>
 
 
+    {{-- sweet alert --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     {{-- notyf --}}
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 

@@ -36,7 +36,7 @@ class Transaction extends Model
 
             $lastNumber = 0;
             if($lastInv){
-                $lastNumber = (int) substr($lastInv->invoice_number, -3); 
+                $lastNumber = (int) substr($lastInv->invoice_number, -3);
             }
             $nextNumber = $lastNumber + 1;
             $user_id = str_pad(Auth::user()->id, 2, 0, STR_PAD_LEFT);

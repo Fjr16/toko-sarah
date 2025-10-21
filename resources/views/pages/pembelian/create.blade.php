@@ -191,7 +191,7 @@
             <div class="row my-2">
                 <div class="col-md-8">
                     <label for="defaultInput" class="form-label">Supplier</label>
-                    <select id="supplier_id" class="form-select" onchange="updateSupplier(this)">
+                    <select id="supplier_id" class="form-select">
                         @foreach ($suppliers as $sup)
                             @if ($sup->id === old('supplier_id'))
                                 <option value="{{ $sup->id }}" selected>{{ $sup->name ?? '-' }}</option>
@@ -203,7 +203,7 @@
                 </div>
                 <div class="col-md-4">
                     <label for="defaultInput" class="form-label">Tgl. Pembelian</label>
-                    <input class="form-control" name="tanggal_pembelian" id="tanggal_pembelian" type="date" value="{{ date('Y-m-d') }}" onchange="updatePurchaseDate(this.value)"/>
+                    <input class="form-control" name="tanggal_pembelian" id="tanggal_pembelian" type="date" value="{{ date('Y-m-d') }}"/>
                 </div>
             </div>
             <div class="row mb-4">
@@ -211,109 +211,6 @@
             </div>
         </div>
     </div>
-    <!-- Modal with long content -->
-      <!-- Modal -->
-      <div class="modal fade" id="modalLong" tabindex="-1" aria-labelledby="modalLongTitle" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-header border-bottom d-block">
-              <h5 class="modal-title" id="modalLongTitle">Konfirmasi Pembelian</h5>
-              <p class="small my-0 py-0 text-uppercase">Transaction ID : <span class="fw-bold">-</span></p>
-            </div>
-            <form action="{{ route('pembelian/save.all') }}" method="POST">
-                @csrf
-                <div class="modal-body">
-                    <div class="table-responsive">
-                        <table class="table">
-                            <tbody>
-                                <tr>
-                                    <td>Tanggal :
-                                        <span id="purchase_date">-</span>
-                                        <input type="hidden" name="purchase_date" required>
-                                    </td>
-                                    <td>Supplier :
-                                        <span id="namaSupplier">-</span>
-                                        <input type="hidden" name="supplier_id" required>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Jam : <span>{{ date('H:i') }}</span></td>
-                                    <td>
-                                        Status Bayar : <span class="status_bayar text-white">-</span>
-                                        <input type="hidden" name="status" required>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Item</th>
-                                    <th>Qty</th>
-                                    <th>Harga</th>
-                                    <th>Total</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <tr>
-                                    <th colspan="3">
-                                        <input type="hidden" name="subtotal" required>
-                                        Subtotal
-                                    </th>
-                                    <th class="subtotal">Rp. 0</th>
-                                </tr>
-                                <tr>
-                                    <th colspan="3">Items</th>
-                                    <th class="totalItems">Rp. 0</th>
-                                </tr>
-                                <tr>
-                                    <th colspan="3">Total Qty</th>
-                                    <th class="totalQty">Rp. 0</th>
-                                </tr>
-                                <tr>
-                                    <th colspan="3">
-                                        <input type="hidden" name="tax" required>
-                                        Pajak
-                                    </th>
-                                    <th class="totalPajak">Rp. 0</th>
-                                </tr>
-                                <tr>
-                                    <th colspan="3">
-                                        <input type="hidden" name="other_cost" required>
-                                        Biaya Lainnya
-                                    </th>
-                                    <th class="biayaLainnya">Rp. 0</th>
-                                </tr>
-                                <tr>
-                                    <th colspan="3">
-                                        <input type="hidden" name="diskon" required>
-                                        Diskon
-                                    </th>
-                                    <th class="totalDiskon">Rp. 0</th>
-                                </tr>
-                                <tr>
-                                    <th colspan="3" class="fw-bold">
-                                        <input type="hidden" name="grand_total" required>
-                                        Total
-                                    </th>
-                                    <th class="fw-bold totalAkhir">Rp. 0</th>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Batal</button>
-                  <button type="submit" class="btn btn-outline-primary">Lanjutkan</button>
-                </div>
-            </form>
-          </div>
-        </div>
-      </div>
-    <!-- End Modal with long content -->
 
 @endsection
 @section('footer')
@@ -361,13 +258,11 @@
                 </button>
 
                 <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-secondary btn-sm">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="storeAll('{{ $stts::draft->value }}')">
                         <i class="bi bi-file-earmark-text"></i>
                         Simpan Draft
                     </button>
-                    <button type="button" class="btn btn-primary btn-sm"
-                            data-bs-toggle="modal"
-                            data-bs-target="#modalLong">
+                    <button type="button" class="btn btn-primary btn-sm" onclick="storeAll('{{ $stts::finish->value }}')">
                         <i class="bx bx-check"></i> Pembelian Selesai
                     </button>
                 </div>
@@ -416,6 +311,11 @@
     </script>
 
     <script>
+        let onedited = null;
+        const sttsAvailable = @json($stts::cases());
+        const sttsDraft = "{{ $stts::draft->value }}";
+        const sttsFinished = "{{ $stts::finish->value }}";
+
         async function addToCart() {
             const productId = $('#product-select').val();
             const batchId = $('input[name="product_batch_id[]"]').map(function (){return this.value.trim()}).get();
@@ -495,6 +395,14 @@
             }
         }
         async function editItem(purchaseTempDetailId) {
+            const table = window.LaravelDataTables['purchasetemp-table'];
+
+            if (onedited && onedited !== purchaseTempDetailId) {
+               table.row('#'+onedited).invalidate().draw(false);
+            }
+
+            onedited = purchaseTempDetailId;
+
             var currentPrice = 0,currentQty = 0,currentDisc = 0,currentTax = 0, productSatuan = '';
             try {
                 const res = await fetch('/purchase/temp/detail/byId/' + purchaseTempDetailId);
@@ -514,11 +422,11 @@
                     productSatuan = data.small_unit ?? '';
                 }
             } catch (error) {
+                onedited = null;
                 console.log(error.message)
                 notify('error', error.message.slice(0,150) ?? 'Terjadi kesalahan sistem');
             }
 
-            const table = window.LaravelDataTables['purchasetemp-table'];
             const row = '#' + purchaseTempDetailId;
 
             const actionIndex  = table.column('.action_table').index();
@@ -534,12 +442,12 @@
             const colTax = table.cell(row, taxIndex).node();
 
             const btnSimpan = `<button onclick="updateItem(${purchaseTempDetailId})" class="text-success border-0 bg-transparent p-0"><i class="bx bx-save fs-4"></i></button>`;
-            const btnBtl =`<button onclick="window.LaravelDataTables['purchasetemp-table'].ajax.reload()" class="text-danger border-0 bg-transparent p-0"><i class="bx bx-exit fs-4"></i></button>`;
+            const btnBtl =`<button onclick="window.LaravelDataTables['purchasetemp-table'].row('#${purchaseTempDetailId}').invalidate().draw(false)" class="text-danger border-0 bg-transparent p-0"><i class="bx bx-exit fs-4"></i></button>`;
 
             const inputUnitPrice = `<input type="text" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="${currentPrice}" placeholder="0" name="unit_price_edit" id="unit_price_edit_${purchaseTempDetailId}" class="form-control form-control-sm">`;
             const inputQty = `
                 <div class="input-group input-group-sm">
-                    <input type="number" class="form-control" oninput="this.value = this.value,replace(/[^0-9]/g, '')" name="qty_edit" id="qty_edit_${purchaseTempDetailId}" value="${currentQty}">
+                    <input type="number" class="form-control" oninput="this.value = this.value.replace(/[^0-9]/g, '')" name="qty_edit" id="qty_edit_${purchaseTempDetailId}" value="${currentQty}">
                     <span class="input-group-text bg-primary text-white">${productSatuan}</span>
                 </div>`;
             const inputDisc = `<input type="text" oninput="this.value = this.value.replace(/[^0-9]/g, '')" value="${currentDisc}" name="discount_edit" id="discount_edit_${purchaseTempDetailId}" class="form-control form-control-sm">`;
@@ -588,8 +496,34 @@
             }
         }
         async function storeAll(status) {
+            if(sttsAvailable.includes(status) == false) return notify('error', 'Status Tidak Dikenali');
+            const supp_id = $('#supplier_id').val() ?? null;
+            const purc_date = $('#tanggal_pembelian').val() ?? null;
+            const inv_tax = reverseFormatRupiah($('#invoice_tax').val());
+            const inv_disc = reverseFormatRupiah($('#invoice_discount').val());
+            const inv_other = reverseFormatRupiah($('#invoice_other').val());
+            const subTot = reverseFormatRupiah($('#summarySubtotal').text());
+            const grandTot = reverseFormatRupiah($('#summaryTotalAkhir').text());
+
+            const { isConfirmed, value:notes } =  await Swal.fire({
+                title: 'Catatan',
+                input:"textarea",
+                inputPlaceholder:"Tuliskan catatan untuk pembelian ini, jika ada",
+                theme: 'auto',
+                icon:'warning',
+                showConfirmButton:true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: 'Lanjutkan',
+                cancelButtonText: 'Batalkan',
+                showCancelButton:true,
+                reverseButtons:true
+            });
+
+            if (!isConfirmed) return;
+
             try {
-                const res = await fetch('pembelian/save/all', {
+                const res = await fetch('/pembelian/save/all', {
                     method : 'POST',
                     headers: {
                         'X-CSRF-TOKEN' : "{{ csrf_token() }}",
@@ -597,24 +531,33 @@
                         'Content-Type' : 'application/json'
                     },
                     body:JSON.stringify({
-
+                        status : status,
+                        purchase_date : purc_date,
+                        supplier_id : supp_id,
+                        tax : inv_tax,
+                        diskon : inv_disc,
+                        other_cost : inv_other,
+                        subtotal:subTot,
+                        grand_total:grandTot,
+                        notes : notes ?? null
                     })
                 });
 
                 if (!res.ok) {
-                    const errorText = await res.statusText;
-                    throw new Error(errorText || "Gagal simpan pembelian");
+                    const errorText = res.statusText;
+                    throw new Error(errorText || "Gagal simpan data");
                 }
 
                 const result = await res.json();
                 if (result.status) {
-                    table.ajax.reload();
+                    window.LaravelDataTables['purchasetemp-table'].ajax.reload();
                     notify('success', result.message);
                 }else{
-                    notify('success', result.message || 'Gagal simpan pembelian');
+                    notify('error', result.message || 'Gagal simpan data');
                 }
 
             } catch (error) {
+                console.log(error.message)
                 notify('error', error.message || 'Terjadi Kesalahan');
             }
         }
@@ -779,29 +722,6 @@
                 input.value = val.replace(/[^0-9.]/g, '');
             });
         });
-
-         // setting global variabel
-        // let symbol, position, thouSeparator, decSeparator;
-        $(document).ready(function(){
-            const selectSupplier = document.getElementById('supplier_id');
-            updateSupplier(selectSupplier);
-            updatePurchaseDate($('#tanggal_pembelian').val());
-        });
-
-        $('#modalLong').keypress(function (e){
-            if (e.key === 'Enter') {
-                $(this).find('form').submit();
-            }
-        })
-
-        function updateSupplier(selectSupplier){
-            $('#namaSupplier').text(selectSupplier.options[selectSupplier.selectedIndex].text);
-            $('input[name="supplier_id"]').val(selectSupplier.value);
-        }
-        function updatePurchaseDate(value){
-            $('#purchase_date').text(value);
-            $('input[name="purchase_date"]').val(value);
-        }
     </script>
 
 @endpush

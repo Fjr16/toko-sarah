@@ -25,4 +25,9 @@ class TransactionDetail extends Model
     {
         return $this->belongsTo(Transaction::class);
     }
+
+    // untuk pencatatan log stok saat pembelian barang
+    public function inventoryMovements(){
+        return $this->morphMany(InventoryMovement::class, 'reference');
+    }
 }
