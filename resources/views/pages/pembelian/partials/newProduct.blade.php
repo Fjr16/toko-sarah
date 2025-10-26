@@ -208,9 +208,14 @@
             let result = await res.json();
 
             if (result.status) {
+                if (result.selectedItem){
+                    const item = result.selectedItem;
+                    $('#product-select').select2('trigger', 'select', {
+                        data: { id: item.id, text: '['+item.code+'] ' + item.name }
+                    });
+                }
                 notify('success', result.message);
                 form.reset();
-                location.reload();
             }else{
                 console.log(result.message);
                 notify('error', result.message.slice(0,150));

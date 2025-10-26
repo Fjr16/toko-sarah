@@ -35,12 +35,6 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('dashboard');
 
-
-
-    // Route::get('/home', function () {
-        //     return view('welcome');
-    // });
-
     // other controller for any licensed function
     Route::get('product/search', [OtherController::class, 'searchProduct'])->name('product.search');
     Route::get('product/show/by-id/{item_id}', [OtherController::class, 'showDetailProductById'])->name('product/show.by-id');
@@ -103,14 +97,11 @@ Route::middleware(['auth'])->group(function () {
     // Route::post('cart/store', [CartController::class, 'store'])->name('cart.store');
 
     // Pembelian
-    // Route::get('pembelian/riwayat', [SalesController::class, 'index'])->name('pembelian/riwayat.index');
-    // Route::get('pembelian/riwayat/detail/{id}', [SalesController::class, 'detail'])->name('pembelian/riwayat.detail');
     Route::get('pembelian/create', [TransactionController::class, 'create'])->name('pembelian.create');
     Route::post('pembelian/store/item', [TransactionController::class, 'storeItem'])->name('pembelian/store.item');
     Route::put('pembelian/update/item/{id}', [TransactionController::class, 'updateItem'])->name('pembelian/update.item');
     Route::delete('pembelian/destroy/{id}', [TransactionController::class, 'destroyItem'])->name('pembelian.destroy');
     Route::delete('pembelian/reset', [TransactionController::class, 'resetCart'])->name('pembelian.reset');
-    Route::get('pembelian/invoice', [TransactionController::class, 'show'])->name('pembelian.invoice');
     Route::post('pembelian/save/all', [TransactionController::class, 'finishPurchase'])->name('pembelian/save.all');
 
     // setting

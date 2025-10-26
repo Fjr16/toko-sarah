@@ -230,19 +230,19 @@
                 <div class="col-6 col-md-4">
                     <div class="input-group input-group-sm">
                     <span class="input-group-text">Pajak</span>
-                    <input type="text" id="invoice_tax" class="form-control text-end price" placeholder="0" oninput="this.value = this.value.replace(/[^0-9]/g,''), updateGrandTotal()">
+                    <input type="text" id="invoice_tax" class="form-control text-end price" placeholder="0" value="{{ number_format($item?->tax,0,'','.') }}" oninput="this.value = this.value.replace(/[^0-9]/g,''), updateGrandTotal()">
                     </div>
                 </div>
                 <div class="col-6 col-md-4">
                     <div class="input-group input-group-sm">
                     <span class="input-group-text">Diskon</span>
-                    <input type="text" id="invoice_discount" class="form-control text-end price" placeholder="0" oninput="this.value = this.value.replace(/[^0-9]/g,''), updateGrandTotal()">
+                    <input type="text" id="invoice_discount" class="form-control text-end price" placeholder="0" value="{{ number_format($item?->diskon,0,'','.') }}" oninput="this.value = this.value.replace(/[^0-9]/g,''), updateGrandTotal()">
                     </div>
                 </div>
                 <div class="col-6 col-md-4">
                     <div class="input-group input-group-sm">
                     <span class="input-group-text">Biaya Lain</span>
-                    <input type="text" id="invoice_other" class="form-control text-end price" placeholder="0" oninput="this.value = this.value.replace(/[^0-9]/g,''), updateGrandTotal()">
+                    <input type="text" id="invoice_other" class="form-control text-end price" placeholder="0" value="{{ number_format($item?->other_cost,0,'','.') }}" oninput="this.value = this.value.replace(/[^0-9]/g,''), updateGrandTotal()">
                     </div>
                 </div>
             </div>
@@ -550,6 +550,12 @@
 
                 const result = await res.json();
                 if (result.status) {
+                    if (result.type && result.type === sttsFinished) {
+                        $('#summarySubtotal').text('Rp. 0');
+                        $('#invoice_tax').val('0');
+                        $('#invoice_discount').val('0');
+                        $('#invoice_other').val('0');
+                    }
                     window.LaravelDataTables['purchasetemp-table'].ajax.reload();
                     notify('success', result.message);
                 }else{

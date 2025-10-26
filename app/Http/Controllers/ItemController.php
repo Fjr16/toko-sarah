@@ -142,22 +142,12 @@ class ItemController extends Controller
             $item->status = Status::active;
 
             if ($item->save()) {
-                $req = Request::create(route('pembelian.store', $item->id), 'GET');
-                $res = app()->handle($req);
-                $message = json_decode($res->getContent(), true)['message'];
-                if ($res->getStatusCode() === 200) {
-                    DB::commit();
-                    return response()->json([
-                        'status' => true,
-                        'message' => $message
-                    ]);
-                }else{
-                    DB::rollBack();
-                    return response()->json([
-                        'status' => false,
-                        'message' => $message
-                    ]);
-                }
+                DB::commit();
+                return response()->json([
+                    'status' => true,
+                    'message' => "berhasil membuat produk dan menambahkan ke keranjang",
+                    'selectedItem' => $item,
+                ]);
             }else{
                 DB::rollBack();
                 return response()->json([

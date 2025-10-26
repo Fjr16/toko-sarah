@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable(false);
             $table->foreignId('supplier_id')->nullable(false);
-            $table->string('invoice_nunmber')->nullable(false);
+            $table->string('invoice_number')->nullable(false);
             $table->date('purchase_date')->nullable(false);
             $table->decimal('subtotal',12,2)->default(0);
             $table->decimal('diskon',12,2)->default(0);

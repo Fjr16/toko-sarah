@@ -30,12 +30,14 @@ class TransactionController extends Controller
         $suppliers = Supplier::get();
         $itemCategories = ItemCategory::get();
         $stts = PurchaseStatus::class;
+        $item = PurchaseTemp::first();
         return $dataTable->render('pages.pembelian.create', [
             'title' => 'Pembelian',
             'menu' => 'Pembelian',
             'suppliers' => $suppliers,
             'itemCategories' => $itemCategories,
-            'stts' => $stts
+            'stts' => $stts,
+            'item' => $item
         ]);
     }
 
@@ -197,15 +199,9 @@ class TransactionController extends Controller
                     $item->delete();
                 }
             });
-            return response()->json([
-                'status' => true,
-                'message' => 'Keranjang berhasil dikosongkan'
-            ]);
+            return back()->with('success', 'Keranjang berhasil dikosongkan');
         } catch (\Throwable $th) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Gagal mengosongkan keranjang'
-            ]);
+            return back()->with('success', 'Gagal mengosongkan keranjang');
         }
     }
 
@@ -232,6 +228,8 @@ class TransactionController extends Controller
 
         DB::beginTransaction();
         try {
+            $typeTransaction = PurchaseStatus::draft->value;
+
             $purcTemp = PurchaseTemp::first();
             $purcTemp->user_id = Auth::user()->id;
             $purcTemp->supplier_id = $request->supplier_id;
@@ -299,6 +297,7 @@ class TransactionController extends Controller
                             'message' => substr($res['message'], 0, 150),
                         ]);
                     }
+                    $typeTransaction = PurchaseStatus::finish->value;
                 }
 
                 $purcTemp->purchaseTempDetails()->delete();
@@ -309,7 +308,8 @@ class TransactionController extends Controller
 
             return response()->json([
                 'status' => true,
-                'message' => 'Transaksi berhasil'
+                'message' => 'Transaksi berhasil',
+                'type' => $typeTransaction
             ]);
         } catch (Throwable $th) {
             DB::rollBack();
