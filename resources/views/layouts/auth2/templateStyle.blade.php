@@ -90,7 +90,6 @@
         }
 
         .pos-sidebar {
-            position: fixed;
             top: 0;
             left: -100%;
             height: 100%;
@@ -102,10 +101,6 @@
 
         .pos-wrapper.sidebar-open .pos-sidebar {
             left: 0;
-        }
-
-        .pos-topbar, .pos-content, .pos-checkout {
-            grid-column: 1;
         }
     }
 

@@ -248,22 +248,25 @@
             </div>
 
             <hr class="my-2">
-
-            <div class="d-flex justify-content-between align-items-center">
-                <button type="button" class="btn btn-outline-danger btn-sm"
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-sm-auto">
+                    <button type="button" class="btn btn-outline-danger btn-sm w-100"
                         data-warning="Kosongkan keranjang?"
                         data-url="{{ route('pembelian.reset') }}"
                         onclick="showModalDelete(this)">
-                    <i class="bx bx-reset"></i> Kosongkan Keranjang
+                    <i class="bx bx-reset"></i>
+                    <span class="d-none d-sm-inline">Kosongkan Keranjang</span>
+                    <span class="d-sm-none">Kosongkan</span>
                 </button>
-
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="storeAll('{{ $stts::draft->value }}')">
+                </div>
+                <div class="col-12 col-sm d-flex gap-2 justify-content-sm-end">
+                    <button type="button" class="btn btn-secondary btn-sm flex-fill flex-sm-grow-0" onclick="storeAll('{{ $stts::draft->value }}')">
                         <i class="bi bi-file-earmark-text"></i>
-                        Simpan Draft
+                        <span class="ms-1">Simpan Draft</span>
                     </button>
-                    <button type="button" class="btn btn-primary btn-sm" onclick="storeAll('{{ $stts::finish->value }}')">
-                        <i class="bx bx-check"></i> Pembelian Selesai
+                    <button type="button" class="btn btn-primary btn-sm flex-fill flex-sm-grow-0" onclick="storeAll('{{ $stts::finish->value }}')">
+                        <i class="bx bx-check"></i>
+                        <span class="ms-1">Pembelian Selesai</span>
                     </button>
                 </div>
             </div>
