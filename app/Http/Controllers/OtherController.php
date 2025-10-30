@@ -79,6 +79,31 @@ class OtherController extends Controller
         ->make(true);
     }
 
+    public function getDataBatchV2(){
+        $productId = request()->get('product_id');
+
+        $data = ProductBatch::query()
+        ->where('item_id', $productId);
+
+        return DataTables::of($data)
+        ->setRowAttr([
+            'data-batch-id' => function($row){return $row->id;}
+        ])
+        ->editColumn('exp_date', function($row){
+            if ($row && $row->exp_date) {
+                return Carbon::parse($row->exp_date)->format('d F Y');
+            }
+        })
+        ->addColumn('qty', function($row) use ($productId){
+            return '<div class="input-group">
+                <input type="number" class="form-control form-control-sm" id="qty_'. $productId .'_'.$row->id.'" name="qty" value="1" oninput="this.value = this.value.replace(/[^0-9]/g, &quot;&quot;)">
+                <span class="input-group-text">'.($row->product->small_unit ?? '-').'</span>
+            </div>';
+        })
+        ->rawColumns(['qty'])
+        ->make(true);
+    }
+
     public function getItemBatch($batch_id) {
         try {
             $item = ProductBatch::where('id',$batch_id)->first();

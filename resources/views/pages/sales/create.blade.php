@@ -20,7 +20,7 @@
         gap:.5rem;
     }
     .card .bd{
-        padding:.9rem;
+        padding:.4rem;
     }
     .input, .select{
         width:100%;

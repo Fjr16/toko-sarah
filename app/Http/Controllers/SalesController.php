@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\ProductBatch;
 use App\Models\Selling;
 use App\Models\SellingDetail;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 
 class SalesController extends Controller
 {
@@ -28,6 +31,66 @@ class SalesController extends Controller
             'menu' => 'Penjualan',
             'produks' => $produks,
         ]);
+    }
+
+    public function addToCart(Request $req){
+        $validators = Validator::make($req->all(), [
+            'batch_id' => 'required|exists:product_batches,id',
+            'qty' => 'required|numeric|min:1'
+        ]);
+        if ($validators->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validators->errors()->first()
+            ]);
+        }
+
+        try {
+            $dataSession = session()->get('data');
+            $item = ProductBatch::where('id', $req->batch_id)->firstOrFail();
+            $findItem = $this->findItem($item->id);
+            if ($findItem) {
+                // untuk mendapatkan key asli, case misal terdapat array dengan key 0,1,2 ketikda array key 1
+                // dihapus maka array 0,2. disini ketika index dicari maka index yang dikembalikan sesuai dengan index 0,2 bukan 0,1
+                $index = key(array_filter($dataSession, function($itemSession) use ($item) {
+                    return $itemSession['id'] === $item->id;
+                }));
+                $jumlahItem = $dataSession[$index]['jumlah']+$req->qty;
+                $dataSession[$index] = [
+                    'id' => $item->id,
+                    'product_name' => $item->product->name,
+                    'product_code' => $item->product->code,
+                    'batch_number' => $item->batch_number,
+                    'jumlah' => $jumlahItem,
+                    'satuan' => $item->product->small_unit,
+                    'harga' => (int) $item->product->default_price,
+                    'subtotal' => (int) $item->product->default_price * $jumlahItem,
+                ];
+                session()->put('data', $dataSession);
+            }else{
+                session()->push('data', [
+                    'id' => $item->id,
+                    'product_name' => $item->product->name,
+                    'product_code' => $item->product->code,
+                    'batch_number' => $item->batch_number,
+                    'jumlah' => $req->qty,
+                    'satuan' => $item->product->small_unit,
+                    'harga' => (int) $item->product->default_price,
+                    'subtotal' => (int) $item->product->default_price * $req->qty,
+                ]);
+            }
+            // session()->flash('success', 'Berhasil Ditambahkan Keranjang');
+            return response()->json([
+                'status' => 200,
+                'message' => 'Berhasil ditambahkan',
+            ]);
+        } catch (\Throwable $th){
+            // session()->flash('error', 'Produk Tidak Ditemukan');
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage(),
+            ]);
+        }
     }
 
     // public function getProduct(Request $r){
@@ -162,5 +225,15 @@ class SalesController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+
+
+    private function findItem($id) {
+        $data = session()->get('data');
+        $find = Arr::first($data, function($item) use ($id){
+            return $item['id'] === $id;
+        });
+        return $find;
     }
 }

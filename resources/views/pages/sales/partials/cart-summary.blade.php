@@ -10,22 +10,35 @@
         <div class="bd p-0">
             <div class="table-responsive">
             <table id="cart-table" class="table table-sm table-hover mb-0 table-cart">
-                <thead class="table-light">
-                <tr>
-                    <th style="width:34px">#</th>
-                    <th>Item</th>
-                    <th style="width:180px">Batch</th>
-                    <th class="right" style="width:90px">Qty</th>
-                    <th style="width:100px">Unit</th>
-                    <th class="right" style="width:140px">Harga</th>
-                    <th class="right" style="width:160px">Sub Total</th>
-                    <th style="width:40px"></th>
-                </tr>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Produk</th>
+                        <th>Batch</th>
+                        <th class="right">Qty</th>
+                        <th class="right">Harga</th>
+                        <th class="right">Sub Total</th>
+                        <th style="width:40px"></th>
+                    </tr>
                 </thead>
                 <tbody id="cart-body">
-                <tr>
-                    <td colspan="8" class="text-muted">Belum ada item. Cari/scan produk di atas.</td>
-                </tr>
+                    @if (session('data'))
+                    {{-- @dd(session('data')); --}}
+                        @foreach (session('data') as $item)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td>{{ $item['product_name'] }}</td>
+                                <td>{{ $item['batch_number'] }}</td>
+                                <td>{{ $item['jumlah'] . ' ' . $item['satuan'] }}</td>
+                                <td>{{ $item['harga'] }}</td>
+                                <td>{{ $item['subtotal'] }}</td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr>
+                            <td colspan="8" class="text-muted text-center">Belum ada item. Cari/scan produk di atas.</td>
+                        </tr>
+                    @endif
                 </tbody>
                 <tfoot>
                 <tr>
