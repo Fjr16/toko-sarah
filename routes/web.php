@@ -84,6 +84,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('user/restore/{id}', [UserController::class, 'restore'])->name('user.restore');
 
     // Penjualan
+    Route::get('sales/get/dataTable', [SalesController::class, 'getDataTable'])->name('sales/get.dataTable');
     Route::get('sales/riwayat', [SalesController::class, 'index'])->name('sales/riwayat.index');
     Route::get('sales/riwayat/detail/{id}', [SalesController::class, 'detail'])->name('sales/riwayat.detail');
     Route::get('sales/create', [SalesController::class, 'create'])->name('sales.create');

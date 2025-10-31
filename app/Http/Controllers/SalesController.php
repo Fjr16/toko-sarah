@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\CustomHelpers;
 use App\Models\Item;
 use App\Models\ProductBatch;
 use App\Models\Selling;
@@ -14,9 +15,42 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Yajra\DataTables\Facades\DataTables;
 
 class SalesController extends Controller
 {
+    public function getDataTable(){
+        if (session('data')) {
+            session()->put('data', session('data'));
+        }else{
+            session()->put('data', []);
+        }
+        $data = session('data');
+
+        $subTotalSum = array_sum(Arr::pluck($data, 'subtotal'));
+        $qtySum = array_sum(Arr::pluck($data, 'jumlah'));
+
+        return DataTables::of($data)
+        ->addColumn('action', function($row){
+            $btnDelete = '<button type="button" class="btn btn-sm btn-danger btn-icon me-2" onclick=""><i class="bi bi-trash"></i></button>';
+            $btnEdit = '<button type="button" class="btn btn-sm btn-warning btn-icon" onclick=""><i class="bi bi-pencil"></i></button>';
+            return $btnDelete . $btnEdit;
+        })
+        ->editColumn('harga', function($row){
+            return CustomHelpers::formatterRupiah($row['harga']);
+        })
+        ->editColumn('subtotal', function($row){
+            return CustomHelpers::formatterRupiah($row['subtotal']);
+        })
+        ->with([
+            'summary' => [
+                'subTotalSum' => CustomHelpers::formatterRupiah($subTotalSum),
+                'qtySum' => $qtySum,
+            ],
+        ])
+        ->toJson();
+    }
+
     public function create()
     {
         if (session('data')) {

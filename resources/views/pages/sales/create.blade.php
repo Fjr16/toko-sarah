@@ -30,6 +30,7 @@
     }
     .table-cart tfoot th{
         background:#f8fafc;
+        color:black;
     }
     .right{
         text-align:right;
@@ -53,6 +54,7 @@
         color:#0369a1;
         font-weight:700;
     }
+    th.fit, td.fit { white-space: nowrap; width: 1%; }
 </style>
 @endpush
 
@@ -80,22 +82,26 @@
 @endsection
 
 @section('footer')
-  <div class="card mt-3 shadow-flat footer-sticky">
-    <div class="card-body py-2">
-      <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
-        <small class="text-muted">Total Items: <b id="summaryTotalItemBottom">0</b></small>
-        <small class="fw-bold text-success">Grand Total: <span id="grandTotalBottom">Rp0</span></small>
-      </div>
-      <div class="row g-2 align-items-center">
-        <div class="col-12 col-sm-auto">
-          <button type="button" class="btn btn-outline-danger btn-sm">⟲ Kosongkan Keranjang</button>
+    <div class="card mt-3 shadow-flat footer-sticky">
+        <div class="card-body py-2">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+            <small class="text-muted">Total Items: <b id="summaryTotalItemBottom">0</b></small>
+            <small class="fw-bold text-success">Grand Total: <span id="grandTotalBottom">Rp0</span></small>
+            </div>
+
+            <div class="row g-2 align-items-center">
+            <!-- tombol 1: full width di mobile, auto di sm+ -->
+            <div class="col-12 col-sm-auto d-grid">
+                <button type="button" class="btn btn-outline-danger btn-sm">⟲ Kosongkan Keranjang</button>
+            </div>
+
+            <!-- tombol 2: full width di mobile, ke kanan di sm+ -->
+            <div class="col-12 col-sm d-grid d-sm-flex justify-content-sm-end">
+                <button type="button" class="btn btn-primary btn-sm">✔ Penjualan Selesai</button>
+            </div>
+            </div>
         </div>
-        <div class="col-12 col-sm d-flex justify-content-sm-end">
-          <button type="button" class="btn btn-primary btn-sm">✔ Penjualan Selesai</button>
-        </div>
-      </div>
     </div>
-  </div>
 @endsection
 
 @push('scripts')

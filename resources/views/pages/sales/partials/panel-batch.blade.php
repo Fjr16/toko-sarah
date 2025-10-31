@@ -1,6 +1,11 @@
 <div class="col-sm-6 col-md-7">
     <div class="card shadow-flat d-flex flex-column">
-        <div class="hd flex-shrink-0">Panel Batch Cepat</div>
+        <div class="hd flex-shrink-0">
+            Panel Batch Cepat
+            <span class="ms-auto">
+                <input type="text" name="search_batch_table" id="search_batch_table" class="form-control form-control-md" placeholder="Cari batch">
+            </span>
+        </div>
         <div class="bd table-responsive overflow-auto flex-grow-1" id="panel-batch">
             <table class="table table-hover mb-0" id="batch-table">
                 <thead>
@@ -25,10 +30,14 @@
             processing:true,
             serverSide:true,
             searching:true,
-            paginate:true,
-            pageLength:5,
+            info:false,
+            paging:false,
             lengthChange:false,
             deferLoading:0,
+            scrollY:'150px',
+            scrollCollapse:true,
+            responsive:true,
+            dom: "<'d-none'f>t<'row'<'col-sm-6'i><'col-sm-6'p>>",
             ajax:{
                 url: "{{ route('product/get/data/batch.v2') }}",
                 data:function(d){
@@ -78,6 +87,7 @@
                     return;
                 }
 
+                cartTable.ajax.reload();
                 notify('success', result.message.slice(0,150))
 
             } catch (error) {
@@ -85,6 +95,10 @@
                 notify('error', error.message.slice(0,150));
             }
 
+        });
+
+        $('input[name="search_batch_table"]').on('keyup',function(){
+            batchTable.search(this.value, false).draw();
         });
     });
 </script>

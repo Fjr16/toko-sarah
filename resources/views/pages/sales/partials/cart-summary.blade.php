@@ -2,57 +2,34 @@
     {{-- KERANJANG --}}
     <div class="col-lg-9">
         <div class="card shadow-flat">
-        <div class="hd">
-            Keranjang
-            <span class="badge-soft ms-2">Items: <span id="summaryTotalItem">0</span></span>
-            <span class="badge-soft ms-auto">Subtotal: <span id="summarySubtotal">Rp0</span></span>
-        </div>
-        <div class="bd p-0">
-            <div class="table-responsive">
-            <table id="cart-table" class="table table-sm table-hover mb-0 table-cart">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Produk</th>
-                        <th>Batch</th>
-                        <th class="right">Qty</th>
-                        <th class="right">Harga</th>
-                        <th class="right">Sub Total</th>
-                        <th style="width:40px"></th>
-                    </tr>
-                </thead>
-                <tbody id="cart-body">
-                    @if (session('data'))
-                    {{-- @dd(session('data')); --}}
-                        @foreach (session('data') as $item)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ $item['product_name'] }}</td>
-                                <td>{{ $item['batch_number'] }}</td>
-                                <td>{{ $item['jumlah'] . ' ' . $item['satuan'] }}</td>
-                                <td>{{ $item['harga'] }}</td>
-                                <td>{{ $item['subtotal'] }}</td>
-                            </tr>
-                        @endforeach
-                    @else
-                        <tr>
-                            <td colspan="8" class="text-muted text-center">Belum ada item. Cari/scan produk di atas.</td>
-                        </tr>
-                    @endif
-                </tbody>
-                <tfoot>
-                <tr>
-                    <th colspan="3" class="right">Total</th>
-                    <th class="right" id="ft-total-qty">0</th>
-                    <th></th>
-                    <th class="right">Subtotal</th>
-                    <th class="right" id="ft-subtotal"><b>Rp0</b></th>
-                    <th></th>
-                </tr>
-                </tfoot>
-            </table>
+            <div class="hd">
+                Keranjang
+                <span class="badge-soft ms-auto">Subtotal: <span id="summarySubtotal">Rp0</span></span>
             </div>
-        </div>
+            <div class="bd">
+                <div class="table-responsive">
+                    <table id="cart-table" class="table table-sm table-hover mb-0 table-cart">
+                        <thead>
+                            <tr>
+                                <th>Action</th>
+                                <th>Produk</th>
+                                <th>Batch</th>
+                                <th>Qty</th>
+                                <th>Harga</th>
+                                <th>Sub Total</th>
+                            </tr>
+                        </thead>
+                        <tfoot class="text-dark">
+                            <tr>
+                                <th colspan="3">Total</th>
+                                <th id="ft-total-qty" class="text-start">0</th>
+                                <th>Subtotal</th>
+                                <th id="ft-subtotal"><b>Rp0</b></th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -110,6 +87,56 @@
     </div>
 </div>
 
-@push('sripts')
-<script></script>
+@push('scripts')
+<script>
+    var cartTable;
+    $(document).ready(function(){
+        cartTable = $('#cart-table').DataTable({
+            processing:true,
+            serverSide:true,
+            info:false,
+            paging:false,
+            scrollY:'200px',
+            scrollCollapse:true,
+            responsive:true,
+            columnDefs: [
+                {
+                    targets: [0],
+                    className: 'fit',
+                    width: '1%',
+                    orderable: false
+                }
+            ],
+            ajax: {
+                url: "{{ route('sales/get.dataTable') }}",
+            },
+            columns:[
+                {data:'action', name:'action', searchable:false, orderable:false},
+                {data:'product_name',name:'product_name', searchable:true, orderable:true, 'defaultContent':'-'},
+                {data:'batch_number',name:'batch_number', searchable:true, orderable:true, 'defaultContent':'-'},
+                {data:'jumlah',name:'jumlah', searchable:true, orderable:true,},
+                {data:'harga',name:'harga', searchable:true, orderable:true, 'defaultContent':'-'},
+                {data:'subtotal',name:'subtotal', searchable:true, orderable:true, 'defaultContent':'-'},
+            ],
+            order:[[1,'asc']],
+            // drawCallback:function(){
+            //     const json = this.api().ajax.json();
+            //     if (json?.summary) {
+            //         console.log(json.summary.qtySum);
+            //         console.log(json.summary.subTotalSum);
+            //     }
+            // }
+        });
+
+        cartTable.on('xhr.dt', function(e, settings, json, xhr){
+            if (json?.summary) {
+                $('#ft-subtotal').text(json.summary.subTotalSum ?? 'Rp -')
+                $('#sum-subtotal').text(json.summary.subTotalSum ?? 'Rp -')
+                $('#summarySubtotal').text(json.summary.subTotalSum ?? 'Rp -')
+                $('#ft-total-qty').text(json.summary.qtySum ?? '0')
+            }
+        })
+
+    });
+</script>
 @endpush
