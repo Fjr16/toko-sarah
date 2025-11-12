@@ -99,6 +99,7 @@
             scrollY:'200px',
             scrollCollapse:true,
             responsive:true,
+            searching:false,
             columnDefs: [
                 {
                     targets: [0],
