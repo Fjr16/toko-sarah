@@ -91,6 +91,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('sales/store', [SalesController::class, 'store'])->name('sales.store');
     Route::get('sales/invoice', [SalesController::class, 'show'])->name('sales.invoice');
     Route::post('sales/add/to/cart', [SalesController::class, 'addToCart'])->name('sales/add/to.cart');
+    Route::delete('sales/destroy/on/cart/{id}', [SalesController::class, 'destroyOnCart'])->name('sales/destroy/on.cart');
 
     // cart
     Route::get('cart/store/{barcode}', [CartController::class, 'store'])->name('cart.store');

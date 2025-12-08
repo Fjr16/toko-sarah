@@ -7,13 +7,14 @@
             </span>
         </div>
         <div class="bd table-responsive overflow-auto flex-grow-1" id="panel-batch">
-            <table class="table table-hover mb-0" id="batch-table">
+            <table class="table table-striped mb-0" id="batch-table">
                 <thead>
                     <tr>
+                        <th width="5%">Add</th>
+                        <th width="25%">Qty</th>
                         <th>No. Batch</th>
                         <th>Exp Date</th>
                         <th>Stock</th>
-                        <th>Qty</th>
                     </tr>
                 </thead>
             </table>
@@ -23,6 +24,43 @@
 
 @push('scripts')
 <script>
+    async function addProdToCart(element){
+        const batchId = element.dataset.batchId;
+        const qty = $(element).closest('tr').find('input[name="qty"]').val();
+
+        try {
+            const res = await fetch("{{ route('sales/add/to.cart') }}", {
+                method:'POST',
+                headers:{
+                    'X-CSRF-TOKEN':"{{ csrf_token() }}",
+                    'Accept' : 'application/json',
+                    'Content-Type' : 'application/json',
+                },
+                body:JSON.stringify({
+                    batch_id : batchId,
+                    qty : qty
+                })
+            });
+            if (!res.ok) {
+                const errorText = await res.statusText;
+                throw new Error(errorText || 'Gagal ditambahkan');
+            }
+
+            const result = await res.json();
+            if (!result || result.status == false) {
+                notify('error', result.message.slice(0,150));
+                return;
+            }
+
+            cartTable.ajax.reload();
+            notify('success', result.message.slice(0,150))
+
+        } catch (error) {
+            console.log(error.message);
+            notify('error', error.message.slice(0,150));
+        }
+    }
+
     var batchTable;
     var productId;
     $(document).ready(function(){
@@ -45,56 +83,19 @@
                 }
             },
             columns: [
-                {data:'batch_number', name:'batch_number', 'defaultContent' : '-'},
-                {data:'exp_date', name:'exp_date', searchable:true, 'defaultContent' : '-'},
-                {data:'stock', name:'stock'},
-                {data:'qty', name:'qty', 'defaultContent' : '-'}
+                {data:'action', name:'action', orderable:false, searchable:false},
+                {data:'qty', name:'qty', 'defaultContent' : '-', orderable:false, searchable:false},
+                {data:'batch_number', name:'batch_number', 'defaultContent' : '-', searchable:true, orderable:false},
+                {data:'exp_date', name:'exp_date', 'defaultContent' : '-', searchable:true, orderable:true},
+                {data:'stock', name:'stock', orderable:false, searchable:false},
             ],
 
-            order:[[1,'asc']],
+            order:[[3,'asc']],
         });
 
         $('#product-select').on('change', function(e){
             productId = $(this).val();
             batchTable.ajax.reload();
-        });
-
-        $('#batch-table tbody').on('click', 'tr', async function(){
-            const batchId = this.dataset.batchId;
-            const qty = $(this).find('input[name="qty"]').val();
-
-            try {
-                const res = await fetch("{{ route('sales/add/to.cart') }}", {
-                    method:'POST',
-                    headers:{
-                        'X-CSRF-TOKEN':"{{ csrf_token() }}",
-                        'Accept' : 'application/json',
-                        'Content-Type' : 'application/json',
-                    },
-                    body:JSON.stringify({
-                        batch_id : batchId,
-                        qty : qty
-                    })
-                });
-                if (!res.ok) {
-                    const errorText = await res.statusText;
-                    throw new Error(errorText || 'Gagal ditambahkan');
-                }
-
-                const result = await res.json();
-                if (!result || result.status == false) {
-                    notify('error', result.message.slice(0,150));
-                    return;
-                }
-
-                cartTable.ajax.reload();
-                notify('success', result.message.slice(0,150))
-
-            } catch (error) {
-                console.log(error.message);
-                notify('error', error.message.slice(0,150));
-            }
-
         });
 
         $('input[name="search_batch_table"]').on('keyup',function(){

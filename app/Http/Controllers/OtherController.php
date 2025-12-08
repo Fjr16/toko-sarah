@@ -86,9 +86,9 @@ class OtherController extends Controller
         ->where('item_id', $productId);
 
         return DataTables::of($data)
-        ->setRowAttr([
-            'data-batch-id' => function($row){return $row->id;}
-        ])
+        ->addColumn('action', function($row){
+            return '<button class="btn btn-sm btn-icon btn-primary" data-batch-id="'. $row->id .'" onclick="addProdToCart(this)"><i class="bi bi-plus"></i></button>';
+        })
         ->editColumn('exp_date', function($row){
             if ($row && $row->exp_date) {
                 return Carbon::parse($row->exp_date)->format('d F Y');
@@ -100,7 +100,7 @@ class OtherController extends Controller
                 <span class="input-group-text">'.($row->product->small_unit ?? '-').'</span>
             </div>';
         })
-        ->rawColumns(['qty'])
+        ->rawColumns(['qty','action'])
         ->make(true);
     }
 

@@ -288,6 +288,14 @@
                 $(this).remove();
             });
         }, 2000);
+        // function untuk membuat column datatable jadi responsive terjadi perubahan ukuran layar seperti toggle sidebar
+        function dtAdjustAll() {
+            $.fn.dataTable
+                .tables({ api: true })
+                .columns.adjust()
+                .responsive.recalc()
+                .draw(false);
+        }
     </script>
     <script src="{{ asset('/assets/vendor/libs/jquery/jquery.js') }}"></script>
     <script src="{{ asset('/assets/vendor/libs/jquery/jquery.blockUI.js') }}"></script>

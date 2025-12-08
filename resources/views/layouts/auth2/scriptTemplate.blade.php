@@ -12,6 +12,7 @@
     const now = !(localStorage.getItem(collapsedKey) === '1');
     localStorage.setItem(collapsedKey, now ? '1' : '0');
     applySidebarState();
+    dtAdjustAll();
   });
 
   // Theme toggle (light/dark/auto)

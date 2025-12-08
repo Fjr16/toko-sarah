@@ -32,7 +32,8 @@ class SalesController extends Controller
 
         return DataTables::of($data)
         ->addColumn('action', function($row){
-            $btnDelete = '<button type="button" class="btn btn-sm btn-danger btn-icon me-2" onclick=""><i class="bi bi-trash"></i></button>';
+            $url = route('sales/destroy/on.cart', $row['id']);
+            $btnDelete = '<button type="button" class="btn btn-sm btn-danger btn-icon me-2" data-url="'.$url.'" onclick="deleteProdOnCart(this)"><i class="bi bi-trash"></i></button>';
             $btnEdit = '<button type="button" class="btn btn-sm btn-warning btn-icon" onclick=""><i class="bi bi-pencil"></i></button>';
             return $btnDelete . $btnEdit;
         })
@@ -120,6 +121,26 @@ class SalesController extends Controller
             ]);
         } catch (\Throwable $th){
             // session()->flash('error', 'Produk Tidak Ditemukan');
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage(),
+            ]);
+        }
+    }
+
+    public function destroyOnCart($id){
+        try {
+            $item = ProductBatch::findOrFail($id);
+            $dataSession = session('data', []);
+            $key = array_search($item->id, array_column($dataSession, 'id'), true);
+
+            unset($dataSession[$key]);
+            session(['data' => array_values($dataSession)]);
+            return response()->json([
+                'status' => true,
+                'message' => 'Berhasil dihapus pada keranjang',
+            ]);
+        } catch (\Throwable $th){
             return response()->json([
                 'status' => false,
                 'message' => $th->getMessage(),

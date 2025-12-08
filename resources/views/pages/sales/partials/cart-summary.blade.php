@@ -7,7 +7,7 @@
                 <span class="badge-soft ms-auto">Subtotal: <span id="summarySubtotal">Rp0</span></span>
             </div>
             <div class="bd">
-                <div class="table-responsive">
+                {{-- <div class="table-responsive"> --}}
                     <table id="cart-table" class="table table-sm table-hover mb-0 table-cart">
                         <thead>
                             <tr>
@@ -28,7 +28,7 @@
                             </tr>
                         </tfoot>
                     </table>
-                </div>
+                {{-- </div> --}}
             </div>
         </div>
     </div>
@@ -100,6 +100,7 @@
             scrollCollapse:true,
             responsive:true,
             searching:false,
+            autoWidth:true,
             columnDefs: [
                 {
                     targets: [0],
@@ -139,5 +140,33 @@
         })
 
     });
+
+    async function deleteProdOnCart(element){
+        const url = element.dataset.url;
+        try {
+            const res = await fetch (url, {
+                method:'DELETE',
+                headers:{
+                    'X-CSRF-TOKEN' : "{{ csrf_token() }}",
+                },
+            });
+
+            if (!res.ok) {
+                const errorText = await res.statusText;
+                throw new Error(errorText || 'Gagal dihapus');
+            }
+            const result = await res.json();
+            if (!result || result.status == false) {
+                notify('error', result.message.slice(0,150));
+                return;
+            }
+
+            cartTable.ajax.reload();
+            notify('success', result.message.slice(0,150));
+        } catch (error) {
+            console.log(error.message);
+            notify('error', error.message.slice(0,150));
+        }
+    }
 </script>
 @endpush
