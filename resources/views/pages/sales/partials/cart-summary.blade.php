@@ -47,10 +47,10 @@
             <label class="form-label small mb-1">Biaya Lain (opsional)</label>
             <div class="row g-2">
                 <div class="col-6">
-                <input id="add-cost-name" type="text" class="form-control form-control-sm" placeholder="Ongkir/Admin">
+                    <input id="add-cost-name" type="text" class="form-control form-control-sm" placeholder="Ongkir/Admin">
                 </div>
                 <div class="col-6">
-                <input id="add-cost-amount" type="text" class="form-control form-control-sm text-end" placeholder="0">
+                    <input id="add-cost-amount" type="text" class="form-control form-control-sm text-end" oninput="this.value = this.value.replace(/[^0-9]/, '')" placeholder="0">
                 </div>
             </div>
             </div>
@@ -74,7 +74,7 @@
 
             <div class="mb-2">
             <label class="form-label small mb-1">Jumlah Bayar</label>
-            <input id="amount_paid" type="text" class="form-control form-control-sm text-end" placeholder="0">
+            <input id="amount_paid" type="text" oninput="this.value = numberFormatter(reverseFormatRupiah(this.value))" class="form-control form-control-sm text-end" placeholder="0">
             </div>
 
             <div class="d-flex justify-content-between">
@@ -168,5 +168,115 @@
             notify('error', error.message.slice(0,150));
         }
     }
+
+    var onedited;
+    function editOnCart(element){
+        if (onedited) {
+            cancelEdit();
+        }
+
+        const tr = $(element).closest('tr');
+        const row = cartTable.row(tr);
+        onedited = row;
+
+        const data = row.data();
+        const tdAction = cartTable.cell(row,0).node();
+        const tdQty = cartTable.cell(row,3).node();
+
+        const prodBatchId = data.id;
+        const prodQty = data.jumlah;
+        const prodSatuan = data.satuan;
+
+        $(tdAction).find('#btn_edit_'+prodBatchId).prop('hidden',true);
+        $(tdAction).find('#btn_update_'+prodBatchId).prop('hidden', false);
+
+        tdQty.innerHTML = `
+            <div class="input-group">
+                <input type="text" class="form-control form-control-sm" id="qty_${prodBatchId}" name="qty" value="${prodQty}" oninput="this.value = this.value.replace(/[^0-9]/g,'')">
+                <span class="input-group-text">${prodSatuan}</span
+            </div>
+        `;
+
+        const inp = $(tdQty).find('#qty_'+prodBatchId);
+        inp.focus().select();
+    }
+
+    function cancelEdit(){
+        const oldData = onedited.data();
+        const tdOldAction = cartTable.cell(onedited,0).node();
+        const tdOldQty = cartTable.cell(onedited,3).node();
+        $(tdOldAction).find('#btn_edit_'+oldData.id).prop('hidden',false);
+        $(tdOldAction).find('#btn_update_'+oldData.id).prop('hidden', true);
+        tdOldQty.innerHTML = oldData.jumlah;
+    }
+
+    async function updateOnCart(element){
+        const tr = $(element).closest('tr');
+        const id = element.id.replace('btn_update_', '');
+        const newQty = $(tr).find('#qty_'+id).val();
+
+        try {
+            const res = await fetch("{{ route('sales/update/on.cart') }}", {
+                method:'POST',
+                headers:{
+                    'X-CSRF-TOKEN' : "{{ csrf_token() }}",
+                    'Content-Type' : 'application/json',
+                },
+                body: JSON.stringify({
+                    batch_id:id,
+                    qty:newQty
+                })
+            });
+
+            if (!res.ok) {
+                const errorText = await res.statusText;
+                throw new Error(errorText || 'Gagal diperbarui');
+            }
+            const result = await res.json();
+            if (!result || result.status == false) {
+                notify('error', result.message.slice(0,150));
+                return;
+            }
+
+            cartTable.ajax.reload();
+            notify('success', result.message.slice(0,150));
+        } catch (error) {
+            console.log(error.message);
+            notify('error', error.message.slice(0,150));
+        }
+    }
+
+    $(document).on('keydown', 'input[id^="qty_"]', function(e){
+        if(e.key === 'Enter') {
+            e.preventDefault();
+            const id = this.id.replace('qty_', '');
+            $(`#btn_update_${id}`).trigger('click');
+        }else if(e.key === 'Escape'){
+            const tr = $(this).closest('tr');
+            cancelEdit(cartTable.row(tr));
+        }
+    });
+
+    $('#add-cost-amount').on('change', function(e){
+        let subTotal = $('#sum-subtotal').text();
+        subTotal = reverseFormatRupiah(subTotal);
+        const totalBayar = subTotal + toNum(this.value);
+
+        $('#summaryTotalAkhir').text(rupiahFormatter(totalBayar) ?? 'Rp -')
+    });
+
+    $('#amount_paid').on('input', function(){
+        let totalBelanja = reverseFormatRupiah($('#summaryTotalAkhir').text() ?? '0');
+        if (totalBelanja === 0) {
+            totalBelanja = reverseFormatRupiah($('#sum-subtotal').text());
+        }
+        const val = reverseFormatRupiah(this.value);
+        const kembalian = val - totalBelanja;
+        if(val < totalBelanja){
+            $('#change_due').text('Rp 0');
+            return;
+        }
+        $('#change_due').text(rupiahFormatter(kembalian));
+    })
 </script>
 @endpush

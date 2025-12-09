@@ -34,8 +34,9 @@ class SalesController extends Controller
         ->addColumn('action', function($row){
             $url = route('sales/destroy/on.cart', $row['id']);
             $btnDelete = '<button type="button" class="btn btn-sm btn-danger btn-icon me-2" data-url="'.$url.'" onclick="deleteProdOnCart(this)"><i class="bi bi-trash"></i></button>';
-            $btnEdit = '<button type="button" class="btn btn-sm btn-warning btn-icon" onclick=""><i class="bi bi-pencil"></i></button>';
-            return $btnDelete . $btnEdit;
+            $btnEdit = '<button type="button" class="btn btn-sm btn-warning btn-icon" onclick="editOnCart(this)" id="btn_edit_'.$row['id'].'"><i class="bi bi-pencil"></i></button>';
+            $btnUpdate = '<button type="button" class="btn btn-sm btn-success btn-icon" onclick="updateOnCart(this)" id="btn_update_'.$row['id'].'" hidden><i class="bi bi-check-circle"></i></button>';
+            return $btnDelete . $btnEdit . $btnUpdate;
         })
         ->editColumn('harga', function($row){
             return CustomHelpers::formatterRupiah($row['harga']);
@@ -116,7 +117,7 @@ class SalesController extends Controller
             }
             // session()->flash('success', 'Berhasil Ditambahkan Keranjang');
             return response()->json([
-                'status' => 200,
+                'status' => true,
                 'message' => 'Berhasil ditambahkan',
             ]);
         } catch (\Throwable $th){
@@ -269,9 +270,55 @@ class SalesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function updateOnCart(Request $req)
     {
-        //
+        $validators = Validator::make($req->all(), [
+            'batch_id' => 'required|exists:product_batches,id',
+            'qty' => 'required|numeric|min:1'
+        ]);
+        if ($validators->fails()) {
+            return response()->json([
+                'status' => false,
+                'message' => $validators->errors()->first()
+            ]);
+        }
+
+        try {
+            $dataSession = session()->get('data');
+            $item = ProductBatch::where('id', $req->batch_id)->firstOrFail();
+            $findItem = $this->findItem($item->id);
+            if ($findItem) {
+                $index = key(array_filter($dataSession, function($itemSession) use ($item) {
+                    return $itemSession['id'] === $item->id;
+                }));
+                $dataSession[$index] = [
+                    'id' => $item->id,
+                    'product_name' => $item->product->name,
+                    'product_code' => $item->product->code,
+                    'batch_number' => $item->batch_number,
+                    'jumlah' => $req->qty,
+                    'satuan' => $item->product->small_unit,
+                    'harga' => (int) $item->product->default_price,
+                    'subtotal' => (int) $item->product->default_price * $req->qty,
+                ];
+                session()->put('data', $dataSession);
+            }else{
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Data Tidak Ditemukan',
+                ]);
+            }
+            return response()->json([
+                'status' => true,
+                'message' => 'Berhasil Diperbarui',
+            ]);
+        } catch (\Throwable $th){
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage(),
+            ]);
+        }
+
     }
 
     /**

@@ -107,70 +107,70 @@
 @push('scripts')
 <script>
   // ===== Helpers =====
-  const fmt = n => new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(Number(n||0));
-  const num = s => Number(String(s??'').replace(/[^\d-]/g,''))||0;
+//   const fmt = n => new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(Number(n||0));
+//   const num = s => Number(String(s??'').replace(/[^\d-]/g,''))||0;
 
   // Baca subtotal per baris
-  function readSubtotal(){
-    let sum = 0;
-    document.querySelectorAll('#cart-body .sub-total').forEach(td=>{
-      const ds = td.getAttribute('data-subtotal');
-      sum += (ds!=null ? Number(ds)||0 : num(td.textContent));
-    });
-    return sum;
-  }
+//   function readSubtotal(){
+//     let sum = 0;
+//     document.querySelectorAll('#cart-body .sub-total').forEach(td=>{
+//       const ds = td.getAttribute('data-subtotal');
+//       sum += (ds!=null ? Number(ds)||0 : num(td.textContent));
+//     });
+//     return sum;
+//   }
   // Baca total qty (opsional)
-  function readTotalQty(){
-    let qty = 0;
-    document.querySelectorAll('#cart-body .qty-cell').forEach(td=>{
-      const dq = td.getAttribute('data-qty');
-      qty += (dq!=null ? Number(dq)||0 : num(td.textContent));
-    });
-    return qty;
-  }
+//   function readTotalQty(){
+//     let qty = 0;
+//     document.querySelectorAll('#cart-body .qty-cell').forEach(td=>{
+//       const dq = td.getAttribute('data-qty');
+//       qty += (dq!=null ? Number(dq)||0 : num(td.textContent));
+//     });
+//     return qty;
+//   }
   // Hitung jumlah baris item (bukan placeholder)
-  function readTotalItems(){
-    const rows = Array.from(document.querySelectorAll('#cart-body tr'));
-    return rows.filter(tr=>{
-      const tds = tr.querySelectorAll('td');
-      if(tds.length<=1) return false;
-      return tr.querySelector('.sub-total') || tds.length>=4;
-    }).length;
-  }
+//   function readTotalItems(){
+//     const rows = Array.from(document.querySelectorAll('#cart-body tr'));
+//     return rows.filter(tr=>{
+//       const tds = tr.querySelectorAll('td');
+//       if(tds.length<=1) return false;
+//       return tr.querySelector('.sub-total') || tds.length>=4;
+//     }).length;
+//   }
 
-  function refreshSummary(){
-    const subtotal = readSubtotal();
-    const addCost  = num(document.getElementById('add-cost-amount')?.value);
-    const grand    = subtotal + addCost;
-    const paid     = num(document.getElementById('amount_paid')?.value);
-    const change   = Math.max(0, paid - grand);
-    const totalQty = readTotalQty();
-    const items    = readTotalItems();
+//   function refreshSummary(){
+//     const subtotal = readSubtotal();
+//     const addCost  = num(document.getElementById('add-cost-amount')?.value);
+//     const grand    = subtotal + addCost;
+//     const paid     = num(document.getElementById('amount_paid')?.value);
+//     const change   = Math.max(0, paid - grand);
+//     const totalQty = readTotalQty();
+//     const items    = readTotalItems();
 
-    // Header keranjang + ringkasan
-    const el = id => document.getElementById(id);
-    el('summarySubtotal') && (el('summarySubtotal').textContent = fmt(subtotal));
-    el('sum-subtotal')    && (el('sum-subtotal').textContent    = fmt(subtotal));
-    el('ft-subtotal')     && (el('ft-subtotal').textContent     = fmt(subtotal));
-    el('ft-total-qty')    && (el('ft-total-qty').textContent    = totalQty);
-    el('summaryTotalAkhir') && (el('summaryTotalAkhir').textContent = fmt(grand));
-    el('change_due')      && (el('change_due').textContent      = fmt(change));
-    el('summaryTotalItem') && (el('summaryTotalItem').textContent = items);
-    el('summaryTotalItemBottom') && (el('summaryTotalItemBottom').textContent = items);
-    el('grandTotalBottom') && (el('grandTotalBottom').textContent = fmt(grand));
-  }
+//     // Header keranjang + ringkasan
+//     const el = id => document.getElementById(id);
+//     el('summarySubtotal') && (el('summarySubtotal').textContent = fmt(subtotal));
+//     el('sum-subtotal')    && (el('sum-subtotal').textContent    = fmt(subtotal));
+//     el('ft-subtotal')     && (el('ft-subtotal').textContent     = fmt(subtotal));
+//     el('ft-total-qty')    && (el('ft-total-qty').textContent    = totalQty);
+//     el('summaryTotalAkhir') && (el('summaryTotalAkhir').textContent = fmt(grand));
+//     el('change_due')      && (el('change_due').textContent      = fmt(change));
+//     el('summaryTotalItem') && (el('summaryTotalItem').textContent = items);
+//     el('summaryTotalItemBottom') && (el('summaryTotalItemBottom').textContent = items);
+//     el('grandTotalBottom') && (el('grandTotalBottom').textContent = fmt(grand));
+//   }
 
   // Trigger hitung saat input berubah
-  document.getElementById('add-cost-amount')?.addEventListener('input', refreshSummary);
-  document.getElementById('amount_paid')?.addEventListener('input', refreshSummary);
+//   document.getElementById('add-cost-amount')?.addEventListener('input', refreshSummary);
+//   document.getElementById('amount_paid')?.addEventListener('input', refreshSummary);
 
-  // Auto-refresh ketika tbody berubah (baris tambah/hapus/update oleh logic kamu)
-  const cartBody = document.getElementById('cart-body');
-  if(cartBody){
-    const obs = new MutationObserver(refreshSummary);
-    obs.observe(cartBody, {childList:true, subtree:true, characterData:true});
-  }
+//   // Auto-refresh ketika tbody berubah (baris tambah/hapus/update oleh logic kamu)
+//   const cartBody = document.getElementById('cart-body');
+//   if(cartBody){
+//     const obs = new MutationObserver(refreshSummary);
+//     obs.observe(cartBody, {childList:true, subtree:true, characterData:true});
+//   }
 
-  document.addEventListener('DOMContentLoaded', refreshSummary);
+//   document.addEventListener('DOMContentLoaded', refreshSummary);
 </script>
 @endpush
