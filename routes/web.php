@@ -93,6 +93,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('sales/add/to/cart', [SalesController::class, 'addToCart'])->name('sales/add/to.cart');
     Route::delete('sales/destroy/on/cart/{id}', [SalesController::class, 'destroyOnCart'])->name('sales/destroy/on.cart');
     Route::post('sales/update/on/cart', [SalesController::class, 'updateOnCart'])->name('sales/update/on.cart');
+    Route::delete('sales/reset/cart/', [SalesController::class, 'resetCart'])->name('sales.reset.cart');
 
     // cart
     Route::get('cart/store/{barcode}', [CartController::class, 'store'])->name('cart.store');

@@ -55,6 +55,7 @@
         font-weight:700;
     }
     th.fit, td.fit { white-space: nowrap; width: 1%; }
+    .font-monospace { font-variant-numeric: tabular-nums; }
 </style>
 @endpush
 
@@ -79,6 +80,286 @@
     {{-- ROW: KERANJANG + RINGKASAN --}}
     @include('pages.sales.partials.cart-summary')
 
+    {{-- modal konfirmasi penjualan --}}
+    {{-- <div class="modal fade" id="modalConfirmSales" tabindex="-1" aria-labelledby="modalLongTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+            <div class="modal-header border-bottom d-block">
+                <h5 class="modal-title" id="modalLongTitle">Konfirmasi Penjualan</h5>
+                <p class="small my-0 py-0 text-uppercase">Order ID : <span class="fw-bold">-</span></p>
+            </div>
+            <form action="" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <td>No. Nota : <span>-</span></td>
+                                    <td>Tanggal : <span>{{ date('d/m/Y') }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Order : <span>{{ auth()->user()->name ?? '' }}</span></td>
+                                    <td>Jam : <span>{{ date('H:i') }}</span></td>
+                                </tr>
+                                <tr>
+                                    <td>Kasir : <span>{{ auth()->user()->name ?? '' }}</span></td>
+                                    <td>Nama Order : <span>Pelanggan</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Produk</th>
+                                    <th>No Batch</th>
+                                    <th>Qty</th>
+                                    <th>Harga</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach (session()->get('data') as $item)
+                                    <tr>
+                                        <td>{{ $item['product_name'] ?? '-' }}</td>
+                                        <td>{{ $item['batch_number'] ?? '' }}</td>
+                                        <td>{{ $item['jumlah'] }} <span class="badge bg-primary ms-2">{{ $item['satuan'] ?? '-' }}</span></td>
+                                        <td>{{ $item['harga'] }}</td>
+                                        <td>{{ $item['subtotal'] }}</td>
+                                    </tr>
+                                @endforeach
+                                <tr>
+                                    <th colspan="3">Subtotal</th>
+                                    <th class="subtotal"></th>
+                                </tr>
+                                <tr>
+                                    <th colspan="3">Items</th>
+                                    <th class="totalItems">-</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="3">Total Items</th>
+                                    <th class="totalQty">-</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="3" class="fw-bold">Total</th>
+                                    <th class="fw-bold totalAkhir">Rp. -</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="3">
+                                        <input type="hidden" name="tipe_bayar" required>
+                                        Tipe Bayar
+                                    </th>
+                                    <th id="tipeBayar">-</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="3">
+                                        <input type="hidden" name="jumlah_bayar" required>
+                                        Jumlah bayar
+                                    </th>
+                                    <th id="jmlBayar">Rp. -</th>
+                                </tr>
+                                <tr>
+                                    <th colspan="3" class="fw-bold text-uppercase fst-italic">Kembalian</th>
+                                    <th class="kembalian">Rp. -</th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-outline-primary">Lanjutkan</button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div> --}}
+
+    @php
+        $data = session()->get('data', []);
+        $itemsCount = count($data);
+        $subtotalServer = collect($data)->sum(fn($r) => (float)($r['subtotal'] ?? 0));
+        $qtyServer      = collect($data)->sum(fn($r) => (float)($r['jumlah']   ?? 0));
+    @endphp
+    {{-- Modal Konfirmasi Penjualan (versi rapi) --}}
+    <div class="modal fade" id="modalConfirmSales" tabindex="-1" aria-labelledby="confirmSalesTitle" aria-describedby="confirmSalesDesc" aria-hidden="true" style="z-index:1100;">
+    <div class="modal-dialog modal-dialog-centered modal-xl" role="dialog">
+        <div class="modal-content">
+
+        {{-- Header --}}
+        <div class="modal-header border-bottom-0">
+            <div class="w-100">
+            <div class="d-flex align-items-start justify-content-between">
+                <div>
+                <h5 class="modal-title mb-1" id="confirmSalesTitle">Konfirmasi Penjualan</h5>
+                <p id="confirmSalesDesc" class="text-muted small mb-2">Periksa item & pembayaran sebelum menyelesaikan transaksi.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+
+            {{-- Info ringkas --}}
+            <div class="row g-2 mt-2">
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted text-uppercase">Order ID</div>
+                    <div class="fw-semibold" id="uiOrderId">-</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted text-uppercase">No. Nota</div>
+                    <div class="fw-semibold" id="uiNoNota">-</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted text-uppercase">Tanggal</div>
+                    <div class="fw-semibold">{{ now('Asia/Jakarta')->format('d/m/Y') }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted text-uppercase">Jam</div>
+                    <div class="fw-semibold">{{ now('Asia/Jakarta')->format('H:i') }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted text-uppercase">Kasir</div>
+                    <div class="fw-semibold">{{ auth()->user()->name ?? '-' }}</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="small text-muted text-uppercase">Nama Pemesan</div>
+                    <div class="fw-semibold" id="uiNamaPemesan">Pelanggan</div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <form action="" method="POST" id="confirmSalesForm" novalidate>
+            @csrf
+            <div class="modal-body pt-0">
+            <div class="row g-3">
+                {{-- Kiri: Tabel Item --}}
+                <div class="col-lg-8">
+                <div class="table-responsive border rounded">
+                    <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                        <th style="width:40%">Produk</th>
+                        <th class="text-nowrap">No Batch</th>
+                        <th class="text-end">Qty</th>
+                        <th class="text-end">Harga</th>
+                        <th class="text-end">Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($data as $item)
+                        <tr>
+                            <td class="text-truncate" style="max-width: 260px;">
+                            {{ $item['product_name'] ?? '-' }}
+                            @if(!empty($item['satuan']))
+                                <span class="badge rounded-pill text-bg-primary ms-1">{{ $item['satuan'] }}</span>
+                            @endif
+                            </td>
+                            <td class="text-muted">{{ $item['batch_number'] ?? '-' }}</td>
+                            <td class="text-end font-monospace">{{ (float)($item['jumlah'] ?? 0) }}</td>
+                            <td class="text-end font-monospace">
+                            {{ 'Rp ' . number_format((float)($item['harga'] ?? 0), 0, ',', '.') }}
+                            </td>
+                            <td class="text-end fw-semibold font-monospace">
+                            {{ 'Rp ' . number_format((float)($item['subtotal'] ?? 0), 0, ',', '.') }}
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                            Belum ada item di keranjang.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                    </table>
+                </div>
+                {{-- Info jumlah item di bawah tabel --}}
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                    <div class="small text-muted">
+                    <span class="me-3">Items: <span class="fw-semibold totalItems">{{ $itemsCount }}</span></span>
+                    <span>Total Qty: <span class="fw-semibold totalQty font-monospace">{{ (int)$qtyServer }}</span></span>
+                    </div>
+                    <div class="small text-muted">* Periksa kembali nama produk & batch</div>
+                </div>
+                </div>
+
+                {{-- Kanan: Ringkasan & Pembayaran --}}
+                <div class="col-lg-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                    <h6 class="fw-bold mb-3">Ringkasan Pembayaran</h6>
+
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted">Subtotal</span>
+                        <span class="font-monospace subtotal" aria-live="polite">
+                        {{ 'Rp ' . number_format($subtotalServer, 0, ',', '.') }}
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-3" id="otherAdditionalCost"></div>
+
+                    <div class="d-flex justify-content-between border-top pt-2 mb-3">
+                        <span class="fw-bold text-uppercase">Total</span>
+                        <span class="fw-bold font-monospace totalAkhir" aria-live="polite">
+                        {{ 'Rp ' . number_format($subtotalServer, 0, ',', '.') }}
+                        </span>
+                    </div>
+
+                    {{-- Tipe Bayar --}}
+                    <div class="mb-2">
+                        <label class="form-label small text-muted">Tipe Bayar</label>
+                        <div class="d-flex flex-wrap gap-2" aria-label="Pilih tipe bayar">
+                            @foreach ($paymentMethods as $index => $pm)
+                                <input type="radio" class="btn-check" name="tipe_bayar_view"
+                                    id="pay_{{ $pm->value }}" data-dipilih="{{ $pm->value }}" autocomplete="off"
+                                    @if($index === 0) checked @endif>
+
+                                <label class="btn btn-outline-secondary px-3 py-1"
+                                    for="pay_{{ $pm->value }}">
+                                    {{ $pm->label() }}
+                                </label>
+                            @endforeach
+                        </div>
+
+                        <input type="hidden" name="tipe_bayar" id="tipe_bayar"
+                            value="{{ \App\Enums\PaymentMethod::tunai->value }}" required>
+                    </div>
+
+                    {{-- Jumlah Bayar --}}
+                    <div class="mb-2">
+                        <label for="jumlah_bayar_view" class="form-label small text-muted">Jumlah Bayar</label>
+                        <div class="input-group">
+                            <span class="input-group-text">Rp</span>
+                            <input id="amount_paid" type="text" oninput="this.value = numberFormatter(reverseFormatRupiah(this.value))" class="form-control text-end font-monospace" placeholder="0" aria-describedby="helpBayar">
+                        </div>
+                        <div id="helpBayar" class="form-text">Masukkan nominal yang diterima.</div>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-2">
+                        <span class="fw-semibold text-uppercase">Kembalian</span>
+                        <span class="fw-bold font-monospace" id="change_due" aria-live="polite">Rp 0</span>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </div> {{-- /row --}}
+            </div>
+
+            {{-- Footer --}}
+            <div class="modal-footer d-flex justify-content-between">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-primary" id="btnSubmitConfirm" disabled>
+                <span class="spinner-border spinner-border-sm me-2 d-none" id="btnSubmitSpinner" aria-hidden="true"></span>
+                Lanjutkan
+            </button>
+            </div>
+        </form>
+        </div>
+    </div>
+    </div>
+
 @endsection
 
 @section('footer')
@@ -92,85 +373,169 @@
             <div class="row g-2 align-items-center">
             <!-- tombol 1: full width di mobile, auto di sm+ -->
             <div class="col-12 col-sm-auto d-grid">
-                <button type="button" class="btn btn-outline-danger btn-sm">⟲ Kosongkan Keranjang</button>
+                <button type="button" class="btn btn-outline-danger btn-sm" id="resetCart" onclick="resetCart()">⟲ Kosongkan Keranjang</button>
             </div>
 
             <!-- tombol 2: full width di mobile, ke kanan di sm+ -->
             <div class="col-12 col-sm d-grid d-sm-flex justify-content-sm-end">
-                <button type="button" class="btn btn-primary btn-sm">✔ Penjualan Selesai</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="$('#modalConfirmSales').modal('show')">✔ Penjualan Selesai</button>
             </div>
             </div>
         </div>
     </div>
 @endsection
-
 @push('scripts')
-<script>
-  // ===== Helpers =====
-//   const fmt = n => new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(Number(n||0));
-//   const num = s => Number(String(s??'').replace(/[^\d-]/g,''))||0;
+    <script>
+        $(document).on('change', '#add-cost-name', function(){
+            const namaTambahan = this.value;
+            const jumlahTambahan = rupiahFormatter($('#add-cost-amount').val() ?? 0);
+            if (!namaTambahan && !jumlahTambahan) {
+                return;
+            }
 
-  // Baca subtotal per baris
-//   function readSubtotal(){
-//     let sum = 0;
-//     document.querySelectorAll('#cart-body .sub-total').forEach(td=>{
-//       const ds = td.getAttribute('data-subtotal');
-//       sum += (ds!=null ? Number(ds)||0 : num(td.textContent));
-//     });
-//     return sum;
-//   }
-  // Baca total qty (opsional)
-//   function readTotalQty(){
-//     let qty = 0;
-//     document.querySelectorAll('#cart-body .qty-cell').forEach(td=>{
-//       const dq = td.getAttribute('data-qty');
-//       qty += (dq!=null ? Number(dq)||0 : num(td.textContent));
-//     });
-//     return qty;
-//   }
-  // Hitung jumlah baris item (bukan placeholder)
-//   function readTotalItems(){
-//     const rows = Array.from(document.querySelectorAll('#cart-body tr'));
-//     return rows.filter(tr=>{
-//       const tds = tr.querySelectorAll('td');
-//       if(tds.length<=1) return false;
-//       return tr.querySelector('.sub-total') || tds.length>=4;
-//     }).length;
-//   }
+            $('#otherAdditionalCost').html(`
+                <span class="text-muted">${namaTambahan}</span>
+                <span class="font-monospace" id="other_cost">${jumlahTambahan}</span>
+            `);
+        })
+        $(document).on('change', '#add-cost-amount', function(){
+            const namaTambahan = $('#add-cost-name').val();
+            const jumlahTambahan = rupiahFormatter(this.value);
+            if (!namaTambahan && !jumlahTambahan) {
+                return;
+            }
 
-//   function refreshSummary(){
-//     const subtotal = readSubtotal();
-//     const addCost  = num(document.getElementById('add-cost-amount')?.value);
-//     const grand    = subtotal + addCost;
-//     const paid     = num(document.getElementById('amount_paid')?.value);
-//     const change   = Math.max(0, paid - grand);
-//     const totalQty = readTotalQty();
-//     const items    = readTotalItems();
+            $('#otherAdditionalCost').html(`
+                <span class="text-muted">${(namaTambahan == '' || namaTambahan == null) ? '-' : namaTambahan}</span>
+                <span class="font-monospace" id="other_cost">${jumlahTambahan}</span>
+            `);
+        });
 
-//     // Header keranjang + ringkasan
-//     const el = id => document.getElementById(id);
-//     el('summarySubtotal') && (el('summarySubtotal').textContent = fmt(subtotal));
-//     el('sum-subtotal')    && (el('sum-subtotal').textContent    = fmt(subtotal));
-//     el('ft-subtotal')     && (el('ft-subtotal').textContent     = fmt(subtotal));
-//     el('ft-total-qty')    && (el('ft-total-qty').textContent    = totalQty);
-//     el('summaryTotalAkhir') && (el('summaryTotalAkhir').textContent = fmt(grand));
-//     el('change_due')      && (el('change_due').textContent      = fmt(change));
-//     el('summaryTotalItem') && (el('summaryTotalItem').textContent = items);
-//     el('summaryTotalItemBottom') && (el('summaryTotalItemBottom').textContent = items);
-//     el('grandTotalBottom') && (el('grandTotalBottom').textContent = fmt(grand));
-//   }
+        $(document).on('change', 'input[name="tipe_bayar_view"]', function(){
+            const selectedVal = this.dataset.dipilih;
+            $('#tipe_bayar').val(selectedVal);
+        });
 
-  // Trigger hitung saat input berubah
-//   document.getElementById('add-cost-amount')?.addEventListener('input', refreshSummary);
-//   document.getElementById('amount_paid')?.addEventListener('input', refreshSummary);
+        $('#amount_paid').on('input', function(){
+            let totalBelanja = reverseFormatRupiah($('#summaryTotalAkhir').text() ?? '0');
+            if (totalBelanja === 0) {
+                totalBelanja = reverseFormatRupiah($('#sum-subtotal').text());
+            }
+            const val = reverseFormatRupiah(this.value);
+            const kembalian = val - totalBelanja;
+            if(val < totalBelanja){
+                $('#change_due').text('Rp 0');
+                $('#btnSubmitConfirm').prop('disabled', true);
+                return;
+            }
+            $('#change_due').text(rupiahFormatter(kembalian));
+            $('#btnSubmitConfirm').prop('disabled', false);
+        });
 
-//   // Auto-refresh ketika tbody berubah (baris tambah/hapus/update oleh logic kamu)
-//   const cartBody = document.getElementById('cart-body');
-//   if(cartBody){
-//     const obs = new MutationObserver(refreshSummary);
-//     obs.observe(cartBody, {childList:true, subtree:true, characterData:true});
-//   }
 
-//   document.addEventListener('DOMContentLoaded', refreshSummary);
-</script>
+        async function resetCart() {
+            const res = await fetch("{{ route('sales.reset.cart') }}", {
+                method: 'DELETE',
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+            });
+
+            if (res.ok) {
+                notify('success', 'Keranjang berhasil dikosongkan');
+            } else {
+                notify('error', 'Gagal ' + res.status);
+            }
+            $('#cart-table').DataTable().ajax.reload();
+        }
+
+        // shortcut create
+        (function(){
+            const $modal     = $('#modalConfirmSales');
+            const $form      = $('#confirmSalesForm');
+            const $amountIn  = $('#amount_paid'); // input tampilan
+            const $submitBtn = $('#btnSubmitConfirm');
+            const otherCostName = $('#add-cost-name');
+            const otherCostInput = $('#add-cost-amount');
+            const btnResetCart = $('#resetCart');
+
+            // Helper: abaikan jika user sedang mengetik di input/textarea/select/contenteditable
+            const isTypingInField = (ev) => {
+                const tag = (ev.target.tagName || '').toLowerCase();
+                const editable = ev.target.isContentEditable;
+                return ['input','textarea','select','button'].includes(tag) || editable;
+            };
+
+            // Fokus otomatis ke jumlah bayar ketika modal tampil
+            $modal.on('shown.bs.modal', function(){
+                // kecilkan delay agar pasti fokus setelah animasi
+                setTimeout(() => $amountIn.trigger('focus').select(), 50);
+            });
+
+            // ENTER = submit saat modal terbuka
+            document.addEventListener('keydown', (ev) => {
+                    if (ev.key !== 'Enter') return;
+
+                    const isModalShown = $modal.is(':visible');
+                    if (!isModalShown) return;              // hanya saat modal terbuka
+                    if (isTypingInField(ev)) {
+                    // Kalau Enter di dalam input jumlah bayar, tetap boleh submit:
+                    if (ev.target.id !== 'jumlah_bayar_view') return;
+                }
+
+                ev.preventDefault();
+                if (!$submitBtn.prop('disabled')) {
+                    $form.trigger('submit');              // pakai handler submit kamu
+                }
+            });
+
+            // F10 = buka modal konfirmasi
+            document.addEventListener('keydown', (ev) => {
+                if (ev.key === 'F10') {
+                    ev.preventDefault();
+                    const isModalShown = $modal.is(':visible');
+                    if (!isModalShown) {
+                        // Pastikan ada item, dll. (opsional: validasi sebelum buka)
+                        const itemsCount = Number($('.totalItems').text() || 0);
+                        if (itemsCount > 0) {
+                            $modal.modal('show');
+                        }
+                    }
+                }
+            });
+
+            // F2 = fokus ke jumlah bayar (saat modal terbuka)
+            document.addEventListener('keydown', (ev) => {
+                if (ev.key === 'F2') {
+                    const isModalShown = $modal.is(':visible');
+                    if (isModalShown) {
+                        ev.preventDefault();
+                        $amountIn.trigger('focus').select();
+                    }
+                }
+            });
+
+            // ESC = tutup modal (biarkan default Bootstrap menangani), tapi contoh manual:
+            document.addEventListener('keydown', (ev) => {
+                if (ev.key === 'Escape' && $modal.is(':visible')) {
+                    ev.preventDefault(); // opsional
+                    $modal.modal('hide');
+                }
+            });
+
+            // f6 dan f7 untuk focus ke input biaya lainnya dan f8 reset keranjang
+            document.addEventListener('keydown', (ev) => {
+                if (ev.key === 'F3' && !$modal.is(':visible')) {
+                    ev.preventDefault(); // opsional
+                    otherCostName.trigger('focus').select();
+                }
+                if (ev.key === 'F4' && !$modal.is(':visible')) {
+                    ev.preventDefault(); // opsional
+                    otherCostInput.trigger('focus').select();
+                }
+                if (ev.key === 'F8' && !$modal.is(':visible')) {
+                    btnResetCart.trigger('click');
+                }
+            });
+
+        })();
+    </script>
 @endpush

@@ -39,52 +39,41 @@
         <div class="hd" style="background:#60a5fa;color:#fff">Ringkasan</div>
         <div class="bd">
             <div class="d-flex justify-content-between mb-2">
-            <span>Subtotal</span>
-            <span id="sum-subtotal" class="badge-soft">Rp0</span>
+                <span>Subtotal</span>
+                <span id="sum-subtotal" class="badge-soft">Rp0</span>
             </div>
 
             <div class="mb-2">
-            <label class="form-label small mb-1">Biaya Lain (opsional)</label>
-            <div class="row g-2">
-                <div class="col-6">
-                    <input id="add-cost-name" type="text" class="form-control form-control-sm" placeholder="Ongkir/Admin">
+                <label class="form-label small mb-1">Biaya Lain (opsional)</label>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <input id="add-cost-name" type="text" class="form-control form-control-sm" placeholder="Ongkir/Admin">
+                    </div>
+                    <div class="col-6">
+                        <input id="add-cost-amount" type="text" class="form-control form-control-sm text-end" oninput="this.value = this.value.replace(/[^0-9]/, '')" placeholder="0">
+                    </div>
                 </div>
-                <div class="col-6">
-                    <input id="add-cost-amount" type="text" class="form-control form-control-sm text-end" oninput="this.value = this.value.replace(/[^0-9]/, '')" placeholder="0">
-                </div>
-            </div>
             </div>
 
-            <hr class="my-2">
+            {{-- <hr class="my-2"> --}}
 
-            <div class="d-flex justify-content-between mb-2">
-            <b>Total Bayar</b>
-            <b id="summaryTotalAkhir">Rp0</b>
+            {{-- <div class="mb-4">
+                <label class="form-label small mb-1">Tipe Bayar</label>
+                <select id="payment_type" name="payment_type" class="form-select form-select-sm">
+                    @foreach ($paymentMethods as $pm)
+                        <option value="{{ $pm->value }}" @selected(old('payment_type') == $pm->value)>{{ $pm->label() ?? '-' }}</option>
+                    @endforeach
+                </select>
+            </div> --}}
+
+            <div class="d-flex justify-content-between mb-2 p-2 bg-primary rounded">
+                <b>Total Bayar</b>
+                <b id="summaryTotalAkhir">Rp0</b>
             </div>
-
-            <div class="mb-2">
-            <label class="form-label small mb-1">Tipe Bayar</label>
-            <select id="payment_type" class="form-select form-select-sm">
-                <option value="CASH" selected>Tunai</option>
-                <option value="EWALLET">E-wallet</option>
-                <option value="QRIS">QRIS</option>
-                <option value="TRANSFER">Transfer</option>
-            </select>
-            </div>
-
-            <div class="mb-2">
-            <label class="form-label small mb-1">Jumlah Bayar</label>
-            <input id="amount_paid" type="text" oninput="this.value = numberFormatter(reverseFormatRupiah(this.value))" class="form-control form-control-sm text-end" placeholder="0">
-            </div>
-
-            <div class="d-flex justify-content-between">
-            <span>Kembalian</span>
-            <span id="change_due" class="badge-soft">Rp0</span>
-            </div>
-
         </div>
         </div>
     </div>
+
 </div>
 
 @push('scripts')
@@ -121,20 +110,20 @@
                 {data:'subtotal',name:'subtotal', searchable:true, orderable:true, 'defaultContent':'-'},
             ],
             order:[[1,'asc']],
-            // drawCallback:function(){
-            //     const json = this.api().ajax.json();
-            //     if (json?.summary) {
-            //         console.log(json.summary.qtySum);
-            //         console.log(json.summary.subTotalSum);
-            //     }
-            // }
         });
 
         cartTable.on('xhr.dt', function(e, settings, json, xhr){
             if (json?.summary) {
-                $('#ft-subtotal').text(json.summary.subTotalSum ?? 'Rp -')
-                $('#sum-subtotal').text(json.summary.subTotalSum ?? 'Rp -')
-                $('#summarySubtotal').text(json.summary.subTotalSum ?? 'Rp -')
+                const subTotalFirst = json.summary.subTotalSum;
+                const otherCost = $('#add-cost-amount').val();
+                const grandTotal = reverseFormatRupiah(subTotalFirst) + toNum(otherCost);
+                $('#summaryTotalAkhir').text(rupiahFormatter(grandTotal));
+                $('#grandTotalBottom').text(rupiahFormatter(grandTotal));
+
+                $('#summaryTotalItemBottom').text(json.summary.itemsCount ?? '0')
+                $('#ft-subtotal').text(subTotalFirst ?? 'Rp -')
+                $('#sum-subtotal').text(subTotalFirst ?? 'Rp -')
+                $('#summarySubtotal').text(subTotalFirst ?? 'Rp -')
                 $('#ft-total-qty').text(json.summary.qtySum ?? '0')
             }
         })
@@ -262,21 +251,8 @@
         subTotal = reverseFormatRupiah(subTotal);
         const totalBayar = subTotal + toNum(this.value);
 
-        $('#summaryTotalAkhir').text(rupiahFormatter(totalBayar) ?? 'Rp -')
+        $('#summaryTotalAkhir').text(rupiahFormatter(totalBayar) ?? 'Rp -');
+        $('#grandTotalBottom').text(rupiahFormatter(totalBayar));
     });
-
-    $('#amount_paid').on('input', function(){
-        let totalBelanja = reverseFormatRupiah($('#summaryTotalAkhir').text() ?? '0');
-        if (totalBelanja === 0) {
-            totalBelanja = reverseFormatRupiah($('#sum-subtotal').text());
-        }
-        const val = reverseFormatRupiah(this.value);
-        const kembalian = val - totalBelanja;
-        if(val < totalBelanja){
-            $('#change_due').text('Rp 0');
-            return;
-        }
-        $('#change_due').text(rupiahFormatter(kembalian));
-    })
 </script>
 @endpush

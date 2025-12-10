@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\PaymentMethod;
 use App\Helpers\CustomHelpers;
 use App\Models\Item;
 use App\Models\ProductBatch;
@@ -29,6 +30,7 @@ class SalesController extends Controller
 
         $subTotalSum = array_sum(Arr::pluck($data, 'subtotal'));
         $qtySum = array_sum(Arr::pluck($data, 'jumlah'));
+        $itemsCount = count($data);
 
         return DataTables::of($data)
         ->addColumn('action', function($row){
@@ -48,6 +50,7 @@ class SalesController extends Controller
             'summary' => [
                 'subTotalSum' => CustomHelpers::formatterRupiah($subTotalSum),
                 'qtySum' => $qtySum,
+                'itemsCount' => $itemsCount
             ],
         ])
         ->toJson();
@@ -62,10 +65,12 @@ class SalesController extends Controller
         }
 
         $produks = Item::all();
+        $paymentMethods = PaymentMethod::cases();
         return view('pages.sales.create', [
             'title' => 'Penjualan',
             'menu' => 'Penjualan',
             'produks' => $produks,
+            'paymentMethods' => $paymentMethods,
         ]);
     }
 
@@ -324,9 +329,10 @@ class SalesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function resetCart(Request $req)
     {
-        //
+        $req->session()->put('data', []);
+        return response()->noContent();
     }
 
 
