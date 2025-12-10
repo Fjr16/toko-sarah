@@ -66,7 +66,7 @@
                 </select>
             </div> --}}
 
-            <div class="d-flex justify-content-between mb-2 p-2 bg-primary rounded">
+            <div class="d-flex justify-content-between mb-2 p-2 bg-primary text-white rounded">
                 <b>Total Bayar</b>
                 <b id="summaryTotalAkhir">Rp0</b>
             </div>
