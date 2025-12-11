@@ -117,14 +117,23 @@
                 const subTotalFirst = json.summary.subTotalSum;
                 const otherCost = $('#add-cost-amount').val();
                 const grandTotal = reverseFormatRupiah(subTotalFirst) + toNum(otherCost);
-                $('#summaryTotalAkhir').text(rupiahFormatter(grandTotal));
-                $('#grandTotalBottom').text(rupiahFormatter(grandTotal));
 
+                const grandTotalRp = rupiahFormatter(grandTotal);
+
+                $('#summaryTotalAkhir').text(grandTotalRp);
+                $('#grandTotalBottom').text(grandTotalRp);
+                
                 $('#summaryTotalItemBottom').text(json.summary.itemsCount ?? '0')
                 $('#ft-subtotal').text(subTotalFirst ?? 'Rp -')
                 $('#sum-subtotal').text(subTotalFirst ?? 'Rp -')
                 $('#summarySubtotal').text(subTotalFirst ?? 'Rp -')
                 $('#ft-total-qty').text(json.summary.qtySum ?? '0')
+                
+                // untuk confirm modal
+                $('#totalItems').text(json.summary.itemsCount ?? '0')
+                $('#totalQty').text(json.summary.qtySum ?? '0')
+                $('#subTotalConfirm').text(subTotalFirst ?? 'Rp -')
+                $('#totalAkhirConfirm').text(grandTotalRp);
             }
         })
 
@@ -249,10 +258,11 @@
     $('#add-cost-amount').on('change', function(e){
         let subTotal = $('#sum-subtotal').text();
         subTotal = reverseFormatRupiah(subTotal);
-        const totalBayar = subTotal + toNum(this.value);
+        const totalBayar = rupiahFormatter(subTotal + toNum(this.value));
 
-        $('#summaryTotalAkhir').text(rupiahFormatter(totalBayar) ?? 'Rp -');
-        $('#grandTotalBottom').text(rupiahFormatter(totalBayar));
+        $('#summaryTotalAkhir').text(totalBayar ?? 'Rp -');
+        $('#grandTotalBottom').text(totalBayar);
+        $('#totalAkhirConfirm').text(totalBayar);
     });
 </script>
 @endpush

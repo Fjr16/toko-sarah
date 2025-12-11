@@ -149,8 +149,8 @@
                         <th class="text-end">Subtotal</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @forelse ($data as $item)
+                    <tbody id="confirm-item-list">
+                        {{-- @forelse ($data as $item)
                         <tr>
                             <td class="text-truncate" style="max-width: 260px;">
                             {{ $item['product_name'] ?? '-' }}
@@ -173,15 +173,15 @@
                             Belum ada item di keranjang.
                             </td>
                         </tr>
-                        @endforelse
+                        @endforelse --}}
                     </tbody>
                     </table>
                 </div>
                 {{-- Info jumlah item di bawah tabel --}}
                 <div class="d-flex justify-content-between align-items-center mt-2">
                     <div class="small text-muted">
-                    <span class="me-3">Items: <span class="fw-semibold totalItems">{{ $itemsCount }}</span></span>
-                    <span>Total Qty: <span class="fw-semibold totalQty font-monospace">{{ (int)$qtyServer }}</span></span>
+                    <span class="me-3">Items: <span class="fw-semibold totalItems" id="totalItems">{{ $itemsCount }}</span></span>
+                    <span>Total Qty: <span class="fw-semibold totalQty font-monospace" id="totalQty">{{ (int)$qtyServer }}</span></span>
                     </div>
                     <div class="small text-muted">* Periksa kembali nama produk & batch</div>
                 </div>
@@ -195,7 +195,7 @@
 
                     <div class="d-flex justify-content-between mb-1">
                         <span class="text-muted">Subtotal</span>
-                        <span class="font-monospace subtotal" aria-live="polite">
+                        <span class="font-monospace subtotal" aria-live="polite" id="subTotalConfirm">
                         {{ 'Rp ' . number_format($subtotalServer, 0, ',', '.') }}
                         </span>
                     </div>
@@ -204,7 +204,7 @@
 
                     <div class="d-flex justify-content-between border-top pt-2 mb-3">
                         <span class="fw-bold text-uppercase">Total</span>
-                        <span class="fw-bold font-monospace totalAkhir" aria-live="polite">
+                        <span class="fw-bold font-monospace totalAkhir" aria-live="polite" id="totalAkhirConfirm">
                         {{ 'Rp ' . number_format($subtotalServer, 0, ',', '.') }}
                         </span>
                     </div>
@@ -280,7 +280,7 @@
 
             <!-- tombol 2: full width di mobile, ke kanan di sm+ -->
             <div class="col-12 col-sm d-grid d-sm-flex justify-content-sm-end">
-                <button type="button" class="btn btn-primary btn-sm" onclick="$('#modalConfirmSales').modal('show')">✔ Penjualan Selesai</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="showModalConfirm()">✔ Penjualan Selesai</button>
             </div>
             </div>
         </div>
@@ -349,6 +349,47 @@
             $('#cart-table').DataTable().ajax.reload();
         }
 
+        function showModalConfirm() {
+            const rows = cartTable.rows().data().toArray();
+            const tbody = document.getElementById('confirm-item-list');
+
+            if(!tbody) return;
+
+            if(!rows.length) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            Belum ada item di keranjang.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }else{
+                tbody.innerHTML = rows.map(item => `
+                    <tr>
+                        <td class="text-truncate" style="max-width: 260px;">
+                            ${item.product_name ?? '-'}
+                            ${item.satuan ? `<span class="badge rounded-pill text-bg-primary ms-1">${item.satuan}</span>` : ''}
+                        </td>
+                        <td class="text-muted">${item.batch_number ?? '-'}</td>
+                        <td class="text-end font-monospace">${item.jumlah ?? '0'}</td>
+                        <td class="text-end font-monospace">
+                            ${item.harga ? item.harga : 'Rp -'}
+                        </td>
+                        <td class="text-end fw-semibold font-monospace">
+                            ${item.subtotal ? item.subtotal : 'Rp -'}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            $('#amount_paid').val('');
+            $('#change_due').text('Rp 0');
+            $('#btnSubmitConfirm').prop('disabled', true);
+
+            $('#modalConfirmSales').modal('show');
+        }
+
         // shortcut create
         (function(){
             const $modal     = $('#modalConfirmSales');
@@ -398,7 +439,7 @@
                         // Pastikan ada item, dll. (opsional: validasi sebelum buka)
                         const itemsCount = Number($('.totalItems').text() || 0);
                         if (itemsCount > 0) {
-                            $modal.modal('show');
+                            showModalConfirm();
                         }
                     }
                 }
