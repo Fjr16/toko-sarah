@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Customer;
 use Exception;
 use App\Models\Item;
 use App\Models\ProductBatch;
@@ -175,5 +176,15 @@ class OtherController extends Controller
             'status' => true,
             'data' => $tempDetail
         ]);
+    }
+
+    public function getCustomer(Request $request)
+    {
+        $search = $request->get('search');
+        $customers = Customer::where('name', 'LIKE', "%$search%")
+            ->orWhere('phone', 'LIKE', "%$search%")
+            ->get();
+
+        return response()->json($customers);
     }
 }

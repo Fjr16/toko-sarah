@@ -44,6 +44,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('product/get/batch/select', [OtherController::class, 'getBatchSelect'])->name('product/get/batch.select');
     // Route::get('product/to/cart/{id}', [OtherController::class, 'addProductToCart'])->name('product/to.cart');
     Route::get('purchase/temp/detail/byId/{id}', [OtherController::class, 'getTempDetailById'])->name('purchase/temp/detail.byId');
+    Route::get('customer/search', [OtherController::class, 'getCustomer'])->name('customer.search');
 
 
     // kategori barang (DONE)
@@ -89,6 +90,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('sales/riwayat/detail/{id}', [SalesController::class, 'detail'])->name('sales/riwayat.detail');
     Route::get('sales/create', [SalesController::class, 'create'])->name('sales.create');
     Route::post('sales/store', [SalesController::class, 'store'])->name('sales.store');
+    Route::post('sales/finish', [SalesController::class, 'finishSales'])->name('sales.finish');
     Route::get('sales/invoice', [SalesController::class, 'show'])->name('sales.invoice');
     Route::post('sales/add/to/cart', [SalesController::class, 'addToCart'])->name('sales/add/to.cart');
     Route::delete('sales/destroy/on/cart/{id}', [SalesController::class, 'destroyOnCart'])->name('sales/destroy/on.cart');

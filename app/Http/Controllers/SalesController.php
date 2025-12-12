@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PaymentMethod;
+use App\Enums\PurchaseStatus;
 use App\Helpers\CustomHelpers;
+use App\Models\Customer;
 use App\Models\Item;
 use App\Models\ProductBatch;
 use App\Models\Selling;
@@ -16,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Enum;
 use Yajra\DataTables\Facades\DataTables;
 
 class SalesController extends Controller
@@ -66,11 +69,13 @@ class SalesController extends Controller
 
         $produks = Item::all();
         $paymentMethods = PaymentMethod::cases();
+        $saleStatus = PurchaseStatus::cases();
         return view('pages.sales.create', [
             'title' => 'Penjualan',
             'menu' => 'Penjualan',
             'produks' => $produks,
             'paymentMethods' => $paymentMethods,
+            'saleStatus' => $saleStatus,
         ]);
     }
 
@@ -153,17 +158,6 @@ class SalesController extends Controller
             ]);
         }
     }
-
-    // public function getProduct(Request $r){
-    //     $keyword = request('keyword');
-    //     $data = Item::where('code', $keyword)
-    //             ->orWhere('name', 'like', '%{$keyword}%')
-    //             ->limit(10)->get([
-    //                 'id', 'code', 'name', 'small_unit'
-    //             ]);
-    //     return response()->json($data);
-
-    // }
 
     /**
      * Store a newly created resource in storage.
@@ -272,6 +266,44 @@ class SalesController extends Controller
 
     }
 
+    public function finishSales(Request $req){
+        $validators = Validator::make($req->all(), [
+            'customer_id' => 'nullable',
+            'payment_method' => ['required', new Enum(PaymentMethod::class)],
+            'total_amount' => 'required',
+            'amount_paid' => 'required',
+            'change_due' => '',
+            'sale_status' => '',
+            'note' => 'nullable',
+            'additional_cost_name' => 'nullable|string|max:255',
+            'additional_cost' => 'nullable',
+            'sale_date' => 'required|date'
+        ]);
+
+        if($validators->fails()){
+            return response()->json([
+                'status' => false,
+                'message' => $validators->errors()->first()
+            ]);
+        }
+        return $req->all();
+
+        $cust = Customer::find($req->customer_id);
+        if(!$cust && $req->customer_id != 'umum'){
+            return response()->json([
+                'status' => false,
+                'message' => 'Member tidak ditemukan'
+            ]);
+        }
+
+        return $req->all();
+
+        $data = collect([
+            'user_id' => auth()->user()->id,
+            'customer_id' => $req->customer_id,
+        ]);
+    }
+
     /**
      * Update the specified resource in storage.
      */
@@ -325,10 +357,6 @@ class SalesController extends Controller
         }
 
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function resetCart(Request $req)
     {
         $req->session()->put('data', []);

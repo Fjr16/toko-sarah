@@ -55,16 +55,14 @@
                 </div>
             </div>
 
-            {{-- <hr class="my-2"> --}}
-
-            {{-- <div class="mb-4">
-                <label class="form-label small mb-1">Tipe Bayar</label>
-                <select id="payment_type" name="payment_type" class="form-select form-select-sm">
-                    @foreach ($paymentMethods as $pm)
-                        <option value="{{ $pm->value }}" @selected(old('payment_type') == $pm->value)>{{ $pm->label() ?? '-' }}</option>
-                    @endforeach
-                </select>
-            </div> --}}
+            <div class="mb-2">
+                <label class="form-label small text-muted mb-1">Pelanggan / Member *</label>
+                <div class="input-group input-group-sm">
+                    <select id="customer_id" name="customer_id" class="form-control form-control-sm"></select>
+                    <button class="btn btn-outline-secondary" type="button" id="btnAddCustomer"><i class="bi bi-person-plus"></i></button>
+                </div>
+                <small class="text-muted">F3: cari, F4: tambah pelanggan</small>
+            </div>
 
             <div class="d-flex justify-content-between mb-2 p-2 bg-primary text-white rounded">
                 <b>Total Bayar</b>
@@ -122,13 +120,13 @@
 
                 $('#summaryTotalAkhir').text(grandTotalRp);
                 $('#grandTotalBottom').text(grandTotalRp);
-                
+
                 $('#summaryTotalItemBottom').text(json.summary.itemsCount ?? '0')
                 $('#ft-subtotal').text(subTotalFirst ?? 'Rp -')
                 $('#sum-subtotal').text(subTotalFirst ?? 'Rp -')
                 $('#summarySubtotal').text(subTotalFirst ?? 'Rp -')
                 $('#ft-total-qty').text(json.summary.qtySum ?? '0')
-                
+
                 // untuk confirm modal
                 $('#totalItems').text(json.summary.itemsCount ?? '0')
                 $('#totalQty').text(json.summary.qtySum ?? '0')
@@ -264,5 +262,42 @@
         $('#grandTotalBottom').text(totalBayar);
         $('#totalAkhirConfirm').text(totalBayar);
     });
+
+    const cust = $('#customer_id');
+
+    // sisipkan sekali jika belum ada
+    if (!cust.find('option[value="umum"]').length) {
+        cust.append(new Option('Umum (Non-member)', 'umum', true, true));
+    }
+    cust.select2({
+        theme: 'bootstrap-5',
+        placeholder : 'Cari dan pilih data pelanggan',
+        ajax : {
+            url : '/customer/search',
+            dataType : 'json',
+            delay : 250,
+            data : function(params){
+                return {
+                    search : params.term,
+                }
+            },
+            processResults : function(data, params){
+                const results = data.map(item => ({
+                    id : item.id,   //menjadi value pada select
+                    text : item.name+ ' - ' + item.member_code,
+                }));
+                if (!results.some(r => r.id === 'umum')) {
+                    results.unshift({ id: 'umum', text: 'Umum (Non-member)' });
+                }
+                return {
+                    results
+                };
+            },
+            cache : true    //respon pencarian ajax akan disimpan pada chace, jika dilakukan pencarian dengan keyword yang sama maka tidak memanggi ulang ajax melainkan diambil dari chace
+        },
+        minimumInputLength : 1,     //pencarian baru akan dilakukan jika terdapat 1 character pada form input select
+    });
+
+    cust.val('umum').trigger('change');
 </script>
 @endpush
