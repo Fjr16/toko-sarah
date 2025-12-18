@@ -122,7 +122,7 @@
             </div>
         </div>
 
-        <form data-url="{{ route('sales.finish') }}" method="POST" id="confirmSalesForm" novalidate>
+        <form data-url="{{ route('sales.store') }}" method="POST" id="confirmSalesForm" novalidate>
             @csrf
             <div class="modal-body pt-0">
                 <div class="row g-3">
@@ -379,11 +379,10 @@
                 'note' : $('#note').val(),
                 'additional_cost_name' : $('#additional_cost_name').text(),
                 'additional_cost' : reverseFormatRupiah($('#additional_cost').text()),
-                'sale_date' : $('#sale_date').val(),
+                'sale_date' : $('#sale_date').val()
             }
 
-            console.log(payload);
-            // return;
+            
             try {
                 const res = await fetch(url, {
                     method:'POST',
@@ -392,7 +391,7 @@
                         'Content-Type' : 'application/json',
                         'Accept': 'application/json'
                     },
-                    body:{payload}
+                    body:JSON.stringify(payload)
                 });
 
                 if (!res.ok) {
@@ -402,12 +401,16 @@
                 const result = await res.json();
 
                 if (!result && result.status === false) {
-                    notify('success', result.message.slice(0,150));
+                    notify('error', result.message.slice(0,150));
                     return;
                 }
 
-                // cartTable.ajax.reload();
                 notify('success', result.message.slice(0,150));
+                cartTable.ajax.reload();
+                $('#product-select').val(null).trigger('change');
+                $('#add-cost-name').val('');
+                $('#add-cost-amount').val('');
+                $('#modalConfirmSales').modal('hide');
             } catch (error) {
                 console.log(error.message);
                 notify('error', error.message.slice(0,150));

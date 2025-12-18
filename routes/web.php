@@ -87,11 +87,9 @@ Route::middleware(['auth'])->group(function () {
     // Penjualan
     Route::get('sales/get/dataTable', [SalesController::class, 'getDataTable'])->name('sales/get.dataTable');
     Route::get('sales/riwayat', [SalesController::class, 'index'])->name('sales/riwayat.index');
-    Route::get('sales/riwayat/detail/{id}', [SalesController::class, 'detail'])->name('sales/riwayat.detail');
     Route::get('sales/create', [SalesController::class, 'create'])->name('sales.create');
     Route::post('sales/store', [SalesController::class, 'store'])->name('sales.store');
-    Route::post('sales/finish', [SalesController::class, 'finishSales'])->name('sales.finish');
-    Route::get('sales/invoice', [SalesController::class, 'show'])->name('sales.invoice');
+    Route::get('sales/invoice/{sale}', [SalesController::class, 'show'])->name('sales.invoice');
     Route::post('sales/add/to/cart', [SalesController::class, 'addToCart'])->name('sales/add/to.cart');
     Route::delete('sales/destroy/on/cart/{id}', [SalesController::class, 'destroyOnCart'])->name('sales/destroy/on.cart');
     Route::post('sales/update/on/cart', [SalesController::class, 'updateOnCart'])->name('sales/update/on.cart');

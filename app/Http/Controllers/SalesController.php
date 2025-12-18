@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\InventoryFlag;
 use App\Enums\PaymentMethod;
 use App\Enums\PurchaseStatus;
 use App\Helpers\CustomHelpers;
@@ -19,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Enum;
+use Throwable;
 use Yajra\DataTables\Facades\DataTables;
 
 class SalesController extends Controller
@@ -162,93 +164,117 @@ class SalesController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $req)
     {
+        $validators = Validator::make($req->all(), [
+            'customer_id' => 'nullable',
+            'payment_method' => ['required', new Enum(PaymentMethod::class)],
+            'total_amount' => 'required|numeric|min:0',
+            'amount_paid' => 'required|numeric|min:0|gte:total_amount',
+            'change_due' => 'required|numeric|min:0',
+            'sale_status' => 'required|string|max:50',
+            'note' => 'nullable',
+            'additional_cost_name' => 'nullable|string|max:255',
+            'additional_cost' => 'nullable|numeric|min:0',
+            'sale_date' => 'required|date_format:Y-m-d',
+        ]);
+
+        if($validators->fails()){
+            return response()->json([
+                'status' => false,
+                'message' => $validators->errors()->first()
+            ]);
+        }
+
+        $cust = Customer::find($req->customer_id);
+        if(!$cust && $req->customer_id != 'umum'){
+            return response()->json([
+                'status' => false,
+                'message' => 'Member tidak ditemukan'
+            ]);
+        }
+
+        $products = Session::get('data');
+        if(empty($products)){
+            return response()->json([
+                'status' => false,
+                'message' => 'Keranjang masih kosong'
+            ]);
+        }
+
         DB::beginTransaction();
         try {
-            $dataSession = Session::get('data');
-            if (!empty($dataSession)) {
-                $subtotal = array_sum(array_column($dataSession, 'total_harga'));
-                $items = count($dataSession);
-                $totalItems = array_sum(array_column($dataSession, 'jumlah'));
-                $totalDiskon = array_sum(array_column($dataSession, 'diskon'));
-                $totalAkhir = $subtotal - $totalDiskon;
-                $tipeBayar = $request->tipe_bayar;
-                $request->validate([
-                    'jumlah_bayar' => 'required|gte:' . $totalAkhir,
-                    'tipe_bayar' => 'required|string',
-                ], [
-                    'jumlah_bayar.required' => 'Jumlah Bayar tidak Boleh Kosong',
-                    'jumlah_bayar.gte' => 'Jumlah bayar tidak mencukupi',
-                    'tipe_bayar.required' => 'Tipe bayar tidak valid',
-                ]);
-                $jumlahBayar = $request->jumlah_bayar;
-                $kembalian = $jumlahBayar - $totalAkhir;
-                if ($subtotal > 0 || $totalItems > 0 || $totalAkhir > 0 || $kembalian >= 0) {
-                    $item = Selling::create([
+            $sale = new Selling;
+            $sale->user_id = auth()->user()->id;
+            $sale->customer_id = $req->customer_id == 'umum' ? null : $req->customer_id;
+            $sale->sale_date = $req->sale_date ?? now()->format('Y-m-d');
+            $sale->total_amount = $req->total_amount ?? 0;
+            $sale->payment_method = $req->payment_method ?? PaymentMethod::tunai->value;
+            $sale->amount_paid = $req->amount_paid ?? 0;
+            $sale->change_due = $req->change_due ?? 0;
+            $sale->sale_status = $req->sale_status ?? PurchaseStatus::finish->value;
+            $sale->note = $req->note ?? null;
+            $sale->additional_cost_name = $req->additional_cost_name ?? null;
+            $sale->additional_cost = $req->additional_cost;
+            $sale->save();
+
+            foreach ($products as $prod) {
+                $batch = ProductBatch::findOrFail($prod['id']);
+                if(!$batch->product) throw new Exception('Produk dengan batch ' . $batch->batch_number . ' tidak ditemukan');
+                if ($batch->stock < $prod['jumlah']) throw new Exception('Stok tidak mencukupi untuk produk ' . $batch->product->name . ' pada batch ' . $batch->batch_number);
+                if($batch->exp_date < now()->format('Y-m-d')) throw new Exception('Produk ' . $batch->product->name . ' pada batch ' . $batch->batch_number . ' sudah kadaluarsa');
+
+                if ($sale->sale_status == PurchaseStatus::finish->value) {
+                    // kurangi stok
+                    $batch->stock -= $prod['jumlah'];
+                    $batch->save();
+
+                    // catat inventory movement
+                    $batch->inventoryMovements()->create([
                         'user_id' => auth()->user()->id,
-                        'customer_id' => auth()->user()->id,
-                        'sale_date' => auth()->user()->id,
-                        'total_diskon' => $totalDiskon,
-                        'total_kotor' => $subtotal,
-                        'total_bersih' => $totalAkhir,
-                        'items' => $items,
-                        'total_item' => $totalItems,
-                        'metode_bayar' => $tipeBayar,
-                        'jumlah_bayar' => $jumlahBayar,
-                        'kembalian' => $kembalian,
-                        'status' => 'paid',
+                        'item_id' => $batch->item_id,
+                        'product_batch_id' => $batch->id,
+                        'flag' => InventoryFlag::out->value,
+                        'qty' => $prod['jumlah'],
+                        'unit' => $prod['satuan'],
+                        'note' => 'Penjualan melalui transaksi #' . $sale->invoice_number,
                     ]);
-
-                    foreach ($dataSession as $key => $detail) {
-                        SellingDetail::create([
-                            'selling_id' => $item->id,
-                            'item_id' => $detail['id'],
-                            'product_barcode' => $detail['barcode'],
-                            'product_name' => $detail['name'],
-                            'product_jumlah' => $detail['jumlah'],
-                            'product_satuan' => $detail['satuan'],
-                            'product_harga' => $detail['harga_satuan'],
-                            'product_sub_total' => $detail['total_harga'],
-                            'product_diskon' => $detail['diskon'],
-                        ]);
-                    }
-
-                    DB::commit();
-                    session()->forget('data');
-                    return back()->with('success', 'Berhasil Disimpan');
-                }else{
-                    DB::rollBack();
-                    return back()->with('error', 'Terdapat data produk yang tidak valid pada keranjang');
                 }
-            }else{
-                DB::rollBack();
-                return back()->with('error', 'Keranjang Anda masih kosong');
+                $detail = new SellingDetail;
+                $detail->selling_id = $sale->id;
+                $detail->item_id = $batch->item_id;
+                $detail->product_batch_id = $prod['id'];
+                $detail->qty = $prod['jumlah'];
+                $detail->unit = $prod['satuan'];
+                $detail->price = $prod['harga'];
+                $detail->sub_total = $prod['subtotal'];
+                $detail->save();
             }
-        } catch (Exception $e) {
+
+            DB::commit();
+            session()->forget('data');
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Transaksi berhasil disimpan',
+            ]);
+        } catch (Throwable $th) {
             DB::rollBack();
-            return back()->with('error', $e->getMessage());
-        } catch (ModelNotFoundException $mn) {
-            DB::rollBack();
-            return back()->with('error', $mn->getMessage());
+            return response()->json([
+                'status' => false,
+                'message' => $th->getMessage(),
+            ]);
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show()
+    public function show(Selling $sale)
     {
         return view('pages.sales.invoice', [
             'title' => 'Invoice',
             'menu' => 'Invoice',
-        ]);
-    }
-    public function detail(String $id)
-    {
-        $item = Selling::find(decrypt($id));
-        return view('pages.sales.show', [
-            'item' => $item,
         ]);
     }
 
@@ -270,14 +296,14 @@ class SalesController extends Controller
         $validators = Validator::make($req->all(), [
             'customer_id' => 'nullable',
             'payment_method' => ['required', new Enum(PaymentMethod::class)],
-            'total_amount' => 'required',
-            'amount_paid' => 'required',
-            'change_due' => '',
-            'sale_status' => '',
+            'total_amount' => 'required|numeric|min:0',
+            'amount_paid' => 'required|numeric|min:0',
+            'change_due' => 'required|numeric|min:0',
+            'sale_status' => 'required|string|max:50',
             'note' => 'nullable',
             'additional_cost_name' => 'nullable|string|max:255',
-            'additional_cost' => 'nullable',
-            'sale_date' => 'required|date'
+            'additional_cost' => 'nullable|numeric|min:0',
+            'sale_date' => 'required|date_format:Y-m-d',
         ]);
 
         if($validators->fails()){
@@ -286,7 +312,6 @@ class SalesController extends Controller
                 'message' => $validators->errors()->first()
             ]);
         }
-        return $req->all();
 
         $cust = Customer::find($req->customer_id);
         if(!$cust && $req->customer_id != 'umum'){
@@ -296,12 +321,13 @@ class SalesController extends Controller
             ]);
         }
 
-        return $req->all();
-
-        $data = collect([
-            'user_id' => auth()->user()->id,
-            'customer_id' => $req->customer_id,
-        ]);
+        $products = Session::get('data');
+        if(empty($products)){
+            return response()->json([
+                'status' => false,
+                'message' => 'Keranjang masih kosong'
+            ]);
+        }
     }
 
     /**

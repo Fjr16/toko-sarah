@@ -364,6 +364,7 @@
                 cache : true    //respon pencarian ajax akan disimpan pada chace, jika dilakukan pencarian dengan keyword yang sama maka tidak memanggi ulang ajax melainkan diambil dari chace
             },
             minimumInputLength : 1,     //pencarian baru akan dilakukan jika terdapat 1 character pada form input select
+            allowClear : true,
         });
         setTimeout(() => {
             $('#product-select').select2('open');

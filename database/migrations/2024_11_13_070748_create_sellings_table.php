@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable(false);
             $table->foreignId('customer_id')->nullable();
-            $table->foreignId('invoice_number')->nullable();
+            $table->string('invoice_number')->nullable();
             $table->date('sale_date')->nullable(false);
             $table->decimal('total_amount', 10,2)->default(0)->nullable(false);
             $table->string('payment_method', 50)->nullable(false);
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('sale_status', 50)->nullable(false);
             $table->string('note')->nullable();
             $table->string('additional_cost_name')->nullable(); //untuk custom biaya tambahan
-            $table->decimal('additional_cost')->nullable();
+            $table->decimal('additional_cost',10,2)->default(0);
             $table->timestamps();
         });
     }

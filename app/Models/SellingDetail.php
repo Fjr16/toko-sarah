@@ -12,18 +12,18 @@ class SellingDetail extends Model
     protected $fillable = [
         'selling_id',
         'item_id',
-        'product_barcode',
-        'product_name',
-        'product_jumlah',
-        'product_satuan',
-        'product_harga',
-        'product_sub_total',
-        'product_diskon',
-        // 'product_pajak',
+        'product_batch_id',
+        'qty',
+        'unit',
+        'price',
+        'sub_total',
     ];
 
     public function item() {
         return $this->belongsTo(Item::class);
+    }
+    public function productBatch() {
+        return $this->belongsTo(ProductBatch::class);
     }
     public function selling() {
         return $this->belongsTo(Selling::class);
